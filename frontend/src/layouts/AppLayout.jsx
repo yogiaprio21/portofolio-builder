@@ -6,7 +6,9 @@ export default function AppLayout() {
   return (
     <>
       <Navbar />
-      <Outlet />
+      <main className="bg-slate-900 min-h-screen pt-24">
+        <Outlet />
+      </main>
       <Footer />
     </>
   );

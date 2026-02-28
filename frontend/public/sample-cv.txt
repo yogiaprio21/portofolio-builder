@@ -1,0 +1,51 @@
+Nama Lengkap: Andi Pratama
+Email: andi.pratama@example.com
+Telepon: +62 812 3456 7890
+Lokasi: Jakarta, Indonesia
+
+Ringkasan:
+Profesional teknologi dengan pengalaman 5+ tahun di pengembangan web dan manajemen proyek. Fokus pada peningkatan performa, UX, dan otomatisasi alur kerja. Berpengalaman memimpin tim lintas fungsi untuk merilis produk berkualitas.
+
+Pengalaman
+Project Manager — PT Teknologi Nusantara
+Jan 2022 - Present
+- Memimpin tim 8 orang (Frontend, Backend, QA, Design)
+- Meningkatkan konversi pendaftaran sebesar 15% melalui eksperimen A/B
+- Menerapkan praktik agile dan perencanaan sprint yang terukur
+
+Software Engineer at Inovasi Digital
+2019 - 2021
+- Mengembangkan fitur pembayaran, otentikasi, dan dashboard analitik
+- Menulis unit test dan e2e test untuk meningkatkan reliabilitas sistem
+- Berkolaborasi dengan tim produk untuk merancang arsitektur yang scalable
+
+Pengalaman Kerja
+Senior Software Engineer — Startup XYZ
+Feb 2021 - Des 2021
+- Memimpin modernisasi frontend dan peningkatan performa
+- Menerapkan pipeline CI/CD untuk rilis yang lebih cepat
+- Berkolaborasi lintas fungsi dengan Produk dan QA
+
+Education
+Sarjana Informatika, Universitas Indonesia
+2015 - 2019
+
+Keahlian
+JavaScript, React, Node.js, TypeScript, SQL, Docker, AWS, CI/CD, UX
+
+Projects
+Portfolio Builder
+- Membangun generator CV & portofolio dengan template modern
+- Tech: React, Node.js, Tailwind, PDF rendering
+
+Sertifikasi
+AWS Certified Cloud Practitioner — Amazon
+
+Pencapaian
+- Juara 1 Hackathon ABC 2023
+- • Peningkatan performa aplikasi >30% melalui optimasi rendering
+
+Referensi
+John Doe
+Senior Manager • ABC Corp
+john.doe@abc.com

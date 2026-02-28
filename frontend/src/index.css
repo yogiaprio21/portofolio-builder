@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+/* Fallback for html2canvas/html2pdf which doesn't support oklch colors */
+@layer base {
+
+    .pdf-safe,
+    .pdf-safe * {
+        /* Capture common Tailwind oklch variables and provide fallbacks if possible, 
+       but the best approach is to ensure themes use standard colors when in PDF mode */
+        --fallback-color: #000000;
+    }
+}
+
+/* Force standard color formats for PDF capture */
+.pdf-safe {
+    color-scheme: light;
+}
+
+@media print {
+    .pdf-safe {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

@@ -2,12 +2,15 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/sequelize');
 
 const Portfolio = sequelize.define('Portfolio', {
-  name: DataTypes.STRING,
-  email: DataTypes.STRING,
-  bio: DataTypes.TEXT,
-  skills: DataTypes.TEXT,
-  experience: DataTypes.TEXT,
-  template: DataTypes.INTEGER,
+  cv: DataTypes.JSON,
+  templateId: DataTypes.INTEGER,
+  theme: DataTypes.JSON,
+  sectionsOrder: DataTypes.JSON,
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'user_id'
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

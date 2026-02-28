@@ -1,7 +1,12 @@
 import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { getTemplates } from '../api'
 import Footer from '../components/Footer'
 
 export default function Landing() {
+  useEffect(() => {
+    getTemplates().catch(() => {});
+  }, []);
   return (
     <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <section className="min-h-screen flex items-center">

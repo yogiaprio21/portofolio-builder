@@ -33,6 +33,24 @@ export default function Navbar() {
           >
             Create
           </Link>
+          <Link
+            to="/app/portfolios"
+            className="px-4 py-2 rounded-lg bg-slate-600 text-white hover:bg-slate-700 transition font-medium"
+          >
+            Portfolios
+          </Link>
+          <Link
+            to="/app/login"
+            className="px-4 py-2 rounded-lg bg-slate-500 text-white hover:bg-slate-600 transition font-medium"
+          >
+            Login
+          </Link>
+          <Link
+            to="/app/register"
+            className="px-4 py-2 rounded-lg bg-slate-500 text-white hover:bg-slate-600 transition font-medium"
+          >
+            Register
+          </Link>
 
         </nav>
       </div>
