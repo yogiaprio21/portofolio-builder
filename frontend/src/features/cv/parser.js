@@ -1,15 +1,15 @@
-import { getDocument } from "pdfjs-dist/build/pdf.mjs";
+import { getDocument } from 'pdfjs-dist/build/pdf.mjs';
 
 export const extractSectionsFromText = (text) => {
   const labelMap = {
-    experience: { id: ["pengalaman"], en: ["experience"] },
-    workExperience: { id: ["pengalaman kerja"], en: ["work experience"] },
-    education: { id: ["pendidikan"], en: ["education"] },
-    skills: { id: ["keahlian"], en: ["skills"] },
-    projects: { id: ["proyek"], en: ["projects"] },
-    certifications: { id: ["sertifikasi"], en: ["certifications"] },
-    achievements: { id: ["pencapaian", "prestasi"], en: ["achievements"] },
-    references: { id: ["referensi"], en: ["references"] },
+    experience: { id: ['pengalaman'], en: ['experience'] },
+    workExperience: { id: ['pengalaman kerja'], en: ['work experience'] },
+    education: { id: ['pendidikan'], en: ['education'] },
+    skills: { id: ['keahlian'], en: ['skills'] },
+    projects: { id: ['proyek'], en: ['projects'] },
+    certifications: { id: ['sertifikasi'], en: ['certifications'] },
+    achievements: { id: ['pencapaian', 'prestasi'], en: ['achievements'] },
+    references: { id: ['referensi'], en: ['references'] },
   };
   const lines = text.split(/\r?\n/);
   const indices = {};
@@ -18,12 +18,12 @@ export const extractSectionsFromText = (text) => {
     const l = line.trim().toLowerCase();
     Object.entries(labelMap).forEach(([key, langs]) => {
       if (indices[key] != null) return;
-      if (langs.id.some((p) => l === p || l.startsWith(p + ":"))) {
+      if (langs.id.some((p) => l === p || l.startsWith(p + ':'))) {
         indices[key] = idx;
-        sectionLangMap[key] = "id";
-      } else if (langs.en.some((p) => l === p || l.startsWith(p + ":"))) {
+        sectionLangMap[key] = 'id';
+      } else if (langs.en.some((p) => l === p || l.startsWith(p + ':'))) {
         indices[key] = idx;
-        sectionLangMap[key] = "en";
+        sectionLangMap[key] = 'en';
       }
     });
   });
@@ -34,14 +34,14 @@ export const extractSectionsFromText = (text) => {
     return lines.slice(s, e).map((x) => x.trim());
   };
   const orderKeys = [
-    "workExperience",
-    "experience",
-    "education",
-    "skills",
-    "projects",
-    "certifications",
-    "achievements",
-    "references",
+    'workExperience',
+    'experience',
+    'education',
+    'skills',
+    'projects',
+    'certifications',
+    'achievements',
+    'references',
   ];
   const sorted = orderKeys
     .filter((k) => indices[k] != null)
@@ -66,29 +66,27 @@ export const extractSectionsFromText = (text) => {
     let current = null;
     arr.forEach((l) => {
       const mDate =
-        l.match(
-          /([A-Za-z]+|\d{2})\s*\d{4}[^\d]+([A-Za-z]+|\d{2})?\s*(\d{4}|present|sekarang)/i
-        ) || l.match(/(\d{4})(?:[^\d]+)(\d{4}|present|sekarang)/i);
-      const mHeader =
-        l.match(/^(.+?)\s[—-]\s(.+)/) || l.match(/^(.+?)\s+at\s+(.+)/i);
+        l.match(/([A-Za-z]+|\d{2})\s*\d{4}[^\d]+([A-Za-z]+|\d{2})?\s*(\d{4}|present|sekarang)/i) ||
+        l.match(/(\d{4})(?:[^\d]+)(\d{4}|present|sekarang)/i);
+      const mHeader = l.match(/^(.+?)\s[—-]\s(.+)/) || l.match(/^(.+?)\s+at\s+(.+)/i);
       if (mHeader || mDate) {
         if (current) out.push(current);
-        const role = mHeader ? mHeader[1].trim() : "";
-        const company = mHeader ? mHeader[2].trim() : "";
-        const startDate = mDate ? (mDate[3] ? `${mDate[1]} ${mDate[2]}` : mDate[1]) : "";
-        const endDate = mDate ? (mDate[3] || mDate[2] || "") : "";
-        current = { role, company, location: "", startDate, endDate, highlights: [] };
+        const role = mHeader ? mHeader[1].trim() : '';
+        const company = mHeader ? mHeader[2].trim() : '';
+        const startDate = mDate ? (mDate[3] ? `${mDate[1]} ${mDate[2]}` : mDate[1]) : '';
+        const endDate = mDate ? mDate[3] || mDate[2] || '' : '';
+        current = { role, company, location: '', startDate, endDate, highlights: [] };
       } else if (/^[-*\u2022]/.test(l)) {
         if (!current)
           current = {
-            role: "",
-            company: "",
-            location: "",
-            startDate: "",
-            endDate: "",
+            role: '',
+            company: '',
+            location: '',
+            startDate: '',
+            endDate: '',
             highlights: [],
           };
-        const bullet = l.replace(/^[-*\u2022]\s*/, "").trim();
+        const bullet = l.replace(/^[-*\u2022]\s*/, '').trim();
         if (bullet) current.highlights.push(bullet);
       }
     });
@@ -103,17 +101,17 @@ export const extractSectionsFromText = (text) => {
       const mHeader = l.match(/^(.+?),\s*(.+)$/);
       if (mHeader || mDate) {
         if (current) out.push(current);
-        const degree = mHeader ? mHeader[1].trim() : "";
-        const institution = mHeader ? mHeader[2].trim() : "";
-        const startDate = mDate ? mDate[1] : "";
-        const endDate = mDate ? mDate[2] : "";
+        const degree = mHeader ? mHeader[1].trim() : '';
+        const institution = mHeader ? mHeader[2].trim() : '';
+        const startDate = mDate ? mDate[1] : '';
+        const endDate = mDate ? mDate[2] : '';
         current = {
           degree,
           institution,
-          location: "",
+          location: '',
           startDate,
           endDate,
-          gpa: "",
+          gpa: '',
         };
       }
     });
@@ -121,24 +119,21 @@ export const extractSectionsFromText = (text) => {
     return out;
   };
   const parseSkills = (arr) => {
-    const textJoined = arr.join(" ");
+    const textJoined = arr.join(' ');
     const items = textJoined
       .split(/[\n;,•\u2022]/)
       .map((x) => x.trim())
       .filter((x) => x.length > 0);
-    return items.length ? [{ category: "", items }] : [];
+    return items.length ? [{ category: '', items }] : [];
   };
   const parseProjects = (arr) => {
     const out = [];
     let current = null;
     arr.forEach((l) => {
       if (/^[-*\u2022]/.test(l)) {
-        if (!current)
-          current = { name: "", role: "", description: "", tech: "", link: "" };
-        const bullet = l.replace(/^[-*\u2022]\s*/, "").trim();
-        current.description = current.description
-          ? current.description + " " + bullet
-          : bullet;
+        if (!current) current = { name: '', role: '', description: '', tech: '', link: '' };
+        const bullet = l.replace(/^[-*\u2022]\s*/, '').trim();
+        current.description = current.description ? current.description + ' ' + bullet : bullet;
       } else if (l) {
         if (current) {
           out.push(current);
@@ -146,10 +141,10 @@ export const extractSectionsFromText = (text) => {
         } else {
           out.push({
             name: l.trim(),
-            role: "",
-            description: "",
-            tech: "",
-            link: "",
+            role: '',
+            description: '',
+            tech: '',
+            link: '',
           });
         }
       }
@@ -160,13 +155,16 @@ export const extractSectionsFromText = (text) => {
   const parseCertifications = (arr) => {
     return arr
       .map((l) => {
-        const parts = l.split(/[•—-]/).map((x) => x.trim()).filter(Boolean);
+        const parts = l
+          .split(/[•—-]/)
+          .map((x) => x.trim())
+          .filter(Boolean);
         if (parts.length >= 2)
           return {
             name: parts[0],
             issuer: parts[1],
-            date: "",
-            credentialUrl: "",
+            date: '',
+            credentialUrl: '',
           };
         return null;
       })
@@ -174,7 +172,7 @@ export const extractSectionsFromText = (text) => {
   };
   const parseAchievements = (arr) => {
     const items = parseBullets(arr);
-    return items.map((t) => ({ title: t, date: "", description: "" }));
+    return items.map((t) => ({ title: t, date: '', description: '' }));
   };
   return {
     experience: parseExperience(sections.experience || []),
@@ -193,12 +191,11 @@ export const parsePdfToText = async (file) => {
   const buffer = await file.arrayBuffer();
   const loadingTask = getDocument({ data: buffer });
   const pdf = await loadingTask.promise;
-  let text = "";
+  let text = '';
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    text += content.items.map((it) => it.str).join(" ") + "\n";
+    text += content.items.map((it) => it.str).join(' ') + '\n';
   }
   return text;
 };
-

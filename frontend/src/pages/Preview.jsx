@@ -1,18 +1,18 @@
-import { useParams, useSearchParams } from "react-router-dom";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
-const TemplateRenderer = lazy(() => import("../templates/TemplateRenderer"));
-import { getPortfolio, getTemplate } from "../api";
-import { downloadPdfFromElement } from "../utils/pdfGenerator";
+import { useParams, useSearchParams } from 'react-router-dom';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
+import { getPortfolio, getTemplate } from '../api';
+import { downloadPdfFromElement } from '../utils/pdfGenerator';
 
 export default function Preview() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const [portfolio, setPortfolio] = useState(null);
   const [template, setTemplate] = useState(null);
-  const [previewMode, setPreviewMode] = useState(searchParams.get("mode") || "web");
-  const [error, setError] = useState("");
+  const [previewMode, setPreviewMode] = useState(searchParams.get('mode') || 'web');
+  const [error, setError] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfError, setPdfError] = useState("");
+  const [pdfError, setPdfError] = useState('');
 
   const previewRef = useRef(null);
 
@@ -21,7 +21,7 @@ export default function Preview() {
       try {
         const data = await getPortfolio(id);
         if (data?.error) {
-          setError(data.error || "Gagal memuat portfolio");
+          setError(data.error || 'Gagal memuat portfolio');
           return;
         }
         setPortfolio(data);
@@ -30,7 +30,7 @@ export default function Preview() {
           if (!templateData?.error) setTemplate(templateData);
         }
       } catch {
-        setError("Gagal memuat portfolio");
+        setError('Gagal memuat portfolio');
       }
     }
     load();
@@ -42,33 +42,33 @@ export default function Preview() {
   }, [portfolio, template]);
 
   const previewWidth =
-    previewMode === "mobile"
-      ? "max-w-[420px]"
-      : previewMode === "pdf"
-        ? "max-w-[794px]"
-        : "max-w-4xl";
+    previewMode === 'mobile'
+      ? 'max-w-[420px]'
+      : previewMode === 'pdf'
+        ? 'max-w-[794px]'
+        : 'max-w-4xl';
 
   const downloadPDF = async () => {
     const element = previewRef.current;
     if (!element) return;
 
     try {
-      setPdfError("");
+      setPdfError('');
       setPdfLoading(true);
 
       // Give some time for TemplateRenderer to finish styling/rendering
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
 
       await downloadPdfFromElement(element, {
         filename: `portfolio-${id}.pdf`,
         marginMm: [20, 15, 20, 15],
         scale: 2,
         useCORS: true,
-        backgroundColor: "#ffffff"
+        backgroundColor: '#ffffff',
       });
     } catch (err) {
-      console.error("PDF generation error:", err);
-      setPdfError("Gagal generate PDF.");
+      console.error('PDF generation error:', err);
+      setPdfError('Gagal generate PDF.');
     } finally {
       setPdfLoading(false);
     }
@@ -102,14 +102,15 @@ export default function Preview() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-10 flex flex-col items-center mt-24">
-      <div className="w-full max-w-5xl flex justify-between items-center mb-6">
+      <div className="w-full max-w-5xl flex justify-between items-center mb-6 print:hidden">
         <div className="flex gap-2">
-          {["web", "pdf", "mobile"].map((mode) => (
+          {['web', 'pdf', 'mobile'].map((mode) => (
             <button
               key={mode}
               onClick={() => setPreviewMode(mode)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold ${previewMode === mode ? "bg-blue-600 text-white" : "bg-white border"
-                }`}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+                previewMode === mode ? 'bg-blue-600 text-white' : 'bg-white border'
+              }`}
             >
               {mode.toUpperCase()}
             </button>
@@ -118,7 +119,7 @@ export default function Preview() {
         <button
           onClick={downloadPDF}
           disabled={pdfLoading}
-          className={`px-6 py-3 text-white font-semibold rounded-lg shadow-lg flex items-center gap-2 transition-all active:scale-95 ${pdfLoading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          className={`px-6 py-3 text-white font-semibold rounded-lg shadow-lg flex items-center gap-2 transition-all active:scale-95 ${pdfLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -134,18 +135,25 @@ export default function Preview() {
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4"
             />
           </svg>
-          {pdfLoading ? "Membuat PDF…" : "Download PDF"}
+          {pdfLoading ? 'Membuat PDF…' : 'Download PDF'}
         </button>
       </div>
       {pdfError && <div className="w-full max-w-5xl mb-4 text-red-500">{pdfError}</div>}
 
       <div
-        className={`bg-white rounded-[12px] shadow-[0_0_35px_rgba(0,0,0,0.12)] w-full transition-all ${previewMode === 'pdf' ? 'p-0 border-0 shadow-none' : 'p-10 border border-gray-200'
-          } ${previewWidth}`}
-        style={{ minHeight: "1123px" }}
+        className={`bg-white rounded-[12px] shadow-[0_0_35px_rgba(0,0,0,0.12)] w-full transition-all ${
+          previewMode === 'pdf' ? 'p-0 border-0 shadow-none' : 'p-10 border border-gray-200'
+        } ${previewWidth}`}
+        style={{ minHeight: '1123px' }}
       >
         <div ref={previewRef} className="w-full h-full bg-white relative">
-          <Suspense fallback={<div className="h-[1123px] flex items-center justify-center text-slate-500">Memuat preview…</div>}>
+          <Suspense
+            fallback={
+              <div className="h-[1123px] flex items-center justify-center text-slate-500">
+                Memuat preview…
+              </div>
+            }
+          >
             <TemplateRenderer
               data={{ ...portfolio, theme: portfolio.theme || {} }}
               template={template || {}}

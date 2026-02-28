@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function ReferencesList({
   lang,
@@ -13,7 +13,7 @@ export default function ReferencesList({
   attemptSubmit,
   markIfError,
 }) {
-  const sectionKey = "references";
+  const sectionKey = 'references';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -32,9 +32,7 @@ export default function ReferencesList({
           </select>
         </div>
         <button
-          onClick={() =>
-            addItem(sectionKey, { name: "", title: "", company: "", contact: "" })
-          }
+          onClick={() => addItem(sectionKey, { name: '', title: '', company: '', contact: '' })}
           className="px-3 py-1 rounded-lg bg-blue-600 text-sm"
         >
           Tambah
@@ -50,7 +48,7 @@ export default function ReferencesList({
             <input
               value={resolveText(item.name, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "name", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'name', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -59,14 +57,12 @@ export default function ReferencesList({
               placeholder="Nama"
             />
             {attemptSubmit && errors[`references.${index}.name`] && (
-              <div className="text-xs text-red-600 mt-1">
-                {errors[`references.${index}.name`]}
-              </div>
+              <div className="text-xs text-red-600 mt-1">{errors[`references.${index}.name`]}</div>
             )}
             <input
               value={resolveText(item.title, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "title", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'title', lang, e.target.value)
               }
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Jabatan"
@@ -74,22 +70,19 @@ export default function ReferencesList({
             <input
               value={resolveText(item.company, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "company", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'company', lang, e.target.value)
               }
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Perusahaan"
             />
             <input
               value={item.contact}
-              onChange={(e) => updateListField(sectionKey, index, "contact", e.target.value)}
+              onChange={(e) => updateListField(sectionKey, index, 'contact', e.target.value)}
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Kontak"
             />
           </div>
-          <button
-            onClick={() => removeItem(sectionKey, index)}
-            className="text-xs text-red-500"
-          >
+          <button onClick={() => removeItem(sectionKey, index)} className="text-xs text-red-500">
             Hapus
           </button>
         </div>
@@ -97,4 +90,3 @@ export default function ReferencesList({
     </div>
   );
 }
-

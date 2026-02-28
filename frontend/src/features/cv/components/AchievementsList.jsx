@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function AchievementsList({
   lang,
@@ -13,7 +13,7 @@ export default function AchievementsList({
   attemptSubmit,
   markIfError,
 }) {
-  const sectionKey = "achievements";
+  const sectionKey = 'achievements';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -32,9 +32,7 @@ export default function AchievementsList({
           </select>
         </div>
         <button
-          onClick={() =>
-            addItem(sectionKey, { title: "", date: "", description: "" })
-          }
+          onClick={() => addItem(sectionKey, { title: '', date: '', description: '' })}
           className="px-3 py-1 rounded-lg bg-blue-600 text-sm"
         >
           Tambah
@@ -50,7 +48,7 @@ export default function AchievementsList({
             <input
               value={resolveText(item.title, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "title", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'title', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -65,7 +63,7 @@ export default function AchievementsList({
             )}
             <input
               value={item.date}
-              onChange={(e) => updateListField(sectionKey, index, "date", e.target.value)}
+              onChange={(e) => updateListField(sectionKey, index, 'date', e.target.value)}
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Tanggal"
             />
@@ -73,22 +71,13 @@ export default function AchievementsList({
           <textarea
             value={resolveText(item.description, lang)}
             onChange={(e) =>
-              updateLocalizedField(
-                sectionKey,
-                index,
-                "description",
-                lang,
-                e.target.value,
-              )
+              updateLocalizedField(sectionKey, index, 'description', lang, e.target.value)
             }
             className="w-full p-2 rounded text-black border border-slate-200"
             rows={3}
             placeholder="Deskripsi (pisahkan dengan titik .)"
           />
-          <button
-            onClick={() => removeItem(sectionKey, index)}
-            className="text-xs text-red-500"
-          >
+          <button onClick={() => removeItem(sectionKey, index)} className="text-xs text-red-500">
             Hapus
           </button>
         </div>

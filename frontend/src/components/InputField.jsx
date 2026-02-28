@@ -1,15 +1,7 @@
-export default function InputField({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}) {
+export default function InputField({ label, value, onChange, placeholder, type = 'text' }) {
   return (
     <label className="block mb-5">
-      <div className="text-sm font-semibold text-gray-200 mb-2 tracking-wide">
-        {label}
-      </div>
+      <div className="text-sm font-semibold text-gray-200 mb-2 tracking-wide">{label}</div>
 
       <input
         type={type}

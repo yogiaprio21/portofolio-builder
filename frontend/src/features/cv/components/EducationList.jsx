@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function EducationList({
   lang,
@@ -13,7 +13,7 @@ export default function EducationList({
   attemptSubmit,
   markIfError,
 }) {
-  const sectionKey = "education";
+  const sectionKey = 'education';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -34,12 +34,12 @@ export default function EducationList({
         <button
           onClick={() =>
             addItem(sectionKey, {
-              degree: "",
-              institution: "",
-              location: "",
-              startDate: "",
-              endDate: "",
-              gpa: "",
+              degree: '',
+              institution: '',
+              location: '',
+              startDate: '',
+              endDate: '',
+              gpa: '',
             })
           }
           className="px-3 py-1 rounded-lg bg-blue-600 text-sm"
@@ -57,7 +57,7 @@ export default function EducationList({
             <input
               value={resolveText(item.degree, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "degree", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'degree', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -66,21 +66,13 @@ export default function EducationList({
               placeholder="Gelar"
             />
             {attemptSubmit && errors[`education.${index}.degree`] && (
-              <div className="text-xs text-red-600 mt-1">
-                {errors[`education.${index}.degree`]}
-              </div>
+              <div className="text-xs text-red-600 mt-1">{errors[`education.${index}.degree`]}</div>
             )}
             <label className="text-sm text-slate-700">Institusi*</label>
             <input
               value={resolveText(item.institution, lang)}
               onChange={(e) =>
-                updateLocalizedField(
-                  sectionKey,
-                  index,
-                  "institution",
-                  lang,
-                  e.target.value,
-                )
+                updateLocalizedField(sectionKey, index, 'institution', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -96,7 +88,7 @@ export default function EducationList({
             <input
               value={resolveText(item.location, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "location", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'location', lang, e.target.value)
               }
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Lokasi"
@@ -104,32 +96,25 @@ export default function EducationList({
             <div className="grid grid-cols-2 gap-2">
               <input
                 value={item.startDate}
-                onChange={(e) =>
-                  updateListField(sectionKey, index, "startDate", e.target.value)
-                }
+                onChange={(e) => updateListField(sectionKey, index, 'startDate', e.target.value)}
                 className="w-full p-2 rounded text-black border border-slate-200"
                 placeholder="Mulai"
               />
               <input
                 value={item.endDate}
-                onChange={(e) =>
-                  updateListField(sectionKey, index, "endDate", e.target.value)
-                }
+                onChange={(e) => updateListField(sectionKey, index, 'endDate', e.target.value)}
                 className="w-full p-2 rounded text-black border border-slate-200"
                 placeholder="Selesai"
               />
             </div>
             <input
               value={item.gpa}
-              onChange={(e) => updateListField(sectionKey, index, "gpa", e.target.value)}
+              onChange={(e) => updateListField(sectionKey, index, 'gpa', e.target.value)}
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="GPA (opsional)"
             />
           </div>
-          <button
-            onClick={() => removeItem(sectionKey, index)}
-            className="text-xs text-red-500"
-          >
+          <button onClick={() => removeItem(sectionKey, index)} className="text-xs text-red-500">
             Hapus
           </button>
         </div>
@@ -137,4 +122,3 @@ export default function EducationList({
     </div>
   );
 }
-

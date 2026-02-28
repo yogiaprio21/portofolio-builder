@@ -1,52 +1,52 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
-import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf.mjs";
-import workerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
-import { useNavigate, useParams } from "react-router-dom";
-import { createPortfolio, getTemplates, getPortfolio, updatePortfolio, getTemplate } from "../api";
-import { resolveText, hasText } from "../shared/lib/text";
-import { toast } from "react-hot-toast";
-import useImportCv from "../hooks/useImportCv";
-import useAiEnhance from "../hooks/useAiEnhance";
-import PersonalForm from "../features/cv/components/PersonalForm";
-import SummaryForm from "../features/cv/components/SummaryForm";
-import ExperienceList from "../features/cv/components/ExperienceList";
-import EducationList from "../features/cv/components/EducationList";
-import SkillsEditor from "../features/cv/components/SkillsEditor";
-import ImportPanel from "./Create/ImportPanel";
-import ProjectsList from "../features/cv/components/ProjectsList";
-import CertificationsList from "../features/cv/components/CertificationsList";
-import AchievementsList from "../features/cv/components/AchievementsList";
-import ReferencesList from "../features/cv/components/ReferencesList";
-import AdditionalForm from "../features/cv/components/AdditionalForm";
-const TemplateRenderer = lazy(() => import("../templates/TemplateRenderer"));
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf.mjs';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import { useNavigate, useParams } from 'react-router-dom';
+import { createPortfolio, getTemplates, getPortfolio, updatePortfolio, getTemplate } from '../api';
+import { resolveText, hasText } from '../shared/lib/text';
+import { toast } from 'react-hot-toast';
+import useImportCv from '../hooks/useImportCv';
+import useAiEnhance from '../hooks/useAiEnhance';
+import PersonalForm from '../features/cv/components/PersonalForm';
+import SummaryForm from '../features/cv/components/SummaryForm';
+import ExperienceList from '../features/cv/components/ExperienceList';
+import EducationList from '../features/cv/components/EducationList';
+import SkillsEditor from '../features/cv/components/SkillsEditor';
+import ImportPanel from './Create/ImportPanel';
+import ProjectsList from '../features/cv/components/ProjectsList';
+import CertificationsList from '../features/cv/components/CertificationsList';
+import AchievementsList from '../features/cv/components/AchievementsList';
+import ReferencesList from '../features/cv/components/ReferencesList';
+import AdditionalForm from '../features/cv/components/AdditionalForm';
+const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const defaultSections = [
-  "summary",
-  "workExperience",
-  "experience",
-  "education",
-  "skills",
-  "certifications",
-  "projects",
-  "achievements",
-  "references",
-  "additional"
+  'summary',
+  'workExperience',
+  'experience',
+  'education',
+  'skills',
+  'certifications',
+  'projects',
+  'achievements',
+  'references',
+  'additional',
 ];
 
 const emptyCv = {
   personal: {
-    fullName: "",
-    headline: "",
-    email: "",
-    phone: "",
-    location: "",
-    website: "",
-    linkedin: "",
-    github: ""
+    fullName: '',
+    headline: '',
+    email: '',
+    phone: '',
+    location: '',
+    website: '',
+    linkedin: '',
+    github: '',
   },
   summary: {
-    id: "",
-    en: ""
+    id: '',
+    en: '',
   },
   workExperience: [],
   experience: [],
@@ -57,37 +57,37 @@ const emptyCv = {
   achievements: [],
   references: [],
   languageBySection: {
-    summary: "id",
-    workExperience: "id",
-    experience: "id",
-    education: "id",
-    skills: "id",
-    certifications: "id",
-    projects: "id",
-    achievements: "id",
-    references: "id",
-    additional: "id"
+    summary: 'id',
+    workExperience: 'id',
+    experience: 'id',
+    education: 'id',
+    skills: 'id',
+    certifications: 'id',
+    projects: 'id',
+    achievements: 'id',
+    references: 'id',
+    additional: 'id',
   },
   additional: {
-    languages: { id: "", en: "" },
-    interests: { id: "", en: "" },
-    awards: { id: "", en: "" },
-    volunteer: { id: "", en: "" },
-    publications: { id: "", en: "" }
-  }
+    languages: { id: '', en: '' },
+    interests: { id: '', en: '' },
+    awards: { id: '', en: '' },
+    volunteer: { id: '', en: '' },
+    publications: { id: '', en: '' },
+  },
 };
 
 const fontOptions = [
-  "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-  "Poppins, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-  "Merriweather, Georgia, serif",
-  "Lato, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-  "Source Sans 3, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+  'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+  'Poppins, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+  'Merriweather, Georgia, serif',
+  'Lato, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+  'Source Sans 3, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
 ];
 
 const languageOptions = [
-  { value: "id", label: "ID" },
-  { value: "en", label: "EN" }
+  { value: 'id', label: 'ID' },
+  { value: 'en', label: 'EN' },
 ];
 
 // removed RequiredMark; indicators now inline in child components when needed
@@ -101,14 +101,14 @@ export default function Create() {
   const [sectionsOrder, setSectionsOrder] = useState(defaultSections);
   const [dragKey, setDragKey] = useState(null);
   const [theme, setTheme] = useState({
-    accentColor: "#2563eb",
-    backgroundColor: "#ffffff",
-    textColor: "#0f172a",
-    headingColor: "#0f172a",
+    accentColor: '#2563eb',
+    backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    headingColor: '#0f172a',
     fontFamily: fontOptions[0],
-    layout: "single"
+    layout: 'single',
   });
-  const [previewMode, setPreviewMode] = useState("web");
+  const [previewMode, setPreviewMode] = useState('web');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function Create() {
           setCv(p.cv || emptyCv);
           setSectionsOrder(Array.isArray(p.sectionsOrder) ? p.sectionsOrder : defaultSections);
           setSelectedId(p.templateId || null);
-          setTheme({ ...(p.theme || {}), layout: (p.theme?.layout || 'single') });
+          setTheme({ ...(p.theme || {}), layout: p.theme?.layout || 'single' });
           if (p.templateId) {
             const t = await getTemplate(p.templateId);
             if (t?.layout && !p.theme?.layout) {
@@ -153,7 +153,7 @@ export default function Create() {
     setTheme((prev) => ({
       ...prev,
       ...(template.style || {}),
-      layout: template.layout || prev.layout
+      layout: template.layout || prev.layout,
     }));
     const sectionList =
       Array.isArray(template.sections) && template.sections.length
@@ -161,10 +161,10 @@ export default function Create() {
         : defaultSections;
     const injectWorkExp = (() => {
       const list = [...sectionList];
-      const idx = list.indexOf("experience");
-      if (!list.includes("workExperience")) {
-        if (idx >= 0) list.splice(idx, 0, "workExperience");
-        else list.unshift("workExperience");
+      const idx = list.indexOf('experience');
+      if (!list.includes('workExperience')) {
+        if (idx >= 0) list.splice(idx, 0, 'workExperience');
+        else list.unshift('workExperience');
       }
       return list;
     })();
@@ -173,7 +173,7 @@ export default function Create() {
 
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.id === selectedId),
-    [templates, selectedId]
+    [templates, selectedId],
   );
 
   const [errors, setErrors] = useState({});
@@ -188,7 +188,7 @@ export default function Create() {
 
   const mergedErrors = useMemo(() => ({ ...errors, ...formatErrors }), [errors, formatErrors]);
   const markIfError = (path) =>
-    mergedErrors[path] ? "border-red-500 focus:border-red-500" : "border-slate-200";
+    mergedErrors[path] ? 'border-red-500 focus:border-red-500' : 'border-slate-200';
 
   const [previewCv, setPreviewCv] = useState(cv);
   useEffect(() => {
@@ -206,23 +206,23 @@ export default function Create() {
   const activeSections = useMemo(() => sectionsOrder, [sectionsOrder]);
   const stepLabels = useMemo(
     () => ({
-      personal: "Profil",
-      summary: "Ringkasan",
-      workExperience: "Pengalaman Kerja",
-      experience: "Pengalaman",
-      education: "Pendidikan",
-      skills: "Keahlian",
-      certifications: "Sertifikasi",
-      projects: "Proyek",
-      achievements: "Pencapaian",
-      references: "Referensi",
-      additional: "Informasi Tambahan"
+      personal: 'Profil',
+      summary: 'Ringkasan',
+      workExperience: 'Pengalaman Kerja',
+      experience: 'Pengalaman',
+      education: 'Pendidikan',
+      skills: 'Keahlian',
+      certifications: 'Sertifikasi',
+      projects: 'Proyek',
+      achievements: 'Pencapaian',
+      references: 'Referensi',
+      additional: 'Informasi Tambahan',
     }),
-    []
+    [],
   );
   const stepKeys = useMemo(() => {
-    const ordered = activeSections.filter((key) => key !== "summary");
-    return ["personal", "summary", ...ordered];
+    const ordered = activeSections.filter((key) => key !== 'summary');
+    return ['personal', 'summary', ...ordered];
   }, [activeSections]);
   const activeStepKey = stepKeys[activeStepIndex];
   const remainingSteps = Math.max(stepKeys.length - activeStepIndex - 1, 0);
@@ -232,16 +232,16 @@ export default function Create() {
   const updatePersonal = (key, value) => {
     setCv((prev) => ({
       ...prev,
-      personal: { ...prev.personal, [key]: value }
+      personal: { ...prev.personal, [key]: value },
     }));
   };
 
-  const getSectionLanguage = (section) => cv.languageBySection?.[section] || "id";
+  const getSectionLanguage = (section) => cv.languageBySection?.[section] || 'id';
 
   const setSectionLanguage = (section, lang) => {
     setCv((prev) => ({
       ...prev,
-      languageBySection: { ...prev.languageBySection, [section]: lang }
+      languageBySection: { ...prev.languageBySection, [section]: lang },
     }));
   };
 
@@ -252,16 +252,16 @@ export default function Create() {
   const updateAdditional = (key, lang, value) => {
     setCv((prev) => ({
       ...prev,
-      additional: { ...prev.additional, [key]: { ...prev.additional[key], [lang]: value } }
+      additional: { ...prev.additional, [key]: { ...prev.additional[key], [lang]: value } },
     }));
   };
 
   const notify = useCallback((type, message) => {
     if (!message) return;
-    if (type === "success") toast.success(message);
-    else if (type === "error") toast.error(message);
-    else if (type === "info") toast(message, { icon: "ℹ️" });
-    else if (type === "warning") toast(message, { icon: "⚠️" });
+    if (type === 'success') toast.success(message);
+    else if (type === 'error') toast.error(message);
+    else if (type === 'info') toast(message, { icon: 'ℹ️' });
+    else if (type === 'warning') toast(message, { icon: '⚠️' });
     else toast(message);
   }, []);
 
@@ -269,7 +269,7 @@ export default function Create() {
   const isValidPhone = useCallback((value) => /^\+?[0-9\s()-]{6,}$/.test(value), []);
   const isValidUrl = useCallback((value) => {
     try {
-      const normalized = value.startsWith("http") ? value : `https://${value}`;
+      const normalized = value.startsWith('http') ? value : `https://${value}`;
       new URL(normalized);
       return true;
     } catch {
@@ -285,16 +285,17 @@ export default function Create() {
     const github = cv.personal.github.trim();
     setFormatErrors((prev) => {
       const next = { ...prev };
-      if (email && !isValidEmail(email)) next["personal.email"] = "Format email tidak valid.";
-      else delete next["personal.email"];
-      if (phone && !isValidPhone(phone)) next["personal.phone"] = "Format telepon tidak valid.";
-      else delete next["personal.phone"];
-      if (website && !isValidUrl(website)) next["personal.website"] = "Format website tidak valid.";
-      else delete next["personal.website"];
-      if (linkedin && !isValidUrl(linkedin)) next["personal.linkedin"] = "Format LinkedIn tidak valid.";
-      else delete next["personal.linkedin"];
-      if (github && !isValidUrl(github)) next["personal.github"] = "Format GitHub tidak valid.";
-      else delete next["personal.github"];
+      if (email && !isValidEmail(email)) next['personal.email'] = 'Format email tidak valid.';
+      else delete next['personal.email'];
+      if (phone && !isValidPhone(phone)) next['personal.phone'] = 'Format telepon tidak valid.';
+      else delete next['personal.phone'];
+      if (website && !isValidUrl(website)) next['personal.website'] = 'Format website tidak valid.';
+      else delete next['personal.website'];
+      if (linkedin && !isValidUrl(linkedin))
+        next['personal.linkedin'] = 'Format LinkedIn tidak valid.';
+      else delete next['personal.linkedin'];
+      if (github && !isValidUrl(github)) next['personal.github'] = 'Format GitHub tidak valid.';
+      else delete next['personal.github'];
       return next;
     });
   }, [cv.personal, isValidEmail, isValidPhone, isValidUrl]);
@@ -305,7 +306,7 @@ export default function Create() {
       fields.some((field) => {
         const value = item?.[field];
         return hasText(value);
-      })
+      }),
     );
   }, []);
 
@@ -313,7 +314,9 @@ export default function Create() {
     if (!Array.isArray(items) || items.length === 0) return false;
     return items.some((group) => {
       const entries = Array.isArray(group?.items) ? group.items : [];
-      return entries.some((entry) => (typeof entry === "string" ? hasText(entry) : hasText(entry?.name)));
+      return entries.some((entry) =>
+        typeof entry === 'string' ? hasText(entry) : hasText(entry?.name),
+      );
     });
   }, []);
 
@@ -330,9 +333,9 @@ export default function Create() {
       const items = [...prev[section]];
       const current = items[index] || {};
       const existing =
-        current[key] && typeof current[key] === "object" && !Array.isArray(current[key])
+        current[key] && typeof current[key] === 'object' && !Array.isArray(current[key])
           ? current[key]
-          : { id: "", en: "" };
+          : { id: '', en: '' };
       items[index] = { ...current, [key]: { ...existing, [lang]: value } };
       return { ...prev, [section]: items };
     });
@@ -340,7 +343,7 @@ export default function Create() {
 
   const updateLocalizedArrayFieldByDot = (section, index, key, lang, value) => {
     const items = value
-      .split(".")
+      .split('.')
       .map((v) => v.trim())
       .filter(Boolean);
     updateLocalizedField(section, index, key, lang, items);
@@ -353,14 +356,14 @@ export default function Create() {
       const entries = Array.isArray(group.items) ? [...group.items] : [];
       const rawCurrent = entries[entryIndex];
       const current =
-        typeof rawCurrent === "string"
-          ? { name: { id: rawCurrent, en: rawCurrent }, level: "", proof: { id: "", en: "" } }
-          : rawCurrent || { name: { id: "", en: "" }, level: "", proof: { id: "", en: "" } };
-      if (key === "name" || key === "proof") {
+        typeof rawCurrent === 'string'
+          ? { name: { id: rawCurrent, en: rawCurrent }, level: '', proof: { id: '', en: '' } }
+          : rawCurrent || { name: { id: '', en: '' }, level: '', proof: { id: '', en: '' } };
+      if (key === 'name' || key === 'proof') {
         const existing =
-          current[key] && typeof current[key] === "object" && !Array.isArray(current[key])
+          current[key] && typeof current[key] === 'object' && !Array.isArray(current[key])
             ? current[key]
-            : { id: "", en: "" };
+            : { id: '', en: '' };
         entries[entryIndex] = { ...current, [key]: { ...existing, [lang]: value } };
       } else {
         entries[entryIndex] = { ...current, [key]: value };
@@ -375,7 +378,7 @@ export default function Create() {
       const groups = [...prev.skills];
       const group = groups[groupIndex] || {};
       const entries = Array.isArray(group.items) ? [...group.items] : [];
-      entries.push({ name: { id: "", en: "" }, level: "", proof: { id: "", en: "" } });
+      entries.push({ name: { id: '', en: '' }, level: '', proof: { id: '', en: '' } });
       groups[groupIndex] = { ...group, items: entries };
       return { ...prev, skills: groups };
     });
@@ -385,7 +388,9 @@ export default function Create() {
     setCv((prev) => {
       const groups = [...prev.skills];
       const group = groups[groupIndex] || {};
-      const entries = Array.isArray(group.items) ? group.items.filter((_, idx) => idx !== entryIndex) : [];
+      const entries = Array.isArray(group.items)
+        ? group.items.filter((_, idx) => idx !== entryIndex)
+        : [];
       groups[groupIndex] = { ...group, items: entries };
       return { ...prev, skills: groups };
     });
@@ -398,7 +403,7 @@ export default function Create() {
   const removeListItem = (section, index) => {
     setCv((prev) => ({
       ...prev,
-      [section]: prev[section].filter((_, idx) => idx !== index)
+      [section]: prev[section].filter((_, idx) => idx !== index),
     }));
   };
 
@@ -409,7 +414,7 @@ export default function Create() {
   const removeSkillGroup = (index) => {
     setCv((prev) => ({
       ...prev,
-      skills: prev.skills.filter((_, idx) => idx !== index)
+      skills: prev.skills.filter((_, idx) => idx !== index),
     }));
   };
 
@@ -432,43 +437,64 @@ export default function Create() {
   };
 
   const previewWidth =
-    previewMode === "mobile"
-      ? "max-w-[420px]"
-      : previewMode === "pdf"
-      ? "max-w-[794px]"
-      : "max-w-4xl";
+    previewMode === 'mobile'
+      ? 'max-w-[420px]'
+      : previewMode === 'pdf'
+        ? 'max-w-[794px]'
+        : 'max-w-4xl';
 
   const completion = useMemo(() => {
     const missing = [];
-    if (!cv.personal.fullName.trim()) missing.push("Nama Lengkap");
-    if (!cv.personal.headline.trim()) missing.push("Headline");
-    if (!cv.personal.email.trim()) missing.push("Email");
-    if (!hasText(cv.summary)) missing.push("Ringkasan");
-    if (activeSections.includes("workExperience") && !hasItemWithFields(cv.workExperience, ["role", "company", "highlights"])) {
-      missing.push("Pengalaman Kerja");
+    if (!cv.personal.fullName.trim()) missing.push('Nama Lengkap');
+    if (!cv.personal.headline.trim()) missing.push('Headline');
+    if (!cv.personal.email.trim()) missing.push('Email');
+    if (!hasText(cv.summary)) missing.push('Ringkasan');
+    if (
+      activeSections.includes('workExperience') &&
+      !hasItemWithFields(cv.workExperience, ['role', 'company', 'highlights'])
+    ) {
+      missing.push('Pengalaman Kerja');
     }
-    if (activeSections.includes("experience") && !hasItemWithFields(cv.experience, ["role", "company", "highlights"])) {
-      missing.push("Pengalaman");
+    if (
+      activeSections.includes('experience') &&
+      !hasItemWithFields(cv.experience, ['role', 'company', 'highlights'])
+    ) {
+      missing.push('Pengalaman');
     }
-    if (activeSections.includes("education") && !hasItemWithFields(cv.education, ["degree", "institution"])) {
-      missing.push("Pendidikan");
+    if (
+      activeSections.includes('education') &&
+      !hasItemWithFields(cv.education, ['degree', 'institution'])
+    ) {
+      missing.push('Pendidikan');
     }
-    if (activeSections.includes("skills") && !hasSkillEntries(cv.skills)) {
-      missing.push("Keahlian");
+    if (activeSections.includes('skills') && !hasSkillEntries(cv.skills)) {
+      missing.push('Keahlian');
     }
-    if (activeSections.includes("certifications") && !hasItemWithFields(cv.certifications, ["name", "issuer"])) {
-      missing.push("Sertifikasi");
+    if (
+      activeSections.includes('certifications') &&
+      !hasItemWithFields(cv.certifications, ['name', 'issuer'])
+    ) {
+      missing.push('Sertifikasi');
     }
-    if (activeSections.includes("projects") && !hasItemWithFields(cv.projects, ["name", "role", "description", "tech"])) {
-      missing.push("Proyek");
+    if (
+      activeSections.includes('projects') &&
+      !hasItemWithFields(cv.projects, ['name', 'role', 'description', 'tech'])
+    ) {
+      missing.push('Proyek');
     }
-    if (activeSections.includes("achievements") && !hasItemWithFields(cv.achievements, ["title", "description"])) {
-      missing.push("Pencapaian");
+    if (
+      activeSections.includes('achievements') &&
+      !hasItemWithFields(cv.achievements, ['title', 'description'])
+    ) {
+      missing.push('Pencapaian');
     }
-    if (activeSections.includes("references") && !hasItemWithFields(cv.references, ["name", "title", "company"])) {
-      missing.push("Referensi");
+    if (
+      activeSections.includes('references') &&
+      !hasItemWithFields(cv.references, ['name', 'title', 'company'])
+    ) {
+      missing.push('Referensi');
     }
-    if (activeSections.includes("additional")) {
+    if (activeSections.includes('additional')) {
       const additional = cv.additional || {};
       const hasAdditional =
         hasText(additional.languages) ||
@@ -476,7 +502,7 @@ export default function Create() {
         hasText(additional.awards) ||
         hasText(additional.volunteer) ||
         hasText(additional.publications);
-      if (!hasAdditional) missing.push("Informasi Tambahan");
+      if (!hasAdditional) missing.push('Informasi Tambahan');
     }
     return { isComplete: missing.length === 0, missing };
   }, [cv, activeSections, hasItemWithFields, hasSkillEntries]);
@@ -484,28 +510,27 @@ export default function Create() {
   const skillLevelOptions = useMemo(
     () => ({
       id: [
-        { value: "advanced", label: "Mahir" },
-        { value: "intermediate", label: "Menengah" },
-        { value: "beginner", label: "Pemula" }
+        { value: 'advanced', label: 'Mahir' },
+        { value: 'intermediate', label: 'Menengah' },
+        { value: 'beginner', label: 'Pemula' },
       ],
       en: [
-        { value: "advanced", label: "Advanced" },
-        { value: "intermediate", label: "Intermediate" },
-        { value: "beginner", label: "Beginner" }
-      ]
+        { value: 'advanced', label: 'Advanced' },
+        { value: 'intermediate', label: 'Intermediate' },
+        { value: 'beginner', label: 'Beginner' },
+      ],
     }),
-    []
+    [],
   );
 
   const completionLabel = completion.isComplete
-    ? "Form sudah lengkap"
-    : `Lengkapi: ${completion.missing.slice(0, 3).join(", ")}${
-        completion.missing.length > 3 ? ` +${completion.missing.length - 3} lainnya` : ""
-      }`;
+    ? 'Form sudah lengkap'
+    : `Lengkapi: ${completion.missing.slice(0, 3).join(', ')}${completion.missing.length > 3 ? ` +${completion.missing.length - 3} lainnya` : ''
+    }`;
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = window.localStorage.getItem("portfolio-builder.create-draft");
+    if (typeof window === 'undefined') return;
+    const raw = window.localStorage.getItem('portfolio-builder.create-draft');
     if (!raw) {
       setDraftLoaded(true);
       return;
@@ -530,17 +555,17 @@ export default function Create() {
   }, []);
 
   useEffect(() => {
-    if (!draftLoaded || typeof window === "undefined") return;
+    if (!draftLoaded || typeof window === 'undefined') return;
     const payload = {
       cv,
       theme,
       sectionsOrder,
       selectedId,
       previewMode,
-      activeStepIndex
+      activeStepIndex,
     };
     const t = setTimeout(() => {
-      window.localStorage.setItem("portfolio-builder.create-draft", JSON.stringify(payload));
+      window.localStorage.setItem('portfolio-builder.create-draft', JSON.stringify(payload));
     }, 350);
     return () => clearTimeout(t);
   }, [cv, theme, sectionsOrder, selectedId, previewMode, activeStepIndex, draftLoaded]);
@@ -556,128 +581,158 @@ export default function Create() {
     return () => clearTimeout(t);
   }, [activeStepIndex]);
 
-  const summaryLang = getSectionLanguage("summary");
-  const experienceLang = getSectionLanguage("experience");
-  const workExperienceLang = getSectionLanguage("workExperience");
-  const educationLang = getSectionLanguage("education");
-  const skillsLang = getSectionLanguage("skills");
-  const certificationsLang = getSectionLanguage("certifications");
-  const projectsLang = getSectionLanguage("projects");
-  const achievementsLang = getSectionLanguage("achievements");
-  const referencesLang = getSectionLanguage("references");
-  const additionalLang = getSectionLanguage("additional");
+  const summaryLang = getSectionLanguage('summary');
+  const experienceLang = getSectionLanguage('experience');
+  const workExperienceLang = getSectionLanguage('workExperience');
+  const educationLang = getSectionLanguage('education');
+  const skillsLang = getSectionLanguage('skills');
+  const certificationsLang = getSectionLanguage('certifications');
+  const projectsLang = getSectionLanguage('projects');
+  const achievementsLang = getSectionLanguage('achievements');
+  const referencesLang = getSectionLanguage('references');
+  const additionalLang = getSectionLanguage('additional');
 
   const validateStep = useCallback(
     (stepKey) => {
       const nextErrors = {};
-      if (stepKey === "personal") {
-        if (!cv.personal.fullName.trim()) nextErrors["personal.fullName"] = "Nama lengkap wajib diisi.";
-        if (!cv.personal.email.trim()) nextErrors["personal.email"] = "Email wajib diisi.";
+      if (stepKey === 'personal') {
+        if (!cv.personal.fullName.trim())
+          nextErrors['personal.fullName'] = 'Nama lengkap wajib diisi.';
+        if (!cv.personal.email.trim()) nextErrors['personal.email'] = 'Email wajib diisi.';
         if (cv.personal.email.trim() && !isValidEmail(cv.personal.email.trim())) {
-          nextErrors["personal.email"] = "Format email tidak valid.";
+          nextErrors['personal.email'] = 'Format email tidak valid.';
         }
         if (cv.personal.phone.trim() && !isValidPhone(cv.personal.phone.trim())) {
-          nextErrors["personal.phone"] = "Format telepon tidak valid.";
+          nextErrors['personal.phone'] = 'Format telepon tidak valid.';
         }
         if (cv.personal.website.trim() && !isValidUrl(cv.personal.website.trim())) {
-          nextErrors["personal.website"] = "Format website tidak valid.";
+          nextErrors['personal.website'] = 'Format website tidak valid.';
         }
         if (cv.personal.linkedin.trim() && !isValidUrl(cv.personal.linkedin.trim())) {
-          nextErrors["personal.linkedin"] = "Format LinkedIn tidak valid.";
+          nextErrors['personal.linkedin'] = 'Format LinkedIn tidak valid.';
         }
         if (cv.personal.github.trim() && !isValidUrl(cv.personal.github.trim())) {
-          nextErrors["personal.github"] = "Format GitHub tidak valid.";
+          nextErrors['personal.github'] = 'Format GitHub tidak valid.';
         }
       }
-      if (stepKey === "summary") {
-        if (!hasText(cv.summary)) nextErrors.summary = "Ringkasan wajib diisi.";
+      if (stepKey === 'summary') {
+        if (!hasText(cv.summary)) nextErrors.summary = 'Ringkasan wajib diisi.';
       }
-      if (stepKey === "workExperience") {
+      if (stepKey === 'workExperience') {
         (cv.workExperience || []).forEach((item, idx) => {
-          const anyPresence =
-            [item.role, item.company, item.location, item.startDate, item.endDate, item.highlights].some((v) =>
-              v && (typeof v === "string" ? v.trim() : Array.isArray(v) ? v.length : true)
-            );
-          if (anyPresence) {
-            if (!resolveText(item.role, workExperienceLang).trim()) nextErrors[`workExperience.${idx}.role`] = "Posisi wajib diisi.";
-            if (!resolveText(item.company, workExperienceLang).trim()) nextErrors[`workExperience.${idx}.company`] = "Perusahaan wajib diisi.";
-          }
-        });
-      }
-      if (stepKey === "experience") {
-        (cv.experience || []).forEach((item, idx) => {
-          const anyPresence =
-            [item.role, item.company, item.location, item.startDate, item.endDate, item.highlights].some((v) =>
-              v && (typeof v === "string" ? v.trim() : Array.isArray(v) ? v.length : true)
-            );
-          if (anyPresence) {
-            if (!resolveText(item.role, experienceLang).trim()) nextErrors[`experience.${idx}.role`] = "Posisi wajib diisi.";
-            if (!resolveText(item.company, experienceLang).trim()) nextErrors[`experience.${idx}.company`] = "Perusahaan wajib diisi.";
-          }
-        });
-      }
-      if (stepKey === "education") {
-        (cv.education || []).forEach((item, idx) => {
-          const anyPresence = [item.degree, item.institution, item.location, item.startDate, item.endDate, item.gpa].some(
-            (v) => v && (typeof v === "string" ? v.trim() : true)
+          const anyPresence = [
+            item.role,
+            item.company,
+            item.location,
+            item.startDate,
+            item.endDate,
+            item.highlights,
+          ].some(
+            (v) => v && (typeof v === 'string' ? v.trim() : Array.isArray(v) ? v.length : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.degree, educationLang).trim()) nextErrors[`education.${idx}.degree`] = "Gelar wajib diisi.";
-            if (!resolveText(item.institution, educationLang).trim()) nextErrors[`education.${idx}.institution`] = "Institusi wajib diisi.";
+            if (!resolveText(item.role, workExperienceLang).trim())
+              nextErrors[`workExperience.${idx}.role`] = 'Posisi wajib diisi.';
+            if (!resolveText(item.company, workExperienceLang).trim())
+              nextErrors[`workExperience.${idx}.company`] = 'Perusahaan wajib diisi.';
           }
         });
       }
-      if (stepKey === "skills") {
+      if (stepKey === 'experience') {
+        (cv.experience || []).forEach((item, idx) => {
+          const anyPresence = [
+            item.role,
+            item.company,
+            item.location,
+            item.startDate,
+            item.endDate,
+            item.highlights,
+          ].some(
+            (v) => v && (typeof v === 'string' ? v.trim() : Array.isArray(v) ? v.length : true),
+          );
+          if (anyPresence) {
+            if (!resolveText(item.role, experienceLang).trim())
+              nextErrors[`experience.${idx}.role`] = 'Posisi wajib diisi.';
+            if (!resolveText(item.company, experienceLang).trim())
+              nextErrors[`experience.${idx}.company`] = 'Perusahaan wajib diisi.';
+          }
+        });
+      }
+      if (stepKey === 'education') {
+        (cv.education || []).forEach((item, idx) => {
+          const anyPresence = [
+            item.degree,
+            item.institution,
+            item.location,
+            item.startDate,
+            item.endDate,
+            item.gpa,
+          ].some((v) => v && (typeof v === 'string' ? v.trim() : true));
+          if (anyPresence) {
+            if (!resolveText(item.degree, educationLang).trim())
+              nextErrors[`education.${idx}.degree`] = 'Gelar wajib diisi.';
+            if (!resolveText(item.institution, educationLang).trim())
+              nextErrors[`education.${idx}.institution`] = 'Institusi wajib diisi.';
+          }
+        });
+      }
+      if (stepKey === 'skills') {
         (cv.skills || []).forEach((group, gIdx) => {
           const entries = Array.isArray(group.items) ? group.items : [];
           entries.forEach((entry, eIdx) => {
-            const name = typeof entry === "string" ? entry : resolveText(entry?.name, skillsLang);
-            const level = typeof entry === "object" ? entry?.level : "";
+            const name = typeof entry === 'string' ? entry : resolveText(entry?.name, skillsLang);
+            const level = typeof entry === 'object' ? entry?.level : '';
             const anyPresence = (name && name.trim()) || level;
             if (anyPresence) {
-              if (!name || !name.trim()) nextErrors[`skills.${gIdx}.items.${eIdx}.name`] = "Nama keahlian wajib diisi.";
+              if (!name || !name.trim())
+                nextErrors[`skills.${gIdx}.items.${eIdx}.name`] = 'Nama keahlian wajib diisi.';
             }
           });
         });
       }
-      if (stepKey === "certifications") {
+      if (stepKey === 'certifications') {
         (cv.certifications || []).forEach((item, idx) => {
           const anyPresence = [item.name, item.issuer, item.date, item.credentialUrl].some(
-            (v) => v && (typeof v === "string" ? v.trim() : true)
+            (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.name, certificationsLang).trim()) nextErrors[`certifications.${idx}.name`] = "Nama sertifikasi wajib diisi.";
-            if (!resolveText(item.issuer, certificationsLang).trim()) nextErrors[`certifications.${idx}.issuer`] = "Penerbit wajib diisi.";
+            if (!resolveText(item.name, certificationsLang).trim())
+              nextErrors[`certifications.${idx}.name`] = 'Nama sertifikasi wajib diisi.';
+            if (!resolveText(item.issuer, certificationsLang).trim())
+              nextErrors[`certifications.${idx}.issuer`] = 'Penerbit wajib diisi.';
           }
         });
       }
-      if (stepKey === "projects") {
+      if (stepKey === 'projects') {
         (cv.projects || []).forEach((item, idx) => {
           const anyPresence = [item.name, item.role, item.description, item.tech, item.link].some(
-            (v) => v && (typeof v === "string" ? v.trim() : true)
+            (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.name, projectsLang).trim()) nextErrors[`projects.${idx}.name`] = "Nama proyek wajib diisi.";
+            if (!resolveText(item.name, projectsLang).trim())
+              nextErrors[`projects.${idx}.name`] = 'Nama proyek wajib diisi.';
           }
         });
       }
-      if (stepKey === "achievements") {
+      if (stepKey === 'achievements') {
         (cv.achievements || []).forEach((item, idx) => {
           const anyPresence = [item.title, item.date, item.description].some(
-            (v) => v && (typeof v === "string" ? v.trim() : true)
+            (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.title, achievementsLang).trim()) nextErrors[`achievements.${idx}.title`] = "Judul wajib diisi.";
+            if (!resolveText(item.title, achievementsLang).trim())
+              nextErrors[`achievements.${idx}.title`] = 'Judul wajib diisi.';
           }
         });
       }
-      if (stepKey === "references") {
+      if (stepKey === 'references') {
         (cv.references || []).forEach((item, idx) => {
           const anyPresence = [item.name, item.title, item.company, item.contact].some(
-            (v) => v && (typeof v === "string" ? v.trim() : true)
+            (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.name, referencesLang).trim()) nextErrors[`references.${idx}.name`] = "Nama wajib diisi.";
+            if (!resolveText(item.name, referencesLang).trim())
+              nextErrors[`references.${idx}.name`] = 'Nama wajib diisi.';
           }
         });
       }
@@ -695,8 +750,8 @@ export default function Create() {
       referencesLang,
       isValidEmail,
       isValidPhone,
-      isValidUrl
-    ]
+      isValidUrl,
+    ],
   );
 
   const validateAllSteps = useCallback(() => {
@@ -710,17 +765,17 @@ export default function Create() {
     setErrors(allErrors);
     if (Object.keys(submitErrors).length > 0) {
       const firstMessage = Object.values(submitErrors)[0];
-      notify("warning", firstMessage || "Lengkapi field wajib yang belum diisi.");
+      notify('warning', firstMessage || 'Lengkapi field wajib yang belum diisi.');
       return;
     }
     if (!selectedId) {
-      notify("info", "Pilih template terlebih dahulu.");
+      notify('info', 'Pilih template terlebih dahulu.');
       return;
     }
-    const token = typeof window !== "undefined" ? window.localStorage.getItem("ACCESS_TOKEN") : "";
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
     if (!token) {
-      notify("warning", "Silakan login terlebih dahulu.");
-      navigate("/app/login?next=/app/create");
+      notify('warning', 'Silakan login terlebih dahulu.');
+      navigate('/app/login?next=/app/create');
       return;
     }
     try {
@@ -728,22 +783,22 @@ export default function Create() {
         cv,
         templateId: selectedId,
         theme,
-        sectionsOrder
+        sectionsOrder,
       };
       const data = id ? await updatePortfolio(id, payload) : await createPortfolio(payload);
       const targetId = data.id || id;
       if (targetId) {
-        if (typeof window !== "undefined") {
-          window.localStorage.removeItem("portfolio-builder.create-draft");
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('portfolio-builder.create-draft');
         }
-        notify("success", id ? "Portofolio berhasil diperbarui." : "Portofolio berhasil disimpan.");
+        notify('success', id ? 'Portofolio berhasil diperbarui.' : 'Portofolio berhasil disimpan.');
         navigate(`/app/preview/${targetId}`);
       } else {
-        notify("error", data.error || "Gagal menyimpan.");
+        notify('error', data.error || 'Gagal menyimpan.');
       }
     } catch (err) {
       console.error(err);
-      notify("error", "Terjadi kesalahan.");
+      notify('error', 'Terjadi kesalahan.');
     }
   };
 
@@ -754,7 +809,7 @@ export default function Create() {
     setErrors(stepErrors);
     if (Object.keys(nextErrors).length > 0) {
       const firstMessage = Object.values(nextErrors)[0];
-      notify("warning", firstMessage || "Lengkapi field wajib yang belum diisi.");
+      notify('warning', firstMessage || 'Lengkapi field wajib yang belum diisi.');
       return;
     }
     if (activeStepIndex < stepKeys.length - 1) {
@@ -773,7 +828,7 @@ export default function Create() {
   };
 
   const renderStepContent = () => {
-    if (activeStepKey === "personal") {
+    if (activeStepKey === 'personal') {
       return (
         <PersonalForm
           value={cv.personal}
@@ -784,12 +839,12 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "summary") {
+    if (activeStepKey === 'summary') {
       return (
         <SummaryForm
           value={cv.summary}
           lang={summaryLang}
-          onChangeLanguage={(lang) => setSectionLanguage("summary", lang)}
+          onChangeLanguage={(lang) => setSectionLanguage('summary', lang)}
           languageOptions={languageOptions}
           onChangeText={updateSummary}
           errors={mergedErrors}
@@ -798,7 +853,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "workExperience") {
+    if (activeStepKey === 'workExperience') {
       return (
         <ExperienceList
           sectionKey="workExperience"
@@ -818,7 +873,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "experience") {
+    if (activeStepKey === 'experience') {
       return (
         <ExperienceList
           sectionKey="experience"
@@ -838,7 +893,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "education") {
+    if (activeStepKey === 'education') {
       return (
         <EducationList
           lang={educationLang}
@@ -855,7 +910,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "skills") {
+    if (activeStepKey === 'skills') {
       return (
         <SkillsEditor
           lang={skillsLang}
@@ -864,7 +919,7 @@ export default function Create() {
           items={cv.skills}
           addGroup={addSkillGroup}
           updateLocalizedField={(index, key, lang, value) =>
-            updateLocalizedField("skills", index, key, lang, value)
+            updateLocalizedField('skills', index, key, lang, value)
           }
           updateEntry={updateSkillEntry}
           removeEntry={removeSkillEntry}
@@ -877,7 +932,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "certifications") {
+    if (activeStepKey === 'certifications') {
       return (
         <CertificationsList
           lang={certificationsLang}
@@ -894,7 +949,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "projects") {
+    if (activeStepKey === 'projects') {
       return (
         <ProjectsList
           lang={projectsLang}
@@ -911,7 +966,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "achievements") {
+    if (activeStepKey === 'achievements') {
       return (
         <AchievementsList
           lang={achievementsLang}
@@ -928,7 +983,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "references") {
+    if (activeStepKey === 'references') {
       return (
         <ReferencesList
           lang={referencesLang}
@@ -945,7 +1000,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === "additional") {
+    if (activeStepKey === 'additional') {
       return (
         <AdditionalForm
           value={cv.additional}
@@ -960,7 +1015,7 @@ export default function Create() {
   };
 
   return (
-    <div className="min-h-screen text-white bg-gradient-to-br from-slate-900 to-slate-800 p-6 pt-32">
+    <div className="min-h-screen text-white bg-gradient-to-br from-slate-900 to-slate-800 p-6 pt-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-[1.1fr_1.9fr] gap-8">
         <aside className="space-y-6">
           <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl border border-white/10">
@@ -973,9 +1028,10 @@ export default function Create() {
                   onDragStart={() => handleDragStart(key)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(key)}
-                  className={`px-4 py-2 rounded-lg border cursor-move ${
-                    dragKey === key ? "border-blue-400 bg-blue-500/20" : "border-white/20 bg-white/5"
-                  }`}
+                  className={`px-4 py-2 rounded-lg border cursor-move ${dragKey === key
+                      ? 'border-blue-400 bg-blue-500/20'
+                      : 'border-white/20 bg-white/5'
+                    }`}
                 >
                   {key}
                 </div>
@@ -1000,7 +1056,9 @@ export default function Create() {
                 <input
                   type="color"
                   value={theme.backgroundColor}
-                  onChange={(e) => setTheme((prev) => ({ ...prev, backgroundColor: e.target.value }))}
+                  onChange={(e) =>
+                    setTheme((prev) => ({ ...prev, backgroundColor: e.target.value }))
+                  }
                   className="w-full h-10 mt-2 rounded"
                 />
               </label>
@@ -1022,7 +1080,7 @@ export default function Create() {
                 >
                   {fontOptions.map((font) => (
                     <option key={font} value={font}>
-                      {font.split(",")[0]}
+                      {font.split(',')[0]}
                     </option>
                   ))}
                 </select>
@@ -1040,19 +1098,32 @@ export default function Create() {
                   <option value="split">Split</option>
                 </select>
               </label>
+              <label className="text-sm text-gray-300">
+                Posisi Profil
+                <select
+                  value={theme.profileAlignment || 'left'}
+                  onChange={(e) =>
+                    setTheme((prev) => ({ ...prev, profileAlignment: e.target.value }))
+                  }
+                  className="w-full mt-2 p-2 rounded text-black mb-1"
+                >
+                  <option value="left">Rata Kiri</option>
+                  <option value="center">Rata Tengah</option>
+                  <option value="right">Rata Kanan</option>
+                </select>
+              </label>
             </div>
           </div>
 
           <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl border border-white/10">
             <h4 className="font-semibold text-blue-300 mb-4">Mode Preview</h4>
             <div className="grid grid-cols-3 gap-2">
-              {["web", "pdf", "mobile"].map((mode) => (
+              {['web', 'pdf', 'mobile'].map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setPreviewMode(mode)}
-                  className={`py-2 rounded-lg text-sm font-semibold ${
-                    previewMode === mode ? "bg-blue-600" : "bg-white/10"
-                  }`}
+                  className={`py-2 rounded-lg text-sm font-semibold ${previewMode === mode ? 'bg-blue-600' : 'bg-white/10'
+                    }`}
                 >
                   {mode.toUpperCase()}
                 </button>
@@ -1068,17 +1139,15 @@ export default function Create() {
                 <h2 className="text-2xl font-bold text-blue-300">Template</h2>
                 <p className="text-sm text-blue-100/80">
                   {selectedTemplate
-                    ? `${selectedTemplate.name} • ${
-                        selectedTemplate.category || "Template"
-                      }`
-                    : "Belum ada template dipilih"}
+                    ? `${selectedTemplate.name} • ${selectedTemplate.category || 'Template'}`
+                    : 'Belum ada template dipilih'}
                 </p>
               </div>
               <button
                 onClick={() => setShowTemplatePicker((prev) => !prev)}
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold"
               >
-                {showTemplatePicker ? "Tutup Pilihan" : "Pilih Template"}
+                {showTemplatePicker ? 'Tutup Pilihan' : 'Pilih Template'}
               </button>
             </div>
             {showTemplatePicker && (
@@ -1095,11 +1164,10 @@ export default function Create() {
                         applyTemplate(template);
                         setShowTemplatePicker(false);
                       }}
-                      className={`text-left rounded-xl border p-4 transition ${
-                        isSelected
-                          ? "border-blue-400 bg-blue-500/20"
-                          : "border-white/10 bg-white/5 hover:bg-white/10"
-                      }`}
+                      className={`text-left rounded-xl border p-4 transition ${isSelected
+                          ? 'border-blue-400 bg-blue-500/20'
+                          : 'border-white/10 bg-white/5 hover:bg-white/10'
+                        }`}
                     >
                       <div className="text-sm font-semibold text-white">{template.name}</div>
                       <div className="text-xs text-blue-100/80">{template.category}</div>
@@ -1115,19 +1183,13 @@ export default function Create() {
                 <h2 className="text-2xl font-bold text-blue-300">Preview</h2>
                 <p className="text-sm text-blue-100/80">
                   {selectedTemplate
-                    ? `${selectedTemplate.name} • ${
-                        selectedTemplate.category || "Template"
-                      }`
-                    : "Belum ada template dipilih"}
+                    ? `${selectedTemplate.name} • ${selectedTemplate.category || 'Template'}`
+                    : 'Belum ada template dipilih'}
                 </p>
               </div>
             </div>
             <div className={`bg-white rounded-xl p-6 shadow-inner border ${previewWidth}`}>
-              <Suspense
-                fallback={
-                  <div className="h-96 animate-pulse" />
-                }
-              >
+              <Suspense fallback={<div className="h-96 animate-pulse" />}>
                 <TemplateRenderer
                   data={{ cv: previewCv, theme }}
                   template={selectedTemplate || {}}
@@ -1154,7 +1216,9 @@ export default function Create() {
             </div>
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between text-xs text-slate-500">
-                <span>Langkah {activeStepIndex + 1} dari {stepKeys.length}</span>
+                <span>
+                  Langkah {activeStepIndex + 1} dari {stepKeys.length}
+                </span>
                 <span>{remainingSteps} langkah tersisa</span>
               </div>
               <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
@@ -1167,11 +1231,10 @@ export default function Create() {
                 {stepKeys.map((key, index) => (
                   <div
                     key={`${key}-${index}`}
-                    className={`px-3 py-1 rounded-full text-xs ${
-                      index === activeStepIndex
-                        ? "bg-blue-600 text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-xs ${index === activeStepIndex
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-600'
+                      }`}
                   >
                     {index + 1}. {stepLabels[key] || key}
                   </div>
@@ -1179,9 +1242,8 @@ export default function Create() {
               </div>
             </div>
             <div
-              className={`rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 transform-gpu ${
-                isAnimating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"
-              }`}
+              className={`rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 transform-gpu ${isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
+                }`}
             >
               <div className="mb-4">
                 <div className="text-lg font-semibold text-slate-900">
@@ -1197,11 +1259,10 @@ export default function Create() {
               <button
                 onClick={handleStepBack}
                 disabled={activeStepIndex === 0}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold ${
-                  activeStepIndex === 0
-                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-                    : "bg-slate-900 text-white"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold ${activeStepIndex === 0
+                    ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                    : 'bg-slate-900 text-white'
+                  }`}
               >
                 Kembali
               </button>
@@ -1209,7 +1270,7 @@ export default function Create() {
                 onClick={handleStepNext}
                 className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold"
               >
-                {activeStepIndex === stepKeys.length - 1 ? "Simpan & Lanjutkan" : "Selanjutnya"}
+                {activeStepIndex === stepKeys.length - 1 ? 'Simpan & Lanjutkan' : 'Selanjutnya'}
               </button>
             </div>
           </div>

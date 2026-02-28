@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function SkillsEditor({
   lang,
@@ -16,7 +16,7 @@ export default function SkillsEditor({
   markIfError,
   levelOptions,
 }) {
-  const sectionKey = "skills";
+  const sectionKey = 'skills';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -35,7 +35,7 @@ export default function SkillsEditor({
           </select>
         </div>
         <button
-          onClick={() => addGroup({ category: "", items: [] })}
+          onClick={() => addGroup({ category: '', items: [] })}
           className="px-3 py-1 rounded-lg bg-blue-600 text-sm"
         >
           Tambah
@@ -51,24 +51,21 @@ export default function SkillsEditor({
               <label className="text-sm text-slate-700">Kategori</label>
               <input
                 value={resolveText(item.category, lang)}
-                onChange={(e) => updateLocalizedField(index, "category", lang, e.target.value)}
+                onChange={(e) => updateLocalizedField(index, 'category', lang, e.target.value)}
                 className="w-full p-2 rounded text-black border border-slate-200 mt-1"
                 placeholder="Kategori"
               />
             </div>
-            <button
-              onClick={() => removeGroup(index)}
-              className="text-xs text-red-500"
-            >
+            <button onClick={() => removeGroup(index)} className="text-xs text-red-500">
               Hapus Kategori
             </button>
           </div>
           <div className="space-y-4">
             {(Array.isArray(item.items) ? item.items : []).map((skill, skillIndex) => {
               const normalizedSkill =
-                typeof skill === "string"
-                  ? { name: { [lang]: skill }, level: "", proof: { [lang]: "" } }
-                  : skill || { name: { [lang]: "" }, level: "", proof: { [lang]: "" } };
+                typeof skill === 'string'
+                  ? { name: { [lang]: skill }, level: '', proof: { [lang]: '' } }
+                  : skill || { name: { [lang]: '' }, level: '', proof: { [lang]: '' } };
               const skillName = resolveText(normalizedSkill?.name, lang);
               return (
                 <div
@@ -92,7 +89,7 @@ export default function SkillsEditor({
                       <input
                         value={skillName}
                         onChange={(e) =>
-                          updateEntry(index, skillIndex, "name", e.target.value, lang)
+                          updateEntry(index, skillIndex, 'name', e.target.value, lang)
                         }
                         aria-required="true"
                         className={`w-full p-2 rounded text-black border ${markIfError(
@@ -100,21 +97,20 @@ export default function SkillsEditor({
                         )}`}
                         placeholder="Nama Keahlian"
                       />
-                      {attemptSubmit &&
-                        errors[`skills.${index}.items.${skillIndex}.name`] && (
-                          <div className="text-xs text-red-600 mt-1">
-                            {errors[`skills.${index}.items.${skillIndex}.name`]}
-                          </div>
-                        )}
+                      {attemptSubmit && errors[`skills.${index}.items.${skillIndex}.name`] && (
+                        <div className="text-xs text-red-600 mt-1">
+                          {errors[`skills.${index}.items.${skillIndex}.name`]}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm text-slate-700">Tingkat</label>
                       <select
-                        value={normalizedSkill?.level || ""}
-                        onChange={(e) => updateEntry(index, skillIndex, "level", e.target.value)}
+                        value={normalizedSkill?.level || ''}
+                        onChange={(e) => updateEntry(index, skillIndex, 'level', e.target.value)}
                         className="w-full p-2 rounded text-black border border-slate-200"
                       >
-                        <option value="">{lang === "en" ? "Level" : "Tingkat"}</option>
+                        <option value="">{lang === 'en' ? 'Level' : 'Tingkat'}</option>
                         {levelOptions[lang].map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
@@ -124,13 +120,17 @@ export default function SkillsEditor({
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-sm text-slate-700">
-                        {lang === "en" ? "Usage or Certificate" : "Contoh penggunaan / Sertifikat"}
+                        {lang === 'en' ? 'Usage or Certificate' : 'Contoh penggunaan / Sertifikat'}
                       </label>
                       <input
                         value={resolveText(normalizedSkill?.proof, lang)}
-                        onChange={(e) => updateEntry(index, skillIndex, "proof", e.target.value, lang)}
+                        onChange={(e) =>
+                          updateEntry(index, skillIndex, 'proof', e.target.value, lang)
+                        }
                         className="w-full p-2 rounded text-black border border-slate-200"
-                        placeholder={lang === "en" ? "Contoh: Sertifikasi AWS" : "Contoh: Sertifikasi AWS"}
+                        placeholder={
+                          lang === 'en' ? 'Contoh: Sertifikasi AWS' : 'Contoh: Sertifikasi AWS'
+                        }
                       />
                     </div>
                   </div>

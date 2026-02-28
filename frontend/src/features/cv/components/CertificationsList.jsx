@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function CertificationsList({
   lang,
@@ -13,7 +13,7 @@ export default function CertificationsList({
   attemptSubmit,
   markIfError,
 }) {
-  const sectionKey = "certifications";
+  const sectionKey = 'certifications';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -34,10 +34,10 @@ export default function CertificationsList({
         <button
           onClick={() =>
             addItem(sectionKey, {
-              name: "",
-              issuer: "",
-              date: "",
-              credentialUrl: "",
+              name: '',
+              issuer: '',
+              date: '',
+              credentialUrl: '',
             })
           }
           className="px-3 py-1 rounded-lg bg-blue-600 text-sm"
@@ -55,7 +55,7 @@ export default function CertificationsList({
             <input
               value={resolveText(item.name, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "name", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'name', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -72,7 +72,7 @@ export default function CertificationsList({
             <input
               value={resolveText(item.issuer, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "issuer", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'issuer', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -87,23 +87,18 @@ export default function CertificationsList({
             )}
             <input
               value={item.date}
-              onChange={(e) => updateListField(sectionKey, index, "date", e.target.value)}
+              onChange={(e) => updateListField(sectionKey, index, 'date', e.target.value)}
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Tanggal"
             />
             <input
               value={item.credentialUrl}
-              onChange={(e) =>
-                updateListField(sectionKey, index, "credentialUrl", e.target.value)
-              }
+              onChange={(e) => updateListField(sectionKey, index, 'credentialUrl', e.target.value)}
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Link Kredensial"
             />
           </div>
-          <button
-            onClick={() => removeItem(sectionKey, index)}
-            className="text-xs text-red-500"
-          >
+          <button onClick={() => removeItem(sectionKey, index)} className="text-xs text-red-500">
             Hapus
           </button>
         </div>

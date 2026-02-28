@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function SummaryForm({
   value,
@@ -29,7 +29,7 @@ export default function SummaryForm({
       <textarea
         value={resolveText(value, lang)}
         onChange={(e) => onChangeText(lang, e.target.value)}
-        className={`w-full p-3 mt-3 rounded-lg text-black border ${markIfError("summary")}`}
+        className={`w-full p-3 mt-3 rounded-lg text-black border ${markIfError('summary')}`}
         rows={4}
         placeholder="Ringkasan profesional dan tujuan karier"
       />

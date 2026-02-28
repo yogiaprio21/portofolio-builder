@@ -10,7 +10,7 @@ const defaultSections = [
   'projects',
   'achievements',
   'references',
-  'additional'
+  'additional',
 ];
 
 const sectionTitles = {
@@ -24,7 +24,7 @@ const sectionTitles = {
     projects: 'Proyek',
     achievements: 'Pencapaian',
     references: 'Referensi',
-    additional: 'Informasi Tambahan'
+    additional: 'Informasi Tambahan',
   },
   en: {
     summary: 'Summary',
@@ -36,48 +36,50 @@ const sectionTitles = {
     projects: 'Projects',
     achievements: 'Achievements',
     references: 'References',
-    additional: 'Additional Info'
-  }
+    additional: 'Additional Info',
+  },
 };
 
-function TemplateRenderer({
-  data = {},
-  template = {},
-  sectionsOrder = []
-}) {
+function TemplateRenderer({ data = {}, template = {}, sectionsOrder = [] }) {
   const cv = data.cv ? data.cv : data;
   const theme = useMemo(() => data.theme || {}, [data.theme]);
   const layout = theme.layout || template.layout || 'single';
-  const style = useMemo(() => ({
-    accentColor: '#2563eb',
-    backgroundColor: '#ffffff',
-    textColor: '#0f172a',
-    headingColor: '#0f172a',
-    fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-    sectionGap: 20,
-    ...(template.style || {}),
-    ...(theme || {})
-  }), [template.style, theme]);
-  const cssVars = useMemo(() => ({
-    '--accent-color': style.accentColor,
-    '--heading-color': style.headingColor,
-    '--text-color': style.textColor,
-    '--bg-color': style.backgroundColor
-  }), [style]);
+  const style = useMemo(
+    () => ({
+      accentColor: '#2563eb',
+      backgroundColor: '#ffffff',
+      textColor: '#0f172a',
+      headingColor: '#0f172a',
+      fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+      sectionGap: 20,
+      ...(template.style || {}),
+      ...(theme || {}),
+    }),
+    [template.style, theme],
+  );
+  const cssVars = useMemo(
+    () => ({
+      '--accent-color': style.accentColor,
+      '--heading-color': style.headingColor,
+      '--text-color': style.textColor,
+      '--bg-color': style.backgroundColor,
+    }),
+    [style],
+  );
 
   const order =
     sectionsOrder.length > 0
       ? sectionsOrder
       : template.sections && template.sections.length
-      ? template.sections
-      : defaultSections;
+        ? template.sections
+        : defaultSections;
 
   const personal = cv.personal || {};
   const languageBySection = data.languageBySection || cv.languageBySection || {};
   const getLang = (key) => languageBySection[key] || 'id';
 
   const sectionWrapperStyle = {
-    marginBottom: style.sectionGap
+    marginBottom: style.sectionGap,
   };
   const splitByDot = (value) => {
     if (!value) return [];
@@ -137,28 +139,30 @@ function TemplateRenderer({
                 return [];
               })();
               return (
-              <div key={`${resolveText(item.company, lang)}-${idx}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-semibold">
-                      {resolveText(item.role, lang) || resolveText(item.title, lang)}
+                <div key={`${resolveText(item.company, lang)}-${idx}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold">
+                        {resolveText(item.role, lang) || resolveText(item.title, lang)}
+                      </div>
+                      <div className="text-sm opacity-80">
+                        {[resolveText(item.company, lang), resolveText(item.location, lang)]
+                          .filter(Boolean)
+                          .join(' • ')}
+                      </div>
                     </div>
-                    <div className="text-sm opacity-80">
-                      {[resolveText(item.company, lang), resolveText(item.location, lang)]
-                        .filter(Boolean)
-                        .join(' • ')}
+                    <div className="text-xs opacity-70">
+                      {renderDuration(item.startDate, item.endDate)}
                     </div>
                   </div>
-                  <div className="text-xs opacity-70">{renderDuration(item.startDate, item.endDate)}</div>
+                  {highlightList.length > 0 && (
+                    <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
+                      {highlightList.map((h, hIdx) => (
+                        <li key={`${h}-${hIdx}`}>{h}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                {highlightList.length > 0 && (
-                  <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
-                    {highlightList.map((h, hIdx) => (
-                      <li key={`${h}-${hIdx}`}>{h}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
               );
             })}
           </div>
@@ -198,28 +202,30 @@ function TemplateRenderer({
                 return [];
               })();
               return (
-              <div key={`${resolveText(item.company, lang)}-${idx}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-semibold">
-                      {resolveText(item.role, lang) || resolveText(item.title, lang)}
+                <div key={`${resolveText(item.company, lang)}-${idx}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold">
+                        {resolveText(item.role, lang) || resolveText(item.title, lang)}
+                      </div>
+                      <div className="text-sm opacity-80">
+                        {[resolveText(item.company, lang), resolveText(item.location, lang)]
+                          .filter(Boolean)
+                          .join(' • ')}
+                      </div>
                     </div>
-                    <div className="text-sm opacity-80">
-                      {[resolveText(item.company, lang), resolveText(item.location, lang)]
-                        .filter(Boolean)
-                        .join(' • ')}
+                    <div className="text-xs opacity-70">
+                      {renderDuration(item.startDate, item.endDate)}
                     </div>
                   </div>
-                  <div className="text-xs opacity-70">{renderDuration(item.startDate, item.endDate)}</div>
+                  {highlightList.length > 0 && (
+                    <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
+                      {highlightList.map((h, hIdx) => (
+                        <li key={`${h}-${hIdx}`}>{h}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                {highlightList.length > 0 && (
-                  <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
-                    {highlightList.map((h, hIdx) => (
-                      <li key={`${h}-${hIdx}`}>{h}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
               );
             })}
           </div>
@@ -247,7 +253,9 @@ function TemplateRenderer({
                         .join(' • ')}
                     </div>
                   </div>
-                  <div className="text-xs opacity-70">{renderDuration(item.startDate, item.endDate)}</div>
+                  <div className="text-xs opacity-70">
+                    {renderDuration(item.startDate, item.endDate)}
+                  </div>
                 </div>
                 {item.gpa && <div className="text-xs opacity-70 mt-1">GPA: {item.gpa}</div>}
               </div>
@@ -262,12 +270,13 @@ function TemplateRenderer({
       if (!Array.isArray(cv.skills) || cv.skills.length === 0) return null;
       const levelLabel = {
         id: { advanced: 'Mahir', intermediate: 'Menengah', beginner: 'Pemula' },
-        en: { advanced: 'Advanced', intermediate: 'Intermediate', beginner: 'Beginner' }
+        en: { advanced: 'Advanced', intermediate: 'Intermediate', beginner: 'Beginner' },
       };
       const levelOrder = { advanced: 0, intermediate: 1, beginner: 2 };
       const normalizeSkillItems = (items) => {
         const list = Array.isArray(items) ? items : resolveArray(items, lang);
-        const hasStructured = Array.isArray(list) && list.some((entry) => entry && typeof entry === 'object');
+        const hasStructured =
+          Array.isArray(list) && list.some((entry) => entry && typeof entry === 'object');
         if (!hasStructured) {
           return list
             .map((item) => (typeof item === 'string' ? item.trim() : resolveText(item, lang)))
@@ -307,12 +316,15 @@ function TemplateRenderer({
                 {group.category && (
                   <div className="text-sm font-semibold mb-1">{group.category}</div>
                 )}
-                <ul className="list-disc list-inside text-sm space-y-1">
+                <ul className="list-disc pl-5 text-sm space-y-1">
                   {group.entries.map((entry, entryIndex) => (
                     <li key={`${entry.name}-${entryIndex}`}>
                       <span className="font-semibold">{entry.name}</span>
                       {entry.level && (
-                        <span className="opacity-80"> • {levelLabel[lang]?.[entry.level] || entry.level}</span>
+                        <span className="opacity-80">
+                          {' '}
+                          • {levelLabel[lang]?.[entry.level] || entry.level}
+                        </span>
                       )}
                       {entry.proof && <span className="opacity-80"> • {entry.proof}</span>}
                     </li>
@@ -380,7 +392,7 @@ function TemplateRenderer({
                     return <p className="text-sm mt-1">{lines[0]}</p>;
                   }
                   return (
-                    <ul className="mt-2 list-disc list-inside text-sm space-y-1">
+                    <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
                       {lines.map((line, lineIndex) => (
                         <li key={`${line}-${lineIndex}`}>{line}</li>
                       ))}
@@ -415,7 +427,7 @@ function TemplateRenderer({
                     return <p className="text-sm mt-1">{lines[0]}</p>;
                   }
                   return (
-                    <ul className="mt-2 list-disc list-inside text-sm space-y-1">
+                    <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
                       {lines.map((line, lineIndex) => (
                         <li key={`${line}-${lineIndex}`}>{line}</li>
                       ))}
@@ -462,7 +474,7 @@ function TemplateRenderer({
         [lang === 'en' ? 'Interests' : 'Minat', resolveText(additional.interests, lang)],
         [lang === 'en' ? 'Awards' : 'Penghargaan', resolveText(additional.awards, lang)],
         [lang === 'en' ? 'Volunteer' : 'Volunteer', resolveText(additional.volunteer, lang)],
-        [lang === 'en' ? 'Publications' : 'Publikasi', resolveText(additional.publications, lang)]
+        [lang === 'en' ? 'Publications' : 'Publikasi', resolveText(additional.publications, lang)],
       ].filter(([, value]) => value);
       if (rows.length === 0) return null;
       return (
@@ -485,14 +497,35 @@ function TemplateRenderer({
     return null;
   };
 
+  const profileAlignment = style.profileAlignment || 'left';
+  const flexJustify =
+    profileAlignment === 'center'
+      ? 'justify-center'
+      : profileAlignment === 'right'
+        ? 'justify-end'
+        : 'justify-start';
+
   const header = (
-    <header className="mb-6 pb-4 border-b pdf-avoid-break" style={{ borderColor: `${style.accentColor}40` }}>
+    <header
+      className="mb-6 pb-4 border-b pdf-avoid-break"
+      style={{
+        borderColor: `${style.accentColor}40`,
+        textAlign: profileAlignment,
+      }}
+    >
       <h1 className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
         {personal.fullName || 'Nama Lengkap'}
       </h1>
       {personal.headline && <div className="text-sm mt-1">{personal.headline}</div>}
-      <div className="text-sm mt-2 flex flex-wrap gap-x-4 gap-y-1 opacity-80">
-        {[personal.email, personal.phone, personal.location, personal.website, personal.linkedin, personal.github]
+      <div className={`text-sm mt-2 flex flex-wrap gap-x-4 gap-y-1 opacity-80 ${flexJustify}`}>
+        {[
+          personal.email,
+          personal.phone,
+          personal.location,
+          personal.website,
+          personal.linkedin,
+          personal.github,
+        ]
           .filter(Boolean)
           .map((item) => (
             <span key={item}>{item}</span>
@@ -521,8 +554,16 @@ function TemplateRenderer({
       const right = order.slice(mid);
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>{left.map((section) => <div key={section}>{renderSection(section)}</div>)}</div>
-          <div>{right.map((section) => <div key={section}>{renderSection(section)}</div>)}</div>
+          <div>
+            {left.map((section) => (
+              <div key={section}>{renderSection(section)}</div>
+            ))}
+          </div>
+          <div>
+            {right.map((section) => (
+              <div key={section}>{renderSection(section)}</div>
+            ))}
+          </div>
         </div>
       );
     }
@@ -530,16 +571,32 @@ function TemplateRenderer({
     if (layout === 'sidebar-right') {
       return (
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
-          <div>{rightSections.map((section) => <div key={section}>{renderSection(section)}</div>)}</div>
-          <div>{leftSections.map((section) => <div key={section}>{renderSection(section)}</div>)}</div>
+          <div>
+            {rightSections.map((section) => (
+              <div key={section}>{renderSection(section)}</div>
+            ))}
+          </div>
+          <div>
+            {leftSections.map((section) => (
+              <div key={section}>{renderSection(section)}</div>
+            ))}
+          </div>
         </div>
       );
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8">
-        <div>{leftSections.map((section) => <div key={section}>{renderSection(section)}</div>)}</div>
-        <div>{rightSections.map((section) => <div key={section}>{renderSection(section)}</div>)}</div>
+        <div>
+          {leftSections.map((section) => (
+            <div key={section}>{renderSection(section)}</div>
+          ))}
+        </div>
+        <div>
+          {rightSections.map((section) => (
+            <div key={section}>{renderSection(section)}</div>
+          ))}
+        </div>
       </div>
     );
   })();
@@ -551,7 +608,7 @@ function TemplateRenderer({
         fontFamily: style.fontFamily,
         color: 'var(--text-color)',
         backgroundColor: 'var(--bg-color)',
-        ...cssVars
+        ...cssVars,
       }}
     >
       {header}

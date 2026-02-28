@@ -4,9 +4,10 @@ export default function TemplateCard({ preview, title, onSelect, selected }) {
       onClick={onSelect}
       className={`
         cursor-pointer rounded-2xl overflow-hidden border transition-all duration-300
-        ${selected 
-          ? 'border-primary shadow-xl scale-[1.03] bg-white' 
-          : 'border-gray-200 hover:shadow-lg hover:scale-[1.02]'
+        ${
+          selected
+            ? 'border-primary shadow-xl scale-[1.03] bg-white'
+            : 'border-gray-200 hover:shadow-lg hover:scale-[1.02]'
         }
       `}
     >

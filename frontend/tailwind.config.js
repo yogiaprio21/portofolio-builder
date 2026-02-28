@@ -3,8 +3,8 @@ export default {
   theme: {
     extend: {
       colors: { primary: '#4F46E5', accent: '#06B6D4' },
-      fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] }
-    }
+      fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+    },
   },
-  plugins: []
-}
+  plugins: [],
+};

@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import { deletePortfolioItem, getPortfolioItem } from "../api";
-import { generateA4PdfFromElement } from "../utils/pdfGenerator";
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { deletePortfolioItem, getPortfolioItem } from '../api';
+import { generateA4PdfFromElement } from '../utils/pdfGenerator';
 
 export default function PortfolioView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfError, setPdfError] = useState("");
+  const [pdfError, setPdfError] = useState('');
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -23,22 +23,25 @@ export default function PortfolioView() {
           setItem(data);
         }
       })
-      .catch(() => setError("Gagal memuat data"))
+      .catch(() => setError('Gagal memuat data'))
       .finally(() => setLoading(false));
   }, [id]);
 
   const handleDelete = async () => {
-    const token = window.localStorage.getItem("ACCESS_TOKEN") || "";
+    const token = window.localStorage.getItem('ACCESS_TOKEN') || '';
     const res = await deletePortfolioItem(id, token);
-    if (res?.success) navigate("/app/portfolios");
+    if (res?.success) navigate('/app/portfolios');
   };
 
-  if (loading) return <div className="container mx-auto px-6 py-24 text-white">Loading…</div>;
+  if (loading) return <div className="container mx-auto px-6 pt-8 text-white">Loading…</div>;
   if (!item) {
     return (
-      <div className="container mx-auto px-6 py-24 text-white space-y-4">
-        <div>{error || "Tidak ditemukan"}</div>
-        <button onClick={() => navigate("/app/portfolios")} className="px-4 py-2 rounded-lg bg-slate-600">
+      <div className="container mx-auto px-6 pt-8 text-white space-y-4">
+        <div>{error || 'Tidak ditemukan'}</div>
+        <button
+          onClick={() => navigate('/app/portfolios')}
+          className="px-4 py-2 rounded-lg bg-slate-600"
+        >
           Kembali ke daftar
         </button>
       </div>
@@ -46,14 +49,14 @@ export default function PortfolioView() {
   }
 
   return (
-    <div ref={containerRef} className="container mx-auto px-6 py-24 text-white space-y-6">
+    <div ref={containerRef} className="container mx-auto px-6 pt-8 pb-24 text-white space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{item.title}</h1>
         <button
           onClick={async () => {
             if (!containerRef.current) return;
             try {
-              setPdfError("");
+              setPdfError('');
               setPdfLoading(true);
               await generateA4PdfFromElement(containerRef.current, {
                 filename: `portfolio-item-${id}.pdf`,
@@ -63,33 +66,46 @@ export default function PortfolioView() {
                 pixelRatio: 2,
                 quality: 0.85,
                 useCORS: true,
-                backgroundColor: "#ffffff"
+                backgroundColor: '#ffffff',
               });
             } catch {
-              setPdfError("Gagal generate PDF.");
+              setPdfError('Gagal generate PDF.');
             } finally {
               setPdfLoading(false);
             }
           }}
           disabled={pdfLoading}
-          className={`px-4 py-2 rounded-lg ${pdfLoading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          className={`px-4 py-2 rounded-lg ${pdfLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
-          {pdfLoading ? "Membuat PDF…" : "PDF"}
+          {pdfLoading ? 'Membuat PDF…' : 'PDF'}
         </button>
-        {window.localStorage.getItem("ACCESS_TOKEN") && (
+        {window.localStorage.getItem('ACCESS_TOKEN') && (
           <div className="flex gap-3">
-            <Link to={`/app/portfolios/${id}/edit`} className="px-4 py-2 rounded-lg bg-slate-500">Edit</Link>
-            <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600">Hapus</button>
+            <Link to={`/app/portfolios/${id}/edit`} className="px-4 py-2 rounded-lg bg-slate-500">
+              Edit
+            </Link>
+            <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600">
+              Hapus
+            </button>
           </div>
         )}
       </div>
       {pdfError && <div className="text-red-300 text-sm">{pdfError}</div>}
       {item.image_url || item.imageUrl ? (
-        <img alt={item.title} src={item.image_url || item.imageUrl} className="w-full max-w-2xl rounded-lg border border-white/20" />
+        <img
+          alt={item.title}
+          src={item.image_url || item.imageUrl}
+          className="w-full max-w-2xl rounded-lg border border-white/20"
+        />
       ) : null}
       <p className="max-w-3xl opacity-90">{item.description}</p>
       {item.project_url || item.projectUrl ? (
-        <a href={item.project_url || item.projectUrl} target="_blank" rel="noreferrer" className="text-blue-300 underline">
+        <a
+          href={item.project_url || item.projectUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-blue-300 underline"
+        >
           Lihat Project
         </a>
       ) : null}

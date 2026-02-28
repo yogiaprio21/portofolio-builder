@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function ProjectsList({
   lang,
@@ -13,7 +13,7 @@ export default function ProjectsList({
   attemptSubmit,
   markIfError,
 }) {
-  const sectionKey = "projects";
+  const sectionKey = 'projects';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -34,11 +34,11 @@ export default function ProjectsList({
         <button
           onClick={() =>
             addItem(sectionKey, {
-              name: "",
-              role: "",
-              description: "",
-              tech: "",
-              link: "",
+              name: '',
+              role: '',
+              description: '',
+              tech: '',
+              link: '',
             })
           }
           className="px-3 py-1 rounded-lg bg-blue-600 text-sm"
@@ -56,7 +56,7 @@ export default function ProjectsList({
             <input
               value={resolveText(item.name, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "name", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'name', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -65,14 +65,12 @@ export default function ProjectsList({
               placeholder="Nama Proyek"
             />
             {attemptSubmit && errors[`projects.${index}.name`] && (
-              <div className="text-xs text-red-600 mt-1">
-                {errors[`projects.${index}.name`]}
-              </div>
+              <div className="text-xs text-red-600 mt-1">{errors[`projects.${index}.name`]}</div>
             )}
             <input
               value={resolveText(item.role, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "role", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'role', lang, e.target.value)
               }
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Peran"
@@ -80,14 +78,14 @@ export default function ProjectsList({
             <input
               value={resolveText(item.tech, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "tech", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'tech', lang, e.target.value)
               }
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Teknologi"
             />
             <input
               value={item.link}
-              onChange={(e) => updateListField(sectionKey, index, "link", e.target.value)}
+              onChange={(e) => updateListField(sectionKey, index, 'link', e.target.value)}
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Link"
             />
@@ -95,16 +93,13 @@ export default function ProjectsList({
           <textarea
             value={resolveText(item.description, lang)}
             onChange={(e) =>
-              updateLocalizedField(sectionKey, index, "description", lang, e.target.value)
+              updateLocalizedField(sectionKey, index, 'description', lang, e.target.value)
             }
             className="w-full p-2 rounded text-black border border-slate-200"
             rows={3}
             placeholder="Deskripsi proyek (pisahkan dengan titik .)"
           />
-          <button
-            onClick={() => removeItem(sectionKey, index)}
-            className="text-xs text-red-500"
-          >
+          <button onClick={() => removeItem(sectionKey, index)} className="text-xs text-red-500">
             Hapus
           </button>
         </div>

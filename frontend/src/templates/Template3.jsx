@@ -4,14 +4,14 @@ export default function Template3({ data = {} }) {
     email = 'email@domain.com',
     bio = 'Bio',
     skills = '',
-    experience = ''
-  } = data
+    experience = '',
+  } = data;
 
   return (
     <div
       className="p-10 rounded-xl shadow-md leading-relaxed"
       style={{
-        background: 'linear-gradient(135deg, #ffffff, #f3f4ff)'
+        background: 'linear-gradient(135deg, #ffffff, #f3f4ff)',
       }}
     >
       <header className="mb-8 pb-3 border-b border-gray-300/40">
@@ -27,18 +27,13 @@ export default function Template3({ data = {} }) {
       <section className="mb-6">
         <h4 className="font-semibold text-lg mb-2 text-primary">Skills</h4>
         <div className="flex flex-wrap gap-2">
-          {(skills || '')
-            .split(',')
-            .map((s, i) =>
-              s.trim() ? (
-                <span
-                  key={i}
-                  className="text-sm px-3 py-1 bg-white border rounded-full shadow-sm"
-                >
-                  {s.trim()}
-                </span>
-              ) : null
-            )}
+          {(skills || '').split(',').map((s, i) =>
+            s.trim() ? (
+              <span key={i} className="text-sm px-3 py-1 bg-white border rounded-full shadow-sm">
+                {s.trim()}
+              </span>
+            ) : null,
+          )}
         </div>
       </section>
 
@@ -47,5 +42,5 @@ export default function Template3({ data = {} }) {
         <p>{experience}</p>
       </section>
     </div>
-  )
+  );
 }

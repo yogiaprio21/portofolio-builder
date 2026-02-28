@@ -1,4 +1,4 @@
-import { resolveText } from "../../../shared/lib/text";
+import { resolveText } from '../../../shared/lib/text';
 
 export default function AdditionalForm({
   value,
@@ -7,7 +7,7 @@ export default function AdditionalForm({
   setSectionLanguage,
   onChange,
 }) {
-  const sectionKey = "additional";
+  const sectionKey = 'additional';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -29,7 +29,7 @@ export default function AdditionalForm({
           <label className="text-sm text-slate-700">Bahasa</label>
           <input
             value={resolveText(value.languages, lang)}
-            onChange={(e) => onChange("languages", lang, e.target.value)}
+            onChange={(e) => onChange('languages', lang, e.target.value)}
             className="w-full p-3 mt-1 rounded-lg text-black border border-slate-200"
             placeholder="Indonesia, Inggris"
           />
@@ -38,7 +38,7 @@ export default function AdditionalForm({
           <label className="text-sm text-slate-700">Minat</label>
           <input
             value={resolveText(value.interests, lang)}
-            onChange={(e) => onChange("interests", lang, e.target.value)}
+            onChange={(e) => onChange('interests', lang, e.target.value)}
             className="w-full p-3 mt-1 rounded-lg text-black border border-slate-200"
             placeholder="UI Design, AI"
           />
@@ -47,7 +47,7 @@ export default function AdditionalForm({
           <label className="text-sm text-slate-700">Penghargaan</label>
           <input
             value={resolveText(value.awards, lang)}
-            onChange={(e) => onChange("awards", lang, e.target.value)}
+            onChange={(e) => onChange('awards', lang, e.target.value)}
             className="w-full p-3 mt-1 rounded-lg text-black border border-slate-200"
             placeholder="Best Innovator 2024"
           />
@@ -56,7 +56,7 @@ export default function AdditionalForm({
           <label className="text-sm text-slate-700">Volunteer</label>
           <input
             value={resolveText(value.volunteer, lang)}
-            onChange={(e) => onChange("volunteer", lang, e.target.value)}
+            onChange={(e) => onChange('volunteer', lang, e.target.value)}
             className="w-full p-3 mt-1 rounded-lg text-black border border-slate-200"
             placeholder="Komunitas Teknologi"
           />
@@ -65,7 +65,7 @@ export default function AdditionalForm({
           <label className="text-sm text-slate-700">Publikasi</label>
           <input
             value={resolveText(value.publications, lang)}
-            onChange={(e) => onChange("publications", lang, e.target.value)}
+            onChange={(e) => onChange('publications', lang, e.target.value)}
             className="w-full p-3 mt-1 rounded-lg text-black border border-slate-200"
             placeholder="Judul publikasi"
           />
@@ -74,4 +74,3 @@ export default function AdditionalForm({
     </div>
   );
 }
-

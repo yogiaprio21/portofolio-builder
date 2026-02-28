@@ -4,8 +4,8 @@ export default function Template1({ data = {} }) {
     email = 'email@domain.com',
     bio = 'Bio singkat',
     skills = '',
-    experience = ''
-  } = data
+    experience = '',
+  } = data;
 
   return (
     <div className="font-sans text-gray-800 leading-relaxed">
@@ -22,18 +22,13 @@ export default function Template1({ data = {} }) {
       <section className="mb-6">
         <h3 className="text-xl font-semibold mb-3 text-primary">Skills</h3>
         <div className="flex flex-wrap gap-2">
-          {(skills || '')
-            .split(',')
-            .map((s, i) =>
-              s.trim() ? (
-                <span
-                  key={i}
-                  className="px-3 py-1 bg-gray-100 border rounded-full text-sm"
-                >
-                  {s.trim()}
-                </span>
-              ) : null
-            )}
+          {(skills || '').split(',').map((s, i) =>
+            s.trim() ? (
+              <span key={i} className="px-3 py-1 bg-gray-100 border rounded-full text-sm">
+                {s.trim()}
+              </span>
+            ) : null,
+          )}
         </div>
       </section>
 
@@ -42,5 +37,5 @@ export default function Template1({ data = {} }) {
         <p className="text-gray-700">{experience}</p>
       </section>
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { resolveArray, resolveText } from "../../../shared/lib/text";
+import { resolveArray, resolveText } from '../../../shared/lib/text';
 
 export default function ExperienceList({
   sectionKey,
@@ -36,11 +36,11 @@ export default function ExperienceList({
         <button
           onClick={() =>
             addItem(sectionKey, {
-              role: "",
-              company: "",
-              location: "",
-              startDate: "",
-              endDate: "",
+              role: '',
+              company: '',
+              location: '',
+              startDate: '',
+              endDate: '',
               highlights: [],
             })
           }
@@ -59,7 +59,7 @@ export default function ExperienceList({
             <input
               value={resolveText(item.role, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "role", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'role', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -76,7 +76,7 @@ export default function ExperienceList({
             <input
               value={resolveText(item.company, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "company", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'company', lang, e.target.value)
               }
               aria-required="true"
               className={`w-full p-2 rounded text-black border ${markIfError(
@@ -92,7 +92,7 @@ export default function ExperienceList({
             <input
               value={resolveText(item.location, lang)}
               onChange={(e) =>
-                updateLocalizedField(sectionKey, index, "location", lang, e.target.value)
+                updateLocalizedField(sectionKey, index, 'location', lang, e.target.value)
               }
               className="w-full p-2 rounded text-black border border-slate-200"
               placeholder="Lokasi"
@@ -100,35 +100,28 @@ export default function ExperienceList({
             <div className="grid grid-cols-2 gap-2">
               <input
                 value={item.startDate}
-                onChange={(e) =>
-                  updateListField(sectionKey, index, "startDate", e.target.value)
-                }
+                onChange={(e) => updateListField(sectionKey, index, 'startDate', e.target.value)}
                 className="w-full p-2 rounded text-black border border-slate-200"
                 placeholder="Mulai"
               />
               <input
                 value={item.endDate}
-                onChange={(e) =>
-                  updateListField(sectionKey, index, "endDate", e.target.value)
-                }
+                onChange={(e) => updateListField(sectionKey, index, 'endDate', e.target.value)}
                 className="w-full p-2 rounded text-black border border-slate-200"
                 placeholder="Selesai"
               />
             </div>
           </div>
           <textarea
-            value={resolveArray(item.highlights, lang).join(". ")}
+            value={resolveArray(item.highlights, lang).join('. ')}
             onChange={(e) =>
-              updateHighlightsByDot(sectionKey, index, "highlights", lang, e.target.value)
+              updateHighlightsByDot(sectionKey, index, 'highlights', lang, e.target.value)
             }
             className="w-full p-2 rounded text-black border border-slate-200"
             rows={3}
             placeholder="Pencapaian (pisahkan dengan titik .)"
           />
-          <button
-            onClick={() => removeItem(sectionKey, index)}
-            className="text-xs text-red-500"
-          >
+          <button onClick={() => removeItem(sectionKey, index)} className="text-xs text-red-500">
             Hapus
           </button>
         </div>
@@ -136,4 +129,3 @@ export default function ExperienceList({
     </div>
   );
 }
-

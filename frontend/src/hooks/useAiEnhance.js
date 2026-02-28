@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { aiEnhanceCv } from "../api";
+import { useState } from 'react';
+import { aiEnhanceCv } from '../api';
 
 export default function useAiEnhance(cv, setCv) {
-  const [aiMessage, setAiMessage] = useState("");
+  const [aiMessage, setAiMessage] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
   const enhance = async (text) => {
-    setAiMessage("");
+    setAiMessage('');
     if (!text || text.length < 20) {
-      setAiMessage("Import PDF/TXT terlebih dahulu untuk diproses AI.");
+      setAiMessage('Import PDF/TXT terlebih dahulu untuk diproses AI.');
       return;
     }
     setAiLoading(true);
@@ -63,12 +63,12 @@ export default function useAiEnhance(cv, setCv) {
                 : s.achievements
               : prev.achievements,
         }));
-        setAiMessage("Berhasil ditingkatkan dengan AI.");
+        setAiMessage('Berhasil ditingkatkan dengan AI.');
       } else {
-        setAiMessage("Endpoint AI belum aktif. Menggunakan hasil import heuristik.");
+        setAiMessage('Endpoint AI belum aktif. Menggunakan hasil import heuristik.');
       }
     } catch {
-      setAiMessage("Gagal memproses AI. Coba lagi nanti.");
+      setAiMessage('Gagal memproses AI. Coba lagi nanti.');
     } finally {
       setAiLoading(false);
     }
@@ -76,4 +76,3 @@ export default function useAiEnhance(cv, setCv) {
 
   return { aiMessage, setAiMessage, aiLoading, enhance };
 }
-

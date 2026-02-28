@@ -28,14 +28,13 @@ export default function ImportPanel({
           disabled={aiLoading || !canEnhance}
           className={`px-3 py-2 rounded-lg text-sm font-semibold ${
             aiLoading || !canEnhance
-              ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-              : "bg-purple-600 hover:bg-purple-700 text-white"
+              ? 'bg-slate-300 text-slate-600 cursor-not-allowed'
+              : 'bg-purple-600 hover:bg-purple-700 text-white'
           }`}
         >
-          {aiLoading ? "Memproses AI…" : "Tingkatkan dengan AI"}
+          {aiLoading ? 'Memproses AI…' : 'Tingkatkan dengan AI'}
         </button>
       </div>
     </div>
   );
 }
-
