@@ -15,6 +15,8 @@ export default function FormWorkspace({
   onSelectStep,
   onBack,
   onNext,
+  stepErrorKeys = new Set(),
+  saving = false,
 }) {
   return (
     <section className="cv-editor-surface rounded-lg border border-slate-200 bg-white/95 p-4 text-slate-900 shadow-sm sm:p-5">
@@ -55,10 +57,13 @@ export default function FormWorkspace({
               className={`min-h-8 shrink-0 rounded-full px-3 text-xs font-bold ${
                 index === activeStepIndex
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : stepErrorKeys.has(key)
+                    ? 'bg-red-50 text-red-700 ring-1 ring-red-200 hover:bg-red-100'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               {index + 1}. {stepLabels[key] || key}
+              {stepErrorKeys.has(key) ? ' - Perlu dicek' : ''}
             </button>
           ))}
         </div>
@@ -76,8 +81,12 @@ export default function FormWorkspace({
         <Button type="button" variant="light" onClick={onBack} disabled={activeStepIndex === 0}>
           Kembali
         </Button>
-        <Button type="button" onClick={onNext}>
-          {activeStepIndex === stepKeys.length - 1 ? 'Simpan & Lanjutkan' : 'Selanjutnya'}
+        <Button type="button" onClick={onNext} disabled={saving}>
+          {saving
+            ? 'Menyimpan...'
+            : activeStepIndex === stepKeys.length - 1
+              ? 'Simpan & Lanjutkan'
+              : 'Selanjutnya'}
         </Button>
       </div>
     </section>

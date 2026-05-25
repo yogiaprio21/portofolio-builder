@@ -1,18 +1,41 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../auth/useAuth.js';
 import Button from './ui/Button.jsx';
 import BrandLogo from './BrandLogo.jsx';
+import ConfirmDialog from './ui/ConfirmDialog.jsx';
+import { notify } from './ui/notify.js';
 
 export default function Navbar() {
   const { isAuthenticated, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
+  const requestLogout = () => {
     setOpen(false);
-    navigate('/app/login');
+    setConfirmLogout(true);
+  };
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    let serverFailed = false;
+    try {
+      await logout();
+    } catch {
+      serverFailed = true;
+    } finally {
+      setConfirmLogout(false);
+      setLogoutLoading(false);
+      if (serverFailed) {
+        notify.warning('Sesi lokal ditutup. Server logout belum merespons sempurna.');
+      } else {
+        notify.success('Anda sudah keluar dari workspace.');
+      }
+      navigate('/app/login');
+    }
   };
 
   const navClass = ({ isActive }) =>
@@ -40,9 +63,10 @@ export default function Navbar() {
       </Button>
       <button
         type="button"
-        onClick={handleLogout}
-        className="min-h-10 rounded-lg px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:text-red-700"
+        onClick={requestLogout}
+        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:text-red-700"
       >
+        <LogOut aria-hidden="true" size={16} />
         Logout
       </button>
     </>
@@ -80,7 +104,11 @@ export default function Navbar() {
             aria-expanded={open}
             aria-label="Buka navigasi"
           >
-            <span className="text-xl leading-none">{open ? '×' : '☰'}</span>
+            {open ? (
+              <X aria-hidden="true" size={22} strokeWidth={2.4} />
+            ) : (
+              <Menu aria-hidden="true" size={22} strokeWidth={2.4} />
+            )}
           </button>
         </div>
 
@@ -104,6 +132,18 @@ export default function Navbar() {
           </NavLink>
         </nav>
       )}
+
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Keluar dari workspace?"
+        description="Sesi Anda akan ditutup di perangkat ini. Draft lokal tetap tersimpan, tetapi akses dashboard perlu login ulang."
+        confirmLabel="Logout"
+        cancelLabel="Tetap di sini"
+        type="logout"
+        loading={logoutLoading}
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={handleLogout}
+      />
     </>
   );
 }

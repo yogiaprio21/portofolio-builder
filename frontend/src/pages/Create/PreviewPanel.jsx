@@ -20,7 +20,9 @@ export default function PreviewPanel({
   setTheme,
   fontOptions,
   onSubmit,
+  saving = false,
   embedded = false,
+  showSettings = false,
 }) {
   return (
     <aside
@@ -75,32 +77,34 @@ export default function PreviewPanel({
             </Suspense>
           </div>
         </div>
-        <Button type="button" onClick={onSubmit} className="mt-4 w-full">
-          Simpan & Preview Penuh
+        <Button type="button" onClick={onSubmit} className="mt-4 w-full" disabled={saving}>
+          {saving ? 'Menyimpan...' : 'Simpan & Preview Penuh'}
         </Button>
       </section>
 
-      <details className="rounded-lg border border-slate-200 bg-white/95 p-4 shadow-sm">
-        <summary className="cursor-pointer text-sm font-black text-slate-900">
-          Tampilan & section
-        </summary>
-        <div className="mt-4 space-y-5">
-          <div>
-            <h3 className="mb-2 text-sm font-black">Kustomisasi</h3>
-            <ThemeControls theme={theme} setTheme={setTheme} fontOptions={fontOptions} />
+      {showSettings && (
+        <details className="rounded-lg border border-slate-200 bg-white/95 p-4 shadow-sm">
+          <summary className="cursor-pointer text-sm font-black text-slate-900">
+            Tampilan & section
+          </summary>
+          <div className="mt-4 space-y-5">
+            <div>
+              <h3 className="mb-2 text-sm font-black">Kustomisasi</h3>
+              <ThemeControls theme={theme} setTheme={setTheme} fontOptions={fontOptions} />
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-black">Urutan Section</h3>
+              <SectionOrderControl
+                sectionsOrder={sectionsOrder}
+                stepLabels={stepLabels}
+                dragKey={dragKey}
+                onDragStart={onDragStart}
+                onDrop={onDrop}
+              />
+            </div>
           </div>
-          <div>
-            <h3 className="mb-2 text-sm font-black">Urutan Section</h3>
-            <SectionOrderControl
-              sectionsOrder={sectionsOrder}
-              stepLabels={stepLabels}
-              dragKey={dragKey}
-              onDragStart={onDragStart}
-              onDrop={onDrop}
-            />
-          </div>
-        </div>
-      </details>
+        </details>
+      )}
     </aside>
   );
 }

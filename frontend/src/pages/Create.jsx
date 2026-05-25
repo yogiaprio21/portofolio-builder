@@ -1,6 +1,4 @@
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
-import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf.mjs';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   createPortfolio,
@@ -11,7 +9,7 @@ import {
   getStoredToken,
 } from '../api';
 import { resolveTextStrict, hasText } from '../shared/lib/text';
-import { toast } from 'react-hot-toast';
+import { notify as notifyUser } from '../components/ui/notify.js';
 import useImportCv from '../hooks/useImportCv';
 import useAiEnhance from '../hooks/useAiEnhance';
 import PersonalForm from '../features/cv/components/PersonalForm';
@@ -26,10 +24,11 @@ import AchievementsList from '../features/cv/components/AchievementsList';
 import ReferencesList from '../features/cv/components/ReferencesList';
 import AdditionalForm from '../features/cv/components/AdditionalForm';
 import BuilderTopBar from './Create/BuilderTopBar.jsx';
-import BuilderRail from './Create/BuilderRail.jsx';
 import PreviewPanel from './Create/PreviewPanel.jsx';
 import FormWorkspace from './Create/FormWorkspace.jsx';
 import TemplatePickerDialog from './Create/TemplatePickerDialog.jsx';
+import SectionOrderControl from './Create/SectionOrderControl.jsx';
+import ThemeControls from './Create/ThemeControls.jsx';
 import {
   copySectionLanguage,
   normalizeCvLocalization,
@@ -130,6 +129,7 @@ export default function Create() {
   const [documentLanguageMode, setDocumentLanguageMode] = useState('id');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('Semua');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -190,6 +190,7 @@ export default function Create() {
       return list;
     })();
     setSectionsOrder(injectWorkExp);
+    notifyUser.success(`Template "${template.name}" dipilih.`);
   }, []);
 
   const selectedTemplate = useMemo(
@@ -218,9 +219,6 @@ export default function Create() {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
-  useEffect(() => {
-    GlobalWorkerOptions.workerSrc = workerUrl;
-  }, []);
 
   const mergedErrors = useMemo(() => ({ ...errors, ...formatErrors }), [errors, formatErrors]);
   const markIfError = (path) =>
@@ -254,6 +252,11 @@ export default function Create() {
   const activeSections = useMemo(() => sectionsOrder, [sectionsOrder]);
   const stepLabels = useMemo(
     () => ({
+      profile: 'Profil',
+      experienceFlow: 'Pengalaman',
+      educationSkills: 'Pendidikan & Skill',
+      supporting: 'Pendukung',
+      finalize: 'Finalisasi',
       personal: 'Profil',
       summary: 'Ringkasan',
       workExperience: 'Pengalaman Kerja',
@@ -268,35 +271,37 @@ export default function Create() {
     }),
     [],
   );
-  const stepHelp = useMemo(
-    () => ({
-      personal: 'Nama, kontak, dan link profesional',
-      summary: 'Cerita singkat tentang nilai Anda',
-      workExperience: 'Riwayat kerja paling relevan',
-      experience: 'Pengalaman tambahan',
-      education: 'Pendidikan dan kredensial',
-      skills: 'Keahlian yang mudah dipindai',
-      certifications: 'Sertifikasi pendukung',
-      projects: 'Studi kasus dan hasil kerja',
-      achievements: 'Pencapaian terukur',
-      references: 'Kontak referensi jika diperlukan',
-      additional: 'Bahasa, minat, dan informasi lain',
-    }),
-    [],
+  const builderSteps = useMemo(
+    () => [
+      { key: 'profile', sections: ['personal', 'summary'] },
+      {
+        key: 'experienceFlow',
+        sections: ['workExperience', 'experience', 'projects'].filter((key) =>
+          activeSections.includes(key),
+        ),
+      },
+      {
+        key: 'educationSkills',
+        sections: ['education', 'skills', 'certifications'].filter((key) =>
+          activeSections.includes(key),
+        ),
+      },
+      {
+        key: 'supporting',
+        sections: ['achievements', 'references', 'additional'].filter((key) =>
+          activeSections.includes(key),
+        ),
+      },
+      { key: 'finalize', sections: ['finalize'] },
+    ],
+    [activeSections],
   );
-  const stepKeys = useMemo(() => {
-    const ordered = activeSections.filter((key) => key !== 'summary');
-    return ['personal', 'summary', ...ordered];
-  }, [activeSections]);
-  const activeStepKey = stepKeys[activeStepIndex];
+  const stepKeys = useMemo(() => builderSteps.map((step) => step.key), [builderSteps]);
+  const activeStep = builderSteps[activeStepIndex] || builderSteps[0];
+  const activeStepKey = activeStep?.key || 'profile';
   const remainingSteps = Math.max(stepKeys.length - activeStepIndex - 1, 0);
   const totalSteps = Math.max(stepKeys.length, 1);
   const progressPercent = Math.round(((activeStepIndex + 1) / totalSteps) * 100);
-  const stepperItems = useMemo(
-    () => stepKeys.map((key) => ({ key, label: stepLabels[key] || key, help: stepHelp[key] })),
-    [stepKeys, stepLabels, stepHelp],
-  );
-
   const updatePersonal = (key, value) => {
     setCv((prev) => ({
       ...prev,
@@ -326,11 +331,8 @@ export default function Create() {
 
   const notify = useCallback((type, message) => {
     if (!message) return;
-    if (type === 'success') toast.success(message);
-    else if (type === 'error') toast.error(message);
-    else if (type === 'info') toast(message);
-    else if (type === 'warning') toast(message);
-    else toast(message);
+    const fn = notifyUser[type] || notifyUser.info;
+    fn(message);
   }, []);
 
   const isValidEmail = useCallback((value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), []);
@@ -675,7 +677,7 @@ export default function Create() {
   const referencesLang = getSectionLanguage('references');
   const additionalLang = getSectionLanguage('additional');
 
-  const validateStep = useCallback(
+  const validateSection = useCallback(
     (stepKey) => {
       const nextErrors = {};
       if (stepKey === 'personal') {
@@ -838,11 +840,65 @@ export default function Create() {
     ],
   );
 
+  const stepSectionsByKey = useMemo(
+    () =>
+      Object.fromEntries(
+        builderSteps.map((step) => [
+          step.key,
+          step.sections.filter((section) => section !== 'finalize'),
+        ]),
+      ),
+    [builderSteps],
+  );
+
+  const validateStep = useCallback(
+    (stepKey) => {
+      const sections = stepSectionsByKey[stepKey] || [stepKey];
+      return sections.reduce((acc, sectionKey) => ({ ...acc, ...validateSection(sectionKey) }), {});
+    },
+    [stepSectionsByKey, validateSection],
+  );
+
   const validateAllSteps = useCallback(() => {
     return stepKeys.reduce((acc, stepKey) => ({ ...acc, ...validateStep(stepKey) }), {});
   }, [stepKeys, validateStep]);
 
+  const getStepKeyFromErrorPath = useCallback((path) => {
+    if (!path) return activeStepKey;
+    const sectionKey = path.startsWith('personal.')
+      ? 'personal'
+      : activeSections.find((key) => path === key || path.startsWith(`${key}.`)) || path;
+    return (
+      builderSteps.find((step) => step.sections.includes(sectionKey))?.key ||
+      (stepKeys.includes(sectionKey) ? sectionKey : activeStepKey)
+    );
+  }, [activeSections, activeStepKey, builderSteps, stepKeys]);
+
+  const stepErrorKeys = useMemo(() => {
+    const keys = new Set();
+    Object.keys(mergedErrors).forEach((path) => keys.add(getStepKeyFromErrorPath(path)));
+    return keys;
+  }, [getStepKeyFromErrorPath, mergedErrors]);
+
+  const focusFirstError = useCallback(
+    (submitErrors) => {
+      const firstPath = Object.keys(submitErrors)[0];
+      const targetStep = getStepKeyFromErrorPath(firstPath);
+      const targetIndex = stepKeys.indexOf(targetStep);
+      if (targetIndex >= 0) setActiveStepIndex(targetIndex);
+      window.setTimeout(() => {
+        const target = document.querySelector(
+          '[aria-invalid="true"], input.border-red-500, textarea.border-red-500, select.border-red-500',
+        );
+        target?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+        target?.focus?.({ preventScroll: true });
+      }, 80);
+    },
+    [getStepKeyFromErrorPath, stepKeys],
+  );
+
   const handleSubmit = async () => {
+    if (saving) return;
     setAttemptSubmit(true);
     const allErrors = validateAllSteps();
     const submitErrors = { ...allErrors, ...formatErrors };
@@ -850,6 +906,7 @@ export default function Create() {
     if (Object.keys(submitErrors).length > 0) {
       const firstMessage = Object.values(submitErrors)[0];
       notify('warning', firstMessage || 'Lengkapi field wajib yang belum diisi.');
+      focusFirstError(submitErrors);
       return;
     }
     if (!selectedId) {
@@ -862,6 +919,7 @@ export default function Create() {
       navigate('/app/login?next=/app/create');
       return;
     }
+    setSaving(true);
     try {
       const payload = {
         cv: { ...cv, languageMode: documentLanguageMode },
@@ -883,6 +941,8 @@ export default function Create() {
     } catch (err) {
       console.error(err);
       notify('error', 'Terjadi kesalahan.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -894,6 +954,7 @@ export default function Create() {
     if (Object.keys(nextErrors).length > 0) {
       const firstMessage = Object.values(nextErrors)[0];
       notify('warning', firstMessage || 'Lengkapi field wajib yang belum diisi.');
+      focusFirstError(nextErrors);
       return;
     }
     if (activeStepIndex < stepKeys.length - 1) {
@@ -911,8 +972,8 @@ export default function Create() {
     setErrors({});
   };
 
-  const renderStepContent = () => {
-    if (activeStepKey === 'personal') {
+  const renderSingleSection = (sectionKey) => {
+    if (sectionKey === 'personal') {
       return (
         <PersonalForm
           value={cv.personal}
@@ -925,7 +986,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'summary') {
+    if (sectionKey === 'summary') {
       return (
         <SummaryForm
           value={cv.summary}
@@ -941,7 +1002,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'workExperience') {
+    if (sectionKey === 'workExperience') {
       return (
         <ExperienceList
           sectionKey="workExperience"
@@ -963,7 +1024,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'experience') {
+    if (sectionKey === 'experience') {
       return (
         <ExperienceList
           sectionKey="experience"
@@ -985,7 +1046,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'education') {
+    if (sectionKey === 'education') {
       return (
         <EducationList
           lang={educationLang}
@@ -1002,7 +1063,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'skills') {
+    if (sectionKey === 'skills') {
       return (
         <SkillsEditor
           lang={skillsLang}
@@ -1026,7 +1087,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'certifications') {
+    if (sectionKey === 'certifications') {
       return (
         <CertificationsList
           lang={certificationsLang}
@@ -1045,7 +1106,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'projects') {
+    if (sectionKey === 'projects') {
       return (
         <ProjectsList
           lang={projectsLang}
@@ -1064,7 +1125,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'achievements') {
+    if (sectionKey === 'achievements') {
       return (
         <AchievementsList
           lang={achievementsLang}
@@ -1083,7 +1144,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'references') {
+    if (sectionKey === 'references') {
       return (
         <ReferencesList
           lang={referencesLang}
@@ -1102,7 +1163,7 @@ export default function Create() {
         />
       );
     }
-    if (activeStepKey === 'additional') {
+    if (sectionKey === 'additional') {
       return (
         <AdditionalForm
           value={cv.additional}
@@ -1118,6 +1179,62 @@ export default function Create() {
     return null;
   };
 
+  const renderFinalizeContent = () => (
+    <div className="grid gap-5">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-black text-slate-950">Template dan tampilan</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Atur visual setelah isi CV selesai agar fokus pengisian tidak terpecah.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowTemplatePicker(true)}
+            className="min-h-10 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-800 hover:bg-slate-50"
+          >
+            {selectedTemplate ? 'Ganti Template' : 'Pilih Template'}
+          </button>
+        </div>
+        <div className="mt-4">
+          <ThemeControls theme={theme} setTheme={setTheme} fontOptions={fontOptions} compact />
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <h3 className="text-lg font-black text-slate-950">Urutan section</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Geser section untuk menyesuaikan prioritas isi CV sebelum disimpan.
+        </p>
+        <div className="mt-4">
+          <SectionOrderControl
+            sectionsOrder={sectionsOrder}
+            stepLabels={stepLabels}
+            dragKey={dragKey}
+            onDragStart={handleDragStart}
+            onDrop={handleDrop}
+            compact
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStepContent = () => {
+    if (activeStepKey === 'finalize') return renderFinalizeContent();
+    const sections = activeStep?.sections?.filter((section) => section !== 'finalize') || [];
+    return (
+      <div className="space-y-5">
+        {sections.map((section) => (
+          <section key={section} className="rounded-lg border border-slate-200 bg-white p-4">
+            {renderSingleSection(section)}
+          </section>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen p-4 pb-24 pt-5 text-slate-950 sm:p-5 sm:pb-8">
       <div className="mx-auto max-w-[1440px] space-y-5">
@@ -1130,9 +1247,10 @@ export default function Create() {
           onOpenTemplate={() => setShowTemplatePicker(true)}
           onOpenPreview={() => setPreviewOpen(true)}
           onSubmit={handleSubmit}
+          saving={saving}
         />
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,520px)]">
           <main className="space-y-5 lg:min-w-0">
             <div id="create-import-panel">
               <ImportPanel
@@ -1167,22 +1285,29 @@ export default function Create() {
               onSelectStep={setActiveStepIndex}
               onBack={handleStepBack}
               onNext={handleStepNext}
+              stepErrorKeys={stepErrorKeys}
+              saving={saving}
             />
           </main>
 
-          <div className="hidden lg:block">
-            <BuilderRail
-              stepperItems={stepperItems}
-              activeStepIndex={activeStepIndex}
-              activeStepKey={activeStepKey}
-              onSelectStep={setActiveStepIndex}
+          <div className="hidden xl:block">
+            <PreviewPanel
+              TemplateRenderer={TemplateRenderer}
+              previewCv={previewCv}
+              theme={theme}
               selectedTemplate={selectedTemplate}
-              onOpenTemplate={() => setShowTemplatePicker(true)}
-              onScrollToImport={() =>
-                document
-                  .getElementById('create-import-panel')
-                  ?.scrollIntoView({ behavior: 'smooth' })
-              }
+              sectionsOrder={sectionsOrder}
+              previewMode={previewMode}
+              setPreviewMode={setPreviewMode}
+              previewWidth={previewWidth}
+              stepLabels={stepLabels}
+              dragKey={dragKey}
+              onDragStart={handleDragStart}
+              onDrop={handleDrop}
+              setTheme={setTheme}
+              fontOptions={fontOptions}
+              onSubmit={handleSubmit}
+              saving={saving}
             />
           </div>
         </div>
@@ -1193,9 +1318,9 @@ export default function Create() {
           <div className="mx-auto flex max-h-[calc(100vh-1.5rem)] max-w-6xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]">
             <div className="flex items-center justify-between gap-3 border-b border-slate-200 p-4">
               <div>
-                <h2 className="text-lg font-black text-slate-950">Preview dan pengaturan</h2>
+                <h2 className="text-lg font-black text-slate-950">Preview CV</h2>
                 <p className="text-sm text-slate-500">
-                  Cek tampilan CV, tema, dan urutan section tanpa memecah halaman editor.
+                  Cek tampilan CV dalam mode web, PDF, atau mobile.
                 </p>
               </div>
               <button
@@ -1223,6 +1348,7 @@ export default function Create() {
                 setTheme={setTheme}
                 fontOptions={fontOptions}
                 onSubmit={handleSubmit}
+                saving={saving}
                 embedded
               />
             </div>

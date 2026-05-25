@@ -59,7 +59,13 @@ const sectionAliases = {
 };
 
 function normalizeLine(value) {
-  return String(value || '').replace(/\s+/g, ' ').trim();
+  return String(value || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[▪●◦]/g, '•')
+    .replace(/([A-Za-z])\s+-\s+([A-Za-z])/g, '$1-$2')
+    .replace(/\bundefined\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function asArray(value) {
@@ -79,6 +85,12 @@ function detectLanguage(text) {
 
 function matchSection(line) {
   const value = normalizeLine(line).toLowerCase().replace(/[:\-]+$/, '');
+  const compact = value.replace(/\s+/g, '');
+  if (/^education/.test(compact)) return 'education';
+  if (/^workexperience|^professionalexperience/.test(compact)) return 'workExperience';
+  if (/^profile|^professionalsummary|^summary/.test(compact)) return 'summary';
+  if (/^certification|^certifications|^certificate/.test(compact)) return 'certifications';
+  if (/^additionalinformation/.test(compact)) return 'additional';
   for (const [key, aliases] of Object.entries(sectionAliases)) {
     if (aliases.some((alias) => value === alias || value.startsWith(`${alias}:`))) {
       return key;
@@ -90,6 +102,9 @@ function matchSection(line) {
 function splitLines(text) {
   return String(text || '')
     .replace(/\u00a0/g, ' ')
+    .replace(/[▪●◦]/g, '•')
+    .replace(/([A-Za-z])\s+-\s+([A-Za-z])/g, '$1-$2')
+    .replace(/\bundefined\b/gi, '')
     .split(/\r?\n/)
     .map(normalizeLine)
     .filter(Boolean);
@@ -322,6 +337,121 @@ function normalizeCv(cv, languageBySection = {}) {
   };
 }
 
+function cleanAiScalar(value) {
+  const text = normalizeLine(value);
+  if (!text || /^(undefined|null|n\/a|unknown)$/i.test(text)) return '';
+  return text;
+}
+
+function cleanLocalizedText(value) {
+  if (typeof value === 'string') return cleanAiScalar(value);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+  return { ...value, id: cleanAiScalar(value.id), en: cleanAiScalar(value.en) };
+}
+
+function cleanLocalizedArray(value) {
+  if (Array.isArray(value)) return unique(value.map(cleanAiScalar));
+  if (!value || typeof value !== 'object') return value;
+  return {
+    ...value,
+    id: unique(asArray(value.id).map(cleanAiScalar)),
+    en: unique(asArray(value.en).map(cleanAiScalar))
+  };
+}
+
+function trimSummary(value) {
+  const stopPattern = /\b(education|work experience|professional experience|projects|certification|certifications|achievements|additional information|skills|pendidikan|pengalaman kerja|sertifikasi|pencapaian|keahlian)\b/i;
+  const cleanOne = (text) => {
+    const beforeNextSection = cleanAiScalar(text).split(stopPattern)[0].trim();
+    return beforeNextSection
+      .split(/(?<=[.!?])\s+/)
+      .filter(Boolean)
+      .slice(0, 5)
+      .join(' ')
+      .trim();
+  };
+  if (typeof value === 'string') return cleanOne(value);
+  return { id: cleanOne(value?.id), en: cleanOne(value?.en) };
+}
+
+function sanitizeListItem(section, item) {
+  const next = { ...(item || {}) };
+  for (const key of Object.keys(next)) {
+    if (key === 'highlights') {
+      next[key] = cleanLocalizedArray(next[key]);
+    } else if (
+      [
+        'role',
+        'company',
+        'location',
+        'degree',
+        'institution',
+        'category',
+        'name',
+        'issuer',
+        'description',
+        'title',
+        'tech',
+        'proof'
+      ].includes(key)
+    ) {
+      next[key] = cleanLocalizedText(next[key]);
+    } else if (typeof next[key] === 'string') {
+      next[key] = cleanAiScalar(next[key]);
+    }
+  }
+  if (section === 'skills') {
+    next.items = asArray(next.items)
+      .map((entry) => {
+        if (typeof entry === 'string') return cleanAiScalar(entry);
+        return {
+          ...(entry || {}),
+          name: cleanLocalizedText(entry?.name),
+          level: cleanAiScalar(entry?.level),
+          proof: cleanLocalizedText(entry?.proof)
+        };
+      })
+      .filter((entry) =>
+        typeof entry === 'string' ? entry : cleanAiScalar(entry?.name?.id || entry?.name?.en)
+      );
+  }
+  return next;
+}
+
+function sanitizeResult(result) {
+  const source = result || {};
+  const cv = normalizeCv(source.cv || {}, source.languageBySection || source.cv?.languageBySection || {});
+  cv.personal = Object.fromEntries(
+    Object.entries(cv.personal || {}).map(([key, value]) => [key, cleanAiScalar(value)])
+  );
+  cv.summary = trimSummary(cv.summary);
+  for (const section of [
+    'workExperience',
+    'experience',
+    'education',
+    'skills',
+    'projects',
+    'certifications',
+    'achievements',
+    'references'
+  ]) {
+    cv[section] = asArray(cv[section]).map((item) => sanitizeListItem(section, item));
+  }
+  cv.additional = {
+    ...cv.additional,
+    languages: cleanLocalizedText(cv.additional?.languages),
+    interests: cleanLocalizedText(cv.additional?.interests),
+    awards: cleanLocalizedText(cv.additional?.awards),
+    volunteer: cleanLocalizedText(cv.additional?.volunteer),
+    publications: cleanLocalizedText(cv.additional?.publications)
+  };
+  return {
+    ...source,
+    cv,
+    languageBySection: { ...(cv.languageBySection || {}), ...(source.languageBySection || {}) }
+  };
+}
+
 function heuristicEnhanceCv(text, hintLanguageBySection = {}) {
   const lines = splitLines(text);
   const { indices, languageBySection } = detectSectionIndices(lines);
@@ -353,32 +483,32 @@ function heuristicEnhanceCv(text, hintLanguageBySection = {}) {
 }
 
 async function parseCvText(text, hintLanguageBySection = {}, options = {}) {
-  const clippedText = String(text || '').slice(0, config.ai.maxInputChars);
+  const clippedText = splitLines(text).join('\n').slice(0, config.ai.maxInputChars);
   const chain = Array.isArray(config.ai.providerChain) && config.ai.providerChain.length
     ? config.ai.providerChain
     : [config.ai.provider];
 
   for (const provider of chain) {
     if (provider === 'heuristic') {
-      return heuristicEnhanceCv(clippedText, hintLanguageBySection);
+      return sanitizeResult(heuristicEnhanceCv(clippedText, hintLanguageBySection));
     }
 
     try {
       if (provider === 'openai') {
         const { parseWithOpenAi } = require('./openaiCvParser');
-        return await parseWithOpenAi(clippedText, hintLanguageBySection, options);
+        return sanitizeResult(await parseWithOpenAi(clippedText, hintLanguageBySection, options));
       }
       if (provider === 'gemini') {
         const { parseWithGemini } = require('./geminiCvParser');
-        return await parseWithGemini(clippedText, hintLanguageBySection, options);
+        return sanitizeResult(await parseWithGemini(clippedText, hintLanguageBySection, options));
       }
       if (provider === 'groq') {
         const { parseWithGroq } = require('./groqCvParser');
-        return await parseWithGroq(clippedText, hintLanguageBySection, options);
+        return sanitizeResult(await parseWithGroq(clippedText, hintLanguageBySection, options));
       }
       if (provider === 'openrouter') {
         const { parseWithOpenRouter } = require('./openrouterCvParser');
-        return await parseWithOpenRouter(clippedText, hintLanguageBySection, options);
+        return sanitizeResult(await parseWithOpenRouter(clippedText, hintLanguageBySection, options));
       }
       logger.warn('Unknown AI provider skipped', { provider });
     } catch (err) {
@@ -386,9 +516,10 @@ async function parseCvText(text, hintLanguageBySection = {}, options = {}) {
     }
   }
 
-  return heuristicEnhanceCv(clippedText, hintLanguageBySection);
+  return sanitizeResult(heuristicEnhanceCv(clippedText, hintLanguageBySection));
 }
 
 exports.enhanceCv = heuristicEnhanceCv;
 exports.parseCvText = parseCvText;
 exports.normalizeCv = normalizeCv;
+exports.sanitizeResult = sanitizeResult;

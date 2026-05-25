@@ -6,6 +6,7 @@ import Button from '../components/ui/Button.jsx';
 import PageShell from '../components/ui/PageShell.jsx';
 import Alert from '../components/ui/Alert.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
+import { notify } from '../components/ui/notify.js';
 
 export default function PortfolioView() {
   const { id } = useParams();
@@ -16,6 +17,7 @@ export default function PortfolioView() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const isAuthenticated = Boolean(getStoredToken());
   const containerRef = useRef(null);
 
@@ -35,8 +37,24 @@ export default function PortfolioView() {
 
   const handleDelete = async () => {
     const token = getStoredToken();
-    const res = await deletePortfolioItem(id, token);
-    if (res?.success) navigate('/app/portfolios');
+    if (!token) {
+      notify.warning('Anda harus login untuk menghapus item ini.');
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      const res = await deletePortfolioItem(id, token);
+      if (res?.success) {
+        notify.success('Item portfolio berhasil dihapus.');
+        navigate('/app/portfolios');
+      } else {
+        notify.error(res?.error || 'Gagal menghapus item portfolio.');
+      }
+    } catch {
+      notify.error('Terjadi kesalahan koneksi saat menghapus item.');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   if (loading) {
@@ -81,8 +99,10 @@ export default function PortfolioView() {
                   useCORS: true,
                   backgroundColor: '#ffffff',
                 });
+                notify.success('PDF berhasil dibuat.');
               } catch {
                 setPdfError('Gagal generate PDF.');
+                notify.error('Gagal generate PDF.');
               } finally {
                 setPdfLoading(false);
               }
@@ -134,6 +154,8 @@ export default function PortfolioView() {
         description="Item ini akan dihapus permanen dari koleksi Anda."
         confirmLabel="Hapus"
         danger
+        type="delete"
+        loading={deleteLoading}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />

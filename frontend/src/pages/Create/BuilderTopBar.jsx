@@ -10,6 +10,7 @@ export default function BuilderTopBar({
   onOpenTemplate,
   onOpenPreview,
   onSubmit,
+  saving = false,
 }) {
   return (
     <header className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-950/10">
@@ -47,8 +48,8 @@ export default function BuilderTopBar({
             <Button type="button" variant="dark" onClick={onOpenPreview}>
               Preview & Setting
             </Button>
-            <Button type="button" onClick={onSubmit}>
-              Simpan
+            <Button type="button" onClick={onSubmit} disabled={saving}>
+              {saving ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>
         </div>

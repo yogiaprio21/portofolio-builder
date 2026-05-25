@@ -135,16 +135,18 @@ export async function register(payload) {
 }
 
 export async function logout() {
-  const data = await fetchJson(
-    `${env.apiBase}/auth/logout`,
-    {
-      method: 'POST',
-      headers: authHeaders(),
-    },
-    { retryAuth: false },
-  );
-  clearSession();
-  return data;
+  try {
+    return await fetchJson(
+      `${env.apiBase}/auth/logout`,
+      {
+        method: 'POST',
+        headers: authHeaders(),
+      },
+      { retryAuth: false },
+    );
+  } finally {
+    clearSession();
+  }
 }
 
 export async function getMe() {

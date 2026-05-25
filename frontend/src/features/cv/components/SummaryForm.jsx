@@ -26,6 +26,8 @@ export default function SummaryForm({
       <textarea
         value={resolveTextStrict(value, lang)}
         onChange={(e) => onChangeText(lang, e.target.value)}
+        aria-required="true"
+        aria-invalid={Boolean(errors?.summary)}
         className={`w-full p-3 mt-3 rounded-lg text-black border ${markIfError('summary')}`}
         rows={4}
         placeholder={

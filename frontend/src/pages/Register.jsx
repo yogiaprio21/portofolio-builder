@@ -5,6 +5,8 @@ import AuthShell from '../components/ui/AuthShell.jsx';
 import Button from '../components/ui/Button.jsx';
 import Alert from '../components/ui/Alert.jsx';
 import FormField from '../components/ui/FormField.jsx';
+import PasswordInput from '../components/ui/PasswordInput.jsx';
+import { notify } from '../components/ui/notify.js';
 
 function validateEmail(email) {
   return /\S+@\S+\.\S+/.test(email);
@@ -46,16 +48,19 @@ export default function Register() {
     event.preventDefault();
     if (!emailOk) {
       setError('Format email tidak valid.');
+      notify.warning('Format email belum valid.');
       return;
     }
     if (passStrength < 3) {
-      setError(
-        'Password terlalu lemah. Gunakan minimal 8 karakter dengan kombinasi angka dan huruf.',
-      );
+      const message =
+        'Password terlalu lemah. Gunakan minimal 8 karakter dengan kombinasi angka dan huruf.';
+      setError(message);
+      notify.warning(message);
       return;
     }
     if (!passMatch) {
       setError('Konfirmasi password tidak cocok.');
+      notify.warning('Konfirmasi password belum sama.');
       return;
     }
     setLoading(true);
@@ -63,19 +68,23 @@ export default function Register() {
       const data = await register({ email, password });
       if (data?.error) {
         setError(data.error || 'Gagal register.');
+        notify.error(data.error || 'Gagal membuat akun.');
       } else {
         setVerifyLink(data.verification_url || '');
         setSuccessTone(data.email_delivery === 'failed' ? 'warning' : 'success');
-        setSuccessMessage(
+        const message =
           data.email_delivery === 'failed'
             ? 'Akun berhasil dibuat, tetapi email verifikasi belum berhasil dikirim. Coba login lalu gunakan tombol kirim ulang verifikasi.'
             : data.verification_url
               ? 'Akun dibuat. Gunakan tautan verifikasi berikut untuk development.'
-              : data.message || 'Akun dibuat. Silakan cek email Anda untuk verifikasi.',
-        );
+              : data.message || 'Akun dibuat. Silakan cek email Anda untuk verifikasi.';
+        setSuccessMessage(message);
+        if (data.email_delivery === 'failed') notify.warning(message);
+        else notify.success('Akun berhasil dibuat. Silakan cek email untuk verifikasi.');
       }
     } catch {
       setError('Terjadi kesalahan jaringan.');
+      notify.error('Terjadi kesalahan jaringan saat membuat akun.');
     } finally {
       setLoading(false);
     }
@@ -117,6 +126,9 @@ export default function Register() {
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             placeholder="nama@email.com"
+            required
+            aria-required="true"
+            aria-invalid={Boolean(email && !emailOk)}
             className="field-control"
           />
         </FormField>
@@ -126,14 +138,14 @@ export default function Register() {
           label="Password"
           hint="Minimal 8 karakter, lebih baik dengan angka dan simbol."
         >
-          <input
+          <PasswordInput
             id="register-password"
-            type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="new-password"
             placeholder="Buat password"
-            className="field-control"
+            required
+            invalid={Boolean(password && passStrength < 3)}
           />
           <div className="mt-3 flex items-center gap-3">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
@@ -157,14 +169,14 @@ export default function Register() {
           label="Konfirmasi password"
           error={confirm && !passMatch ? 'Password belum sama.' : ''}
         >
-          <input
+          <PasswordInput
             id="register-confirm"
-            type="password"
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}
             autoComplete="new-password"
             placeholder="Ulangi password"
-            className="field-control"
+            required
+            invalid={Boolean(confirm && !passMatch)}
           />
         </FormField>
 

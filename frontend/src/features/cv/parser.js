@@ -1,57 +1,147 @@
-import { getDocument } from 'pdfjs-dist/build/pdf.mjs';
+const sectionHeadingPatterns = [
+  {
+    key: 'summary',
+    lang: 'en',
+    re: /^\s*(profile|professional\s+summary|summary|about\s+me)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'summary',
+    lang: 'id',
+    re: /^\s*(profil|ringkasan|tentang\s+saya)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'workExperience',
+    lang: 'en',
+    re: /^\s*(work\s+experience|professional\s+experience|employment|career\s+history)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'workExperience',
+    lang: 'id',
+    re: /^\s*(pengalaman\s+kerja|riwayat\s+pekerjaan)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'experience',
+    lang: 'en',
+    re: /^\s*(organization\s+experience|organizational\s+experience|leadership\s+experience|experience)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'experience',
+    lang: 'id',
+    re: /^\s*(pengalaman\s+organisasi|pengalaman)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'education',
+    lang: 'en',
+    re: /^\s*(e\s*d\s*u\s*c\s*a\s*t\s*i\s*o\s*n|education|academic\s+background)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'education',
+    lang: 'id',
+    re: /^\s*(pendidikan|riwayat\s+pendidikan)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'projects',
+    lang: 'en',
+    re: /^\s*(projects|selected\s+projects|portfolio)\s*[:-]?\s*(.*)$/i,
+  },
+  { key: 'projects', lang: 'id', re: /^\s*(proyek|projek)\s*[:-]?\s*(.*)$/i },
+  {
+    key: 'certifications',
+    lang: 'en',
+    re: /^\s*(certification|certifications|certificates|licenses)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'certifications',
+    lang: 'id',
+    re: /^\s*(sertifikasi|lisensi)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'achievements',
+    lang: 'en',
+    re: /^\s*(achievements|awards|accomplishments)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'achievements',
+    lang: 'id',
+    re: /^\s*(pencapaian|prestasi|penghargaan)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'skills',
+    lang: 'en',
+    re: /^\s*(software\s+skills|hard\s+skills|soft\s+skills|language\s+skills|skills|technical\s+skills|core\s+skills)\s*[:-]?\s*(.*)$/i,
+  },
+  {
+    key: 'skills',
+    lang: 'id',
+    re: /^\s*(keahlian|keterampilan|kemampuan|bahasa)\s*[:-]?\s*(.*)$/i,
+  },
+  { key: 'references', lang: 'en', re: /^\s*(references|referees)\s*[:-]?\s*(.*)$/i },
+  { key: 'references', lang: 'id', re: /^\s*(referensi)\s*[:-]?\s*(.*)$/i },
+];
+
+function normalizeLine(value) {
+  return String(value || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/([A-Za-z])\s+-\s+([A-Za-z])/g, '$1-$2')
+    .replace(/\s*([/@|])\s*/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function cleanCvText(text) {
+  return String(text || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[▪●◦]/g, '•')
+    .replace(/([A-Za-z])\s+-\s+([A-Za-z])/g, '$1-$2')
+    .replace(/\bundefined\b/gi, '')
+    .split(/\r?\n/)
+    .map(normalizeLine)
+    .filter(Boolean)
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function matchSectionHeading(line) {
+  const normalized = normalizeLine(line);
+  for (const pattern of sectionHeadingPatterns) {
+    const match = normalized.match(pattern.re);
+    if (match) {
+      return {
+        key: pattern.key,
+        lang: pattern.lang,
+        rest: normalizeLine(match[2] || ''),
+      };
+    }
+  }
+  return null;
+}
+
+export function segmentCvText(text) {
+  const lines = cleanCvText(text).split(/\r?\n/).filter(Boolean);
+  const sections = {};
+  const sectionLangMap = {};
+  const preamble = [];
+  let currentKey = null;
+
+  for (const line of lines) {
+    const heading = matchSectionHeading(line);
+    if (heading) {
+      currentKey = heading.key;
+      sectionLangMap[currentKey] = sectionLangMap[currentKey] || heading.lang;
+      sections[currentKey] = sections[currentKey] || [];
+      if (heading.rest) sections[currentKey].push(heading.rest);
+      continue;
+    }
+    if (currentKey) sections[currentKey].push(line);
+    else preamble.push(line);
+  }
+
+  return { preamble, sections, sectionLangMap, lines };
+}
 
 export const extractSectionsFromText = (text) => {
-  const labelMap = {
-    experience: { id: ['pengalaman'], en: ['experience'] },
-    workExperience: { id: ['pengalaman kerja'], en: ['work experience'] },
-    education: { id: ['pendidikan'], en: ['education'] },
-    skills: { id: ['keahlian'], en: ['skills'] },
-    projects: { id: ['proyek'], en: ['projects'] },
-    certifications: { id: ['sertifikasi'], en: ['certifications'] },
-    achievements: { id: ['pencapaian', 'prestasi'], en: ['achievements'] },
-    references: { id: ['referensi'], en: ['references'] },
-  };
-  const lines = text.split(/\r?\n/);
-  const indices = {};
-  const sectionLangMap = {};
-  lines.forEach((line, idx) => {
-    const l = line.trim().toLowerCase();
-    Object.entries(labelMap).forEach(([key, langs]) => {
-      if (indices[key] != null) return;
-      if (langs.id.some((p) => l === p || l.startsWith(p + ':'))) {
-        indices[key] = idx;
-        sectionLangMap[key] = 'id';
-      } else if (langs.en.some((p) => l === p || l.startsWith(p + ':'))) {
-        indices[key] = idx;
-        sectionLangMap[key] = 'en';
-      }
-    });
-  });
-  const slice = (startIdx, endIdx) => {
-    const s = startIdx != null ? startIdx + 1 : null;
-    const e = endIdx != null ? endIdx : lines.length;
-    if (s == null) return [];
-    return lines.slice(s, e).map((x) => x.trim());
-  };
-  const orderKeys = [
-    'workExperience',
-    'experience',
-    'education',
-    'skills',
-    'projects',
-    'certifications',
-    'achievements',
-    'references',
-  ];
-  const sorted = orderKeys
-    .filter((k) => indices[k] != null)
-    .sort((a, b) => indices[a] - indices[b]);
-  const sections = {};
-  sorted.forEach((key, i) => {
-    const start = indices[key];
-    const end = i < sorted.length - 1 ? indices[sorted[i + 1]] : lines.length;
-    sections[key] = slice(start, end);
-  });
+  const { sections, sectionLangMap } = segmentCvText(text);
   const parseBullets = (arr) => {
     const items = [];
     arr.forEach((l) => {
@@ -61,22 +151,46 @@ export const extractSectionsFromText = (text) => {
     });
     return items.filter((x) => x.length > 0);
   };
+  const parseDateRange = (value) => {
+    const month =
+      '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t)?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)';
+    const year = '(?:19|20)\\d{2}';
+    const date = `(?:${month}\\s+)?${year}`;
+    const regex = new RegExp(
+      `(${date})\\s*(?:-|–|—|to|s/d|hingga|sampai)\\s*(${date}|present|current|now|sekarang)`,
+      'i',
+    );
+    const match = normalizeLine(value).match(regex);
+    return match ? { startDate: match[1], endDate: match[2] } : { startDate: '', endDate: '' };
+  };
+  const looksLikeHeader = (line) => {
+    if (!line || /^[-*•\u2022]/.test(line)) return false;
+    return Boolean(parseDateRange(line).startDate) || /(\s+-\s+|\s+—\s+|\s+@\s+|\s+at\s+)/i.test(line);
+  };
+  const splitHeader = (line) => {
+    const dates = parseDateRange(line);
+    const datePattern = dates.startDate
+      ? `${dates.startDate}\\s*(?:-|–|—|to|s/d|hingga|sampai)\\s*${dates.endDate}`
+      : '';
+    const withoutDate = datePattern
+      ? normalizeLine(line).replace(new RegExp(datePattern, 'i'), '').trim()
+      : normalizeLine(line);
+    const parts = withoutDate
+      .split(/\s+-\s+|\s+—\s+|\s+@\s+|\s+at\s+/i)
+      .map(normalizeLine)
+      .filter(Boolean);
+    return { role: parts[0] || withoutDate, company: parts[1] || '', ...dates };
+  };
   const parseExperience = (arr) => {
     const out = [];
     let current = null;
     arr.forEach((l) => {
-      const mDate =
-        l.match(/([A-Za-z]+|\d{2})\s*\d{4}[^\d]+([A-Za-z]+|\d{2})?\s*(\d{4}|present|sekarang)/i) ||
-        l.match(/(\d{4})(?:[^\d]+)(\d{4}|present|sekarang)/i);
-      const mHeader = l.match(/^(.+?)\s[—-]\s(.+)/) || l.match(/^(.+?)\s+at\s+(.+)/i);
-      if (mHeader || mDate) {
+      const line = normalizeLine(l);
+      if (looksLikeHeader(line)) {
         if (current) out.push(current);
-        const role = mHeader ? mHeader[1].trim() : '';
-        const company = mHeader ? mHeader[2].trim() : '';
-        const startDate = mDate ? (mDate[3] ? `${mDate[1]} ${mDate[2]}` : mDate[1]) : '';
-        const endDate = mDate ? mDate[3] || mDate[2] || '' : '';
+        const { role, company, startDate, endDate } = splitHeader(line);
         current = { role, company, location: '', startDate, endDate, highlights: [] };
-      } else if (/^[-*\u2022]/.test(l)) {
+      } else if (/^[-*•\u2022]/.test(line)) {
         if (!current)
           current = {
             role: '',
@@ -86,8 +200,10 @@ export const extractSectionsFromText = (text) => {
             endDate: '',
             highlights: [],
           };
-        const bullet = l.replace(/^[-*\u2022]\s*/, '').trim();
+        const bullet = line.replace(/^[-*•\u2022]\s*/, '').trim();
         if (bullet) current.highlights.push(bullet);
+      } else if (current && line) {
+        current.highlights.push(line);
       }
     });
     if (current) out.push(current);
@@ -97,21 +213,18 @@ export const extractSectionsFromText = (text) => {
     const out = [];
     let current = null;
     arr.forEach((l) => {
-      const mDate = l.match(/(\d{4})(?:[^\d]+)(\d{4}|present|sekarang)/i);
-      const mHeader = l.match(/^(.+?),\s*(.+)$/);
-      if (mHeader || mDate) {
+      const line = normalizeLine(l);
+      const dates = parseDateRange(line);
+      if (!current || /university|universitas|school|college|academy|institut|politeknik/i.test(line) || dates.startDate) {
         if (current) out.push(current);
-        const degree = mHeader ? mHeader[1].trim() : '';
-        const institution = mHeader ? mHeader[2].trim() : '';
-        const startDate = mDate ? mDate[1] : '';
-        const endDate = mDate ? mDate[2] : '';
+        const parts = line.split(/\s+-\s+|\s+—\s+|,\s*/).map(normalizeLine).filter(Boolean);
         current = {
-          degree,
-          institution,
+          degree: parts.find((part) => /s1|s2|s3|bachelor|master|diploma|engineering|teknik/i.test(part)) || parts[0] || '',
+          institution: parts.find((part) => /university|universitas|school|college|academy|institut|politeknik/i.test(part)) || '',
           location: '',
-          startDate,
-          endDate,
-          gpa: '',
+          startDate: dates.startDate,
+          endDate: dates.endDate,
+          gpa: line.match(/(?:GPA|IPK)[:\s]+([0-9.]+\s*\/\s*[0-9.]+|[0-9.]+)/i)?.[1] || '',
         };
       }
     });
@@ -188,38 +301,66 @@ export const extractSectionsFromText = (text) => {
 };
 
 export const parsePdfToText = async (file) => {
+  const [{ getDocument, GlobalWorkerOptions }, worker] = await Promise.all([
+    import('pdfjs-dist/legacy/build/pdf.mjs'),
+    import('pdfjs-dist/legacy/build/pdf.worker.mjs?url'),
+  ]);
+  const workerSrc = typeof worker.default === 'string' ? worker.default : '';
+  if (workerSrc) GlobalWorkerOptions.workerSrc = workerSrc;
   const buffer = await file.arrayBuffer();
   const loadingTask = getDocument({ data: buffer });
   const pdf = await loadingTask.promise;
   const pages = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1 });
     const content = await page.getTextContent();
     const rows = new Map();
     for (const item of content.items) {
       const value = String(item.str || '').trim();
       if (!value) continue;
       const [, , , , x, y] = item.transform || [0, 0, 0, 0, 0, 0];
-      const rowKey = Math.round(y / 3) * 3;
+      const rowKey = Math.round(y / 4) * 4;
       const row = rows.get(rowKey) || [];
-      row.push({ x, value });
+      row.push({ x, width: Number(item.width || 0), value });
       rows.set(rowKey, row);
     }
-    const pageText = [...rows.entries()]
+    const rowSegments = [...rows.entries()]
       .sort((a, b) => b[0] - a[0])
-      .map(([, row]) =>
-        row
-          .sort((a, b) => a.x - b.x)
-          .map((item) => item.value)
-          .join(' ')
-          .replace(/\s+/g, ' ')
-          .trim(),
-      )
-      .filter(Boolean)
+      .flatMap(([y, row]) => {
+        const sorted = row.sort((a, b) => a.x - b.x);
+        const segments = [];
+        let current = [];
+        let lastEnd = 0;
+        for (const item of sorted) {
+          const gap = item.x - lastEnd;
+          if (current.length && gap > Math.max(28, viewport.width * 0.045)) {
+            segments.push(current);
+            current = [];
+          }
+          current.push(item);
+          lastEnd = item.x + item.width;
+        }
+        if (current.length) segments.push(current);
+        return segments.map((segment) => {
+          const xStart = Math.min(...segment.map((item) => item.x));
+          const xEnd = Math.max(...segment.map((item) => item.x + item.width));
+          return {
+            y,
+            xStart,
+            xEnd,
+            text: normalizeLine(segment.map((item) => item.value).join(' ')),
+          };
+        });
+      })
+      .filter((segment) => segment.text);
+    const pageText = rowSegments
+      .sort((a, b) => (Math.abs(b.y - a.y) > 3 ? b.y - a.y : a.xStart - b.xStart))
+      .map((segment) => segment.text)
       .join('\n');
     pages.push(pageText);
   }
-  const text = pages.join('\n\n').trim();
+  const text = cleanCvText(pages.join('\n\n'));
   return {
     text,
     diagnostics: {

@@ -6,6 +6,8 @@ import AuthShell from '../components/ui/AuthShell.jsx';
 import Button from '../components/ui/Button.jsx';
 import Alert from '../components/ui/Alert.jsx';
 import FormField from '../components/ui/FormField.jsx';
+import PasswordInput from '../components/ui/PasswordInput.jsx';
+import { notify } from '../components/ui/notify.js';
 
 function authErrorMessage(error, status) {
   if (error === 'email not verified') {
@@ -52,6 +54,7 @@ export default function Login() {
     setCanResend(false);
     if (!email || !password) {
       setError('Email dan password wajib diisi.');
+      notify.warning('Email dan password wajib diisi.');
       return;
     }
     setLoading(true);
@@ -65,6 +68,7 @@ export default function Login() {
         );
         if (data.error === 'email not verified') setCanResend(true);
       } else {
+        notify.success('Berhasil masuk. Workspace siap digunakan.');
         navigate(nextPath);
       }
     } catch {
@@ -79,25 +83,30 @@ export default function Login() {
     setNotice('');
     if (!email) {
       setError('Masukkan email terlebih dahulu.');
+      notify.warning('Masukkan email terlebih dahulu.');
       return;
     }
     const data = await resendVerification({ email });
     if (data?.error) {
       if (data.status === 429) {
-        setError(
-          `Mohon tunggu ${data.retry_after || 60} detik sebelum meminta email verifikasi lagi.`,
-        );
+        const message = `Mohon tunggu ${data.retry_after || 60} detik sebelum meminta email verifikasi lagi.`;
+        setError(message);
+        notify.warning(message);
       } else if (data.code === 'EMAIL_DELIVERY_FAILED' || data.email_delivery === 'failed') {
-        setError(
-          'Email verifikasi belum bisa dikirim. Pastikan provider email di Render benar, lalu coba lagi.',
-        );
+        const message =
+          'Email verifikasi belum bisa dikirim. Pastikan provider email di Render benar, lalu coba lagi.';
+        setError(message);
+        notify.error(message);
       } else {
         setError(data.error);
+        notify.error(data.error || 'Gagal mengirim email verifikasi.');
       }
     } else if (data?.email_delivery === 'sent') {
       setNotice('Email verifikasi baru sudah dikirim. Silakan cek inbox atau folder spam.');
+      notify.success('Email verifikasi baru sudah dikirim.');
     } else {
       setNotice('Jika akun perlu verifikasi, email verifikasi akan dikirim.');
+      notify.info('Jika akun perlu verifikasi, email verifikasi akan dikirim.');
     }
   };
 
@@ -137,19 +146,22 @@ export default function Login() {
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             placeholder="nama@email.com"
+            required
+            aria-required="true"
+            aria-invalid={Boolean(error && !email)}
             className="field-control"
           />
         </FormField>
 
         <FormField id="login-password" label="Password">
-          <input
+          <PasswordInput
             id="login-password"
-            type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
             placeholder="Masukkan password"
-            className="field-control"
+            required
+            invalid={Boolean(error && !password)}
           />
         </FormField>
 

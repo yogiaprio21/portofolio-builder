@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Trash2 } from 'lucide-react';
 import { listMyPortfolioItems, deletePortfolioItem, getStoredToken } from '../api';
 import Button from '../components/ui/Button.jsx';
 import PageShell from '../components/ui/PageShell.jsx';
@@ -8,6 +9,7 @@ import EmptyState from '../components/ui/EmptyState.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import SkeletonCard from '../components/ui/SkeletonCard.jsx';
 import Badge from '../components/ui/Badge.jsx';
+import { notify } from '../components/ui/notify.js';
 
 function getGradientFromText(text) {
   const gradients = [
@@ -79,6 +81,7 @@ export default function PortfolioList() {
   const [pageSize] = useState(12);
   const [total, setTotal] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
   const filtered = useMemo(() => items, [items]);
@@ -124,22 +127,26 @@ export default function PortfolioList() {
     const token = getStoredToken();
     if (!token) {
       setNotice('Anda harus login untuk menghapus portofolio.');
+      notify.warning('Anda harus login untuk menghapus CV.');
       return;
     }
 
-    setLoading(true);
+    setDeleting(true);
     try {
       const res = await deletePortfolioItem(deleteTarget.id, token);
       if (res?.error) {
         setNotice(res.error || 'Gagal menghapus portofolio.');
+        notify.error(res.error || 'Gagal menghapus CV.');
       } else {
+        notify.success(`CV "${deleteTarget.title}" berhasil dihapus.`);
         setDeleteTarget(null);
         load();
       }
     } catch {
       setNotice('Terjadi kesalahan koneksi saat menghapus.');
+      notify.error('Terjadi kesalahan koneksi saat menghapus CV.');
     } finally {
-      setLoading(false);
+      setDeleting(false);
     }
   };
 
@@ -267,7 +274,7 @@ export default function PortfolioList() {
                       aria-label={`Hapus ${title}`}
                       onClick={() => setDeleteTarget({ id: item.id, title })}
                     >
-                      ×
+                      <Trash2 aria-hidden="true" size={16} />
                     </Button>
                   </div>
                 </div>
@@ -285,6 +292,8 @@ export default function PortfolioList() {
         }
         confirmLabel="Hapus"
         danger
+        type="delete"
+        loading={deleting}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
       />

@@ -50,9 +50,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await logoutRequest();
-    setUser(null);
-    setStatus('anonymous');
+    try {
+      await logoutRequest();
+    } finally {
+      setUser(null);
+      setStatus('anonymous');
+    }
   }, []);
 
   const value = useMemo(

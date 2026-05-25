@@ -1,4 +1,4 @@
-import { createElement } from 'react';
+import { createElement, forwardRef } from 'react';
 
 const variants = {
   primary:
@@ -22,18 +22,14 @@ const sizes = {
   lg: 'min-h-12 px-5 text-base',
 };
 
-export default function Button({
-  as = 'button',
-  variant = 'primary',
-  size = 'md',
-  className = '',
-  disabled,
-  children,
-  ...props
-}) {
+const Button = forwardRef(function Button(
+  { as = 'button', variant = 'primary', size = 'md', className = '', disabled, children, ...props },
+  ref,
+) {
   return createElement(
     as,
     {
+      ref,
       disabled,
       className: [
         'inline-flex items-center justify-center gap-2 rounded-lg font-bold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white',
@@ -46,4 +42,6 @@ export default function Button({
     },
     children,
   );
-}
+});
+
+export default Button;

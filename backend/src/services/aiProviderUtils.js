@@ -36,12 +36,19 @@ const openAiJsonSchema = {
 
 const systemPrompt = [
   'You extract CV/resume text into a JSON object for a portfolio builder.',
+  'The input text may come from a PDF extractor and may contain broken lines, duplicated contact information, or column text in imperfect order.',
   'Preserve Indonesian and English content when present.',
   'For localized text fields, always use objects shaped as { "id": "", "en": "" }.',
   'For localized bullet arrays, always use objects shaped as { "id": [], "en": [] }.',
   'If the source text is only Indonesian, put content only in id and leave en empty. If the source text is only English, put content only in en and leave id empty.',
   'Do not translate unless the source text explicitly contains both language versions or the request asks for bilingual content.',
   'Use these section keys only: personal, summary, workExperience, experience, education, skills, projects, certifications, achievements, references, languageBySection, additional.',
+  'Treat PROFILE, SUMMARY, or RINGKASAN as summary only. Stop summary before EDUCATION, WORK EXPERIENCE, PROJECTS, CERTIFICATION, ACHIEVEMENTS, SKILLS, or ADDITIONAL INFORMATION.',
+  'Put paid jobs, internships, freelance, and product/project roles in workExperience.',
+  'Put student organization, committee, mentoring, campus, and volunteer roles in experience unless they are clearly paid professional work.',
+  'Put software skills, hard skills, soft skills, and language skills into skills groups. Put spoken languages also into additional.languages when clear.',
+  'Never output the word undefined, null, N/A, or unknown as a field value. If a date or field is unclear, return an empty string.',
+  'Keep summary concise: maximum 5 sentences and no bullet list.',
   'Do not invent facts that are not present in the CV text.',
   'Keep dates, URLs, emails, phone numbers, GPA, and credential URLs as plain strings.',
   'Return JSON only.'
