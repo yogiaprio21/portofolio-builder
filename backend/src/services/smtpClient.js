@@ -19,6 +19,27 @@ function dotStuff(value) {
     .replace(/^\./gm, '..');
 }
 
+function normalizeError(err, phase) {
+  const message = err?.message || `${phase} failed without error message`;
+  const error = new Error(message);
+  error.smtpPhase = phase;
+  error.originalName = err?.name || '';
+  error.originalMessage = err?.message || '';
+  error.code = err?.code || '';
+  error.smtpCode = err?.smtpCode;
+  error.smtpResponse = err?.smtpResponse || '';
+  error.cause = err;
+  return error;
+}
+
+async function step(phase, action) {
+  try {
+    return await action();
+  } catch (err) {
+    throw normalizeError(err, phase);
+  }
+}
+
 function buildMessage({ from, to, subject, html, text }) {
   const boundary = `pb_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   const safeSubject = encodeHeader(subject);
@@ -104,7 +125,11 @@ class SmtpConnection {
     const result = await this.readResponse();
     const allowed = Array.isArray(codes) ? codes : [codes];
     if (!allowed.includes(result.code)) {
-      throw new Error(`${label} failed: ${result.response}`);
+      const error = new Error(`${label} failed: ${result.response}`);
+      error.smtpCode = result.code;
+      error.smtpResponse = result.response;
+      error.smtpPhase = label;
+      throw error;
     }
     return result;
   }
@@ -154,21 +179,21 @@ class SmtpConnection {
 
 async function sendSmtpMail({ smtp, from, to, subject, html, text }) {
   const connection = new SmtpConnection(smtp);
-  await connection.connectSocket();
+  await step('connect', () => connection.connectSocket());
   try {
-    await connection.expect(220, 'SMTP greeting');
-    await connection.command(`EHLO ${smtp.ehloName}`, 250, 'EHLO');
+    await step('SMTP greeting', () => connection.expect(220, 'SMTP greeting'));
+    await step('EHLO', () => connection.command(`EHLO ${smtp.ehloName}`, 250, 'EHLO'));
     if (!smtp.secure) {
-      await connection.upgradeToTls();
-      await connection.command(`EHLO ${smtp.ehloName}`, 250, 'EHLO after STARTTLS');
+      await step('STARTTLS', () => connection.upgradeToTls());
+      await step('EHLO after STARTTLS', () => connection.command(`EHLO ${smtp.ehloName}`, 250, 'EHLO after STARTTLS'));
     }
 
-    await connection.authenticate();
-    await connection.command(`MAIL FROM:<${extractEmailAddress(from)}>`, 250, 'MAIL FROM');
-    await connection.command(`RCPT TO:<${extractEmailAddress(to)}>`, [250, 251], 'RCPT TO');
-    await connection.command('DATA', 354, 'DATA');
+    await step('AUTH', () => connection.authenticate());
+    await step('MAIL FROM', () => connection.command(`MAIL FROM:<${extractEmailAddress(from)}>`, 250, 'MAIL FROM'));
+    await step('RCPT TO', () => connection.command(`RCPT TO:<${extractEmailAddress(to)}>`, [250, 251], 'RCPT TO'));
+    await step('DATA', () => connection.command('DATA', 354, 'DATA'));
     connection.send(`${dotStuff(buildMessage({ from, to, subject, html, text }))}\r\n.`);
-    await connection.expect(250, 'message body');
+    await step('message body', () => connection.expect(250, 'message body'));
     await connection.command('QUIT', 221, 'QUIT').catch(() => {});
     return { sent: true };
   } finally {

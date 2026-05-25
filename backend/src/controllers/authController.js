@@ -139,10 +139,23 @@ async function trySendVerification(user, req, source) {
       userId: user.id,
       requestId: req.requestId,
       source,
-      error: err.message
+      ...emailErrorMeta(err)
     });
     return { emailDelivery: 'failed' };
   }
+}
+
+function emailErrorMeta(err) {
+  return {
+    error: err.message || '(empty error message)',
+    name: err.name,
+    code: err.code,
+    smtpPhase: err.smtpPhase,
+    smtpCode: err.smtpCode,
+    smtpResponse: err.smtpResponse,
+    originalName: err.originalName,
+    originalMessage: err.originalMessage
+  };
 }
 
 exports.register = async (req, res) => {
@@ -167,7 +180,7 @@ exports.register = async (req, res) => {
       logger.error('Verification email delivery failed', {
         userId: user.id,
         requestId: req.requestId,
-        error: emailErr.message
+        ...emailErrorMeta(emailErr)
       });
     }
     if (config.isProduction) {

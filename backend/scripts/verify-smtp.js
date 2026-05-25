@@ -45,6 +45,17 @@ async function main() {
 
 main().catch((err) => {
   console.error('SMTP verification failed');
-  console.error(err.message);
+  console.error(
+    JSON.stringify({
+      message: err.message || '(empty error message)',
+      name: err.name,
+      code: err.code,
+      smtpPhase: err.smtpPhase,
+      smtpCode: err.smtpCode,
+      smtpResponse: err.smtpResponse,
+      originalName: err.originalName,
+      originalMessage: err.originalMessage
+    })
+  );
   process.exit(1);
 });
