@@ -1064,24 +1064,24 @@ export default function Create() {
   };
 
   return (
-    <div className="min-h-screen p-4 pb-24 pt-6 text-slate-950 sm:p-6 sm:pb-10">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 xl:grid-cols-[1.05fr_1.95fr]">
+    <div className="min-h-screen p-4 pb-24 pt-5 text-slate-950 sm:p-5 sm:pb-8">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 xl:grid-cols-[0.9fr_1.75fr]">
         <div className="space-y-4 xl:hidden">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-white shadow-xl shadow-slate-950/10">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <Badge tone="blue">Builder</Badge>
                 <h1 className="mt-3 text-2xl font-black tracking-tight">Buat CV</h1>
-                <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                <p className="mt-1 text-sm leading-relaxed text-white/68">
                   Isi langkah aktif, lalu lanjutkan. Template dan preview ada di bawah form.
                 </p>
               </div>
-              <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-                <div className="text-lg font-black text-blue-700">{progressPercent}%</div>
-                <div className="text-[11px] font-bold text-slate-500">lengkap</div>
+              <div className="shrink-0 rounded-xl border border-white/10 bg-white/[0.08] px-3 py-2 text-center">
+                <div className="text-lg font-black text-blue-200">{progressPercent}%</div>
+                <div className="text-[11px] font-bold text-white/58">lengkap</div>
               </div>
             </div>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12">
               <div
                 className="h-full rounded-full bg-blue-600"
                 style={{ width: `${progressPercent}%` }}
@@ -1105,7 +1105,7 @@ export default function Create() {
             </div>
           </div>
 
-          <details className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <details className="rounded-2xl border border-blue-100 bg-blue-50/85 p-4 shadow-sm">
             <summary className="cursor-pointer text-sm font-black text-slate-900">
               Atur section dan tampilan
             </summary>
@@ -1163,8 +1163,8 @@ export default function Create() {
           </details>
         </div>
 
-        <aside className="hidden space-y-5 xl:sticky xl:top-24 xl:block xl:self-start">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <aside className="hidden space-y-4 xl:sticky xl:top-24 xl:block xl:self-start">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-4">
               <Badge tone="blue">Builder</Badge>
               <h1 className="mt-3 text-2xl font-black tracking-tight">Buat CV</h1>
@@ -1179,7 +1179,7 @@ export default function Create() {
             />
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h4 className="mb-2 font-black">Urutan Section</h4>
             <p className="mb-4 text-xs leading-relaxed text-slate-500">
               Drag section untuk mengatur prioritas yang muncul di CV.
@@ -1204,7 +1204,7 @@ export default function Create() {
             </div>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h4 className="font-black">Kustomisasi</h4>
             <div className="grid gap-3">
               <label className="text-sm font-semibold text-slate-700">
@@ -1280,7 +1280,7 @@ export default function Create() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h4 className="mb-4 font-black">Mode Preview</h4>
             <div className="grid grid-cols-3 gap-2">
               {['web', 'pdf', 'mobile'].map((mode) => (
@@ -1300,8 +1300,8 @@ export default function Create() {
           </div>
         </aside>
 
-        <section className="flex flex-col gap-6">
-          <div className="order-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="flex flex-col gap-5">
+          <div className="order-1 rounded-2xl border border-blue-100 bg-blue-50/85 p-4 shadow-sm sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Badge tone={selectedTemplate ? 'emerald' : 'amber'}>
@@ -1357,7 +1357,7 @@ export default function Create() {
               </div>
             )}
           </div>
-          <div className="order-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 xl:order-2">
+          <div className="order-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm sm:p-5 xl:order-2">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
                 <h2 className="text-2xl font-black">Preview langsung</h2>
@@ -1390,7 +1390,7 @@ export default function Create() {
               onEnhance={handleEnhanceWithAI}
             />
           </div>
-          <div className="cv-editor-surface order-3 space-y-6 rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-sm sm:p-6 xl:order-4">
+          <div className="cv-editor-surface order-3 space-y-5 rounded-2xl border border-slate-200 bg-white/95 p-4 text-slate-900 shadow-sm sm:p-5 xl:order-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Badge tone={completion.isComplete ? 'emerald' : 'amber'}>

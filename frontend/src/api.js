@@ -78,7 +78,7 @@ async function fetchJson(url, options = {}, { retryAuth = true } = {}) {
   }
   if (!res.ok) {
     if (res.status === 401) clearSession();
-    return { error: data.error || 'Request failed', status: res.status };
+    return { ...data, error: data.error || 'Request failed', status: res.status };
   }
   persistSession(data);
   return data;

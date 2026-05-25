@@ -93,11 +93,11 @@ export default function Home() {
           </Button>
         </>
       }
-      className="space-y-8 pb-24"
+      className="space-y-6 pb-24"
     >
-      <section className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-        <SectionCard tone="light" className="overflow-hidden">
-          <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
+      <section className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+        <SectionCard tone="tint" className="overflow-hidden">
+          <div className="grid gap-5 p-5 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <Badge tone="blue">Next best action</Badge>
               <h2 className="mt-4 text-2xl font-black tracking-tight">
@@ -126,7 +126,7 @@ export default function Home() {
           </div>
         </SectionCard>
 
-        <SectionCard tone="dark" className="p-6">
+        <SectionCard tone="dark" className="p-5">
           <p className="text-sm font-semibold text-white/55">Masuk sebagai</p>
           <div className="mt-2 break-all text-lg font-bold">{user?.email}</div>
           <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.05] p-4">
@@ -146,8 +146,8 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <SectionCard tone="light" className="p-6">
+      <section className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
+        <SectionCard tone="light" className="p-5">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-black">Alur CV</h2>
@@ -163,7 +163,7 @@ export default function Home() {
             ].map(([title, desc], index) => (
               <div
                 key={title}
-                className="flex gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
+                className="flex gap-4 rounded-xl border border-blue-100 bg-blue-50 p-4"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white">
                   {index + 1}
@@ -177,7 +177,7 @@ export default function Home() {
           </div>
         </SectionCard>
 
-        <SectionCard tone="light" className="p-6">
+        <SectionCard tone="light" className="p-5">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-black">CV Terbaru</h2>
@@ -217,7 +217,7 @@ export default function Home() {
                 return (
                   <article
                     key={item.id}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-xl border border-slate-200 bg-white/95 p-4 shadow-sm"
                   >
                     <div className="text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                       {formatDate(item.createdAt)}

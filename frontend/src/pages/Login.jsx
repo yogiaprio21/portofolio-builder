@@ -20,6 +20,19 @@ function authErrorMessage(error, status) {
   return error || 'Gagal login.';
 }
 
+function verificationLoginMessage(data) {
+  if (data?.email_delivery === 'sent') {
+    return 'Email belum diverifikasi. Link verifikasi baru sudah dikirim, silakan cek inbox atau spam.';
+  }
+  if (data?.email_delivery === 'cooldown') {
+    return `Email belum diverifikasi. Tunggu ${data.retry_after || 60} detik sebelum kirim ulang.`;
+  }
+  if (data?.email_delivery === 'failed') {
+    return 'Email belum diverifikasi, dan pengiriman email belum berhasil. Cek konfigurasi SMTP lalu kirim ulang.';
+  }
+  return authErrorMessage(data?.error, data?.status);
+}
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,7 +58,11 @@ export default function Login() {
     try {
       const data = await login({ email, password });
       if (data?.error) {
-        setError(authErrorMessage(data.error, data.status));
+        setError(
+          data.error === 'email not verified'
+            ? verificationLoginMessage(data)
+            : authErrorMessage(data.error, data.status),
+        );
         if (data.error === 'email not verified') setCanResend(true);
       } else {
         navigate(nextPath);
@@ -67,7 +84,13 @@ export default function Login() {
     const data = await resendVerification({ email });
     if (data?.error) {
       if (data.status === 429) {
-        setError('Mohon tunggu sebelum meminta email verifikasi lagi.');
+        setError(
+          `Mohon tunggu ${data.retry_after || 60} detik sebelum meminta email verifikasi lagi.`,
+        );
+      } else if (data.code === 'EMAIL_DELIVERY_FAILED' || data.email_delivery === 'failed') {
+        setError(
+          'Email verifikasi belum bisa dikirim. Pastikan SMTP Gmail di Render benar, lalu coba lagi.',
+        );
       } else {
         setError(data.error);
       }

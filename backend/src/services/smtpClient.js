@@ -8,11 +8,15 @@ function extractEmailAddress(value) {
 }
 
 function encodeHeader(value) {
-  return String(value || '').replace(/[\r\n]+/g, ' ').trim();
+  return String(value || '')
+    .replace(/[\r\n]+/g, ' ')
+    .trim();
 }
 
 function dotStuff(value) {
-  return String(value || '').replace(/\r?\n/g, '\r\n').replace(/^\./gm, '..');
+  return String(value || '')
+    .replace(/\r?\n/g, '\r\n')
+    .replace(/^\./gm, '..');
 }
 
 function buildMessage({ from, to, subject, html, text }) {
@@ -114,6 +118,21 @@ class SmtpConnection {
     return await this.expect(codes, label);
   }
 
+  async authenticate() {
+    const { user, pass } = this.options;
+    const plainAuth = Buffer.from(`\u0000${user}\u0000${pass}`).toString('base64');
+    try {
+      await this.command(`AUTH PLAIN ${plainAuth}`, 235, 'AUTH PLAIN');
+      return;
+    } catch (err) {
+      if (!/AUTH PLAIN failed/i.test(err.message)) throw err;
+    }
+
+    await this.command('AUTH LOGIN', 334, 'AUTH LOGIN');
+    await this.command(Buffer.from(user).toString('base64'), 334, 'AUTH LOGIN username');
+    await this.command(Buffer.from(pass).toString('base64'), 235, 'AUTH LOGIN password');
+  }
+
   async upgradeToTls() {
     const { host, rejectUnauthorized } = this.options;
     await this.command('STARTTLS', 220, 'STARTTLS');
@@ -144,8 +163,7 @@ async function sendSmtpMail({ smtp, from, to, subject, html, text }) {
       await connection.command(`EHLO ${smtp.ehloName}`, 250, 'EHLO after STARTTLS');
     }
 
-    const auth = Buffer.from(`\u0000${smtp.user}\u0000${smtp.pass}`).toString('base64');
-    await connection.command(`AUTH PLAIN ${auth}`, 235, 'AUTH PLAIN');
+    await connection.authenticate();
     await connection.command(`MAIL FROM:<${extractEmailAddress(from)}>`, 250, 'MAIL FROM');
     await connection.command(`RCPT TO:<${extractEmailAddress(to)}>`, [250, 251], 'RCPT TO');
     await connection.command('DATA', 354, 'DATA');

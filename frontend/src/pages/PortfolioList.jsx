@@ -45,11 +45,11 @@ function PortfolioCover({ item }) {
   const initial = title.charAt(0).toUpperCase();
 
   if (displayImage) {
-    return <img alt={title} src={displayImage} className="h-52 w-full object-cover" />;
+    return <img alt={title} src={displayImage} className="h-44 w-full object-cover" />;
   }
 
   return (
-    <div className={`h-52 w-full bg-gradient-to-br ${gradientClass} p-5`}>
+    <div className={`h-44 w-full bg-gradient-to-br ${gradientClass} p-4`}>
       <div className="h-full rounded-xl bg-white/95 p-4 text-slate-900 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
           <div className="min-w-0">
@@ -157,7 +157,7 @@ export default function PortfolioList() {
       }
       className="pb-24"
     >
-      <section className="mb-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+      <section className="mb-5 grid gap-4 rounded-2xl border border-blue-100 bg-blue-50/80 p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <label htmlFor="portfolio-search" className="mb-2 block text-sm font-bold text-slate-700">
             Cari CV
@@ -183,7 +183,7 @@ export default function PortfolioList() {
         </Alert>
       )}
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           <Badge tone="blue">{total} CV tersimpan</Badge>
           <Badge tone="slate">
@@ -215,7 +215,7 @@ export default function PortfolioList() {
       </div>
 
       {loading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 8 }).map((_, index) => (
             <SkeletonCard key={index} className="h-96" />
           ))}
@@ -232,17 +232,17 @@ export default function PortfolioList() {
           onAction={q ? () => setQ('') : () => navigate('/app/create')}
         />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((item) => {
             const title = item.title || 'CV Tanpa Judul';
             const portfolioId = item.portfolioId || item.id;
             return (
               <article
                 key={item.id}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-xl"
+                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white/95 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-xl"
               >
                 <PortfolioCover item={item} />
-                <div className="flex min-h-56 flex-col p-5">
+                <div className="flex min-h-52 flex-col p-4">
                   <div className="mb-2 text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                     {formatDate(item.createdAt)}
                   </div>

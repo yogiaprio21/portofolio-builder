@@ -11,7 +11,7 @@ export default function ImportPanel({
   onEnhance,
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm sm:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-xl border border-dashed border-blue-200 bg-blue-50/70 p-5">
           <Badge tone="blue">Import</Badge>

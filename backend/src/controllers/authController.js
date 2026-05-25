@@ -110,9 +110,39 @@ async function sendVerification(user, req) {
     verificationExpires: expires
   });
   const verificationUrl = buildVerificationUrl(req, tokenValue);
-  await sendVerificationEmail({ to: user.email, verificationUrl, requestId: req.requestId });
+  await sendVerificationEmail({
+    to: user.email,
+    verificationUrl,
+    requestId: req.requestId
+  });
   await user.update({ verificationSentAt: new Date() });
   return verificationUrl;
+}
+
+function verificationCooldown(user) {
+  if (!user.verificationSentAt) return 0;
+  const secondsSinceLastSend = Math.floor((Date.now() - user.verificationSentAt.getTime()) / 1000);
+  return Math.max(0, config.verificationCooldownSeconds - secondsSinceLastSend);
+}
+
+async function trySendVerification(user, req, source) {
+  const retryAfter = verificationCooldown(user);
+  if (retryAfter > 0) {
+    return { emailDelivery: 'cooldown', retryAfter };
+  }
+
+  try {
+    const verificationUrl = await sendVerification(user, req);
+    return { emailDelivery: 'sent', verificationUrl };
+  } catch (err) {
+    logger.error('Verification email delivery failed', {
+      userId: user.id,
+      requestId: req.requestId,
+      source,
+      error: err.message
+    });
+    return { emailDelivery: 'failed' };
+  }
 }
 
 exports.register = async (req, res) => {
@@ -122,7 +152,12 @@ exports.register = async (req, res) => {
     const existing = await User.findOne({ where: { email } });
     if (existing) return res.status(409).json({ error: 'email already registered' });
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, passwordHash, role: 'user', emailVerified: false });
+    const user = await User.create({
+      email,
+      passwordHash,
+      role: 'user',
+      emailVerified: false
+    });
     let verificationUrl = '';
     let emailDelivery = 'sent';
     try {
@@ -136,7 +171,10 @@ exports.register = async (req, res) => {
       });
     }
     if (config.isProduction) {
-      logger.info('Email verification token created', { userId: user.id, requestId: req.requestId });
+      logger.info('Email verification token created', {
+        userId: user.id,
+        requestId: req.requestId
+      });
       return res.status(emailDelivery === 'sent' ? 201 : 202).json({
         message:
           emailDelivery === 'sent'
@@ -156,7 +194,10 @@ exports.register = async (req, res) => {
       user: { id: user.id, email: user.email, role: user.role }
     });
   } catch (err) {
-    logger.error('Register error', { requestId: req.requestId, error: err.message });
+    logger.error('Register error', {
+      requestId: req.requestId,
+      error: err.message
+    });
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -170,14 +211,34 @@ exports.login = async (req, res) => {
     if (!user) return res.status(401).json({ error: 'invalid credentials' });
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    if (!user.emailVerified) return res.status(403).json({ error: 'email not verified' });
+    if (!user.emailVerified) {
+      const delivery = await trySendVerification(user, req, 'login');
+      return res.status(403).json({
+        error: 'email not verified',
+        email_verification_required: true,
+        email_delivery: delivery.emailDelivery,
+        retry_after: delivery.retryAfter,
+        message:
+          delivery.emailDelivery === 'sent'
+            ? 'Email belum diverifikasi. Link verifikasi baru sudah dikirim.'
+            : delivery.emailDelivery === 'cooldown'
+              ? 'Email belum diverifikasi. Mohon tunggu sebelum meminta email verifikasi baru.'
+              : 'Email belum diverifikasi, tetapi email verifikasi belum bisa dikirim. Periksa konfigurasi SMTP.'
+      });
+    }
     const token = signToken(user);
     const refreshToken = await createSession(req, user);
     setAuthCookie(res, token);
     setRefreshCookie(res, refreshToken);
-    res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, role: user.role }
+    });
   } catch (err) {
-    logger.error('Login error', { requestId: req.requestId, error: err.message });
+    logger.error('Login error', {
+      requestId: req.requestId,
+      error: err.message
+    });
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -186,13 +247,23 @@ exports.verifyEmail = async (req, res) => {
   try {
     const token = req.query.token || '';
     if (!token) return res.status(400).json({ error: 'missing token' });
-    const user = await User.findOne({ where: { verificationToken: hashVerificationToken(token) } });
+    const user = await User.findOne({
+      where: { verificationToken: hashVerificationToken(token) }
+    });
     if (!user) return res.status(404).json({ error: 'invalid token' });
-    if (user.verificationExpires && user.verificationExpires < new Date()) return res.status(410).json({ error: 'token expired' });
-    await user.update({ emailVerified: true, verificationToken: null, verificationExpires: null });
+    if (user.verificationExpires && user.verificationExpires < new Date())
+      return res.status(410).json({ error: 'token expired' });
+    await user.update({
+      emailVerified: true,
+      verificationToken: null,
+      verificationExpires: null
+    });
     res.json({ success: true });
   } catch (err) {
-    logger.error('Verify error', { requestId: req.requestId, error: err.message });
+    logger.error('Verify error', {
+      requestId: req.requestId,
+      error: err.message
+    });
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -203,8 +274,18 @@ exports.logout = async (req, res) => {
   if (refreshToken) {
     await Session.update(
       { revokedAt: new Date() },
-      { where: { refreshTokenHash: hashRefreshToken(refreshToken), revokedAt: null } }
-    ).catch((err) => logger.warn('Failed to revoke session on logout', { requestId: req.requestId, error: err.message }));
+      {
+        where: {
+          refreshTokenHash: hashRefreshToken(refreshToken),
+          revokedAt: null
+        }
+      }
+    ).catch((err) =>
+      logger.warn('Failed to revoke session on logout', {
+        requestId: req.requestId,
+        error: err.message
+      })
+    );
   }
   clearAuthCookies(res);
   res.json({ success: true });
@@ -237,9 +318,15 @@ exports.refresh = async (req, res) => {
     const nextRefreshToken = await createSession(req, user);
     setAuthCookie(res, token);
     setRefreshCookie(res, nextRefreshToken);
-    res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, role: user.role }
+    });
   } catch (err) {
-    logger.error('Refresh error', { requestId: req.requestId, error: err.message });
+    logger.error('Refresh error', {
+      requestId: req.requestId,
+      error: err.message
+    });
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -248,24 +335,37 @@ exports.resendVerification = async (req, res) => {
   try {
     const { email } = req.validatedBody || req.body || {};
     const user = await User.findOne({ where: { email } });
-    const generic = { success: true, message: 'If the account exists and needs verification, a verification email will be sent.' };
+    const generic = {
+      success: true,
+      message: 'If the account exists and needs verification, a verification email will be sent.'
+    };
     if (!user || user.emailVerified) return res.json(generic);
 
-    if (user.verificationSentAt) {
-      const secondsSinceLastSend = Math.floor((Date.now() - user.verificationSentAt.getTime()) / 1000);
-      if (secondsSinceLastSend < config.verificationCooldownSeconds) {
-        return res.status(429).json({
-          error: 'Please wait before requesting another verification email',
-          retry_after: config.verificationCooldownSeconds - secondsSinceLastSend
-        });
-      }
+    const delivery = await trySendVerification(user, req, 'resend-verification');
+    if (delivery.emailDelivery === 'cooldown') {
+      return res.status(429).json({
+        error: 'Please wait before requesting another verification email',
+        retry_after: delivery.retryAfter
+      });
     }
-
-    const verificationUrl = await sendVerification(user, req);
+    if (delivery.emailDelivery === 'failed') {
+      return res.status(502).json({
+        error: 'Email verification could not be sent. Check SMTP configuration or try again later.',
+        code: 'EMAIL_DELIVERY_FAILED',
+        email_delivery: 'failed'
+      });
+    }
     if (config.isProduction) return res.json({ ...generic, email_delivery: 'sent' });
-    return res.json({ ...generic, verification_url: verificationUrl, email_delivery: 'sent' });
+    return res.json({
+      ...generic,
+      verification_url: delivery.verificationUrl,
+      email_delivery: 'sent'
+    });
   } catch (err) {
-    logger.error('Resend verification error', { requestId: req.requestId, error: err.message });
+    logger.error('Resend verification error', {
+      requestId: req.requestId,
+      error: err.message
+    });
     res.status(500).json({ error: 'Server error' });
   }
 };

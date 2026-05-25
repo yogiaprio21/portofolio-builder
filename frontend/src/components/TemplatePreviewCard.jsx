@@ -41,7 +41,7 @@ export default function TemplatePreviewCard({
   onSelect,
   scale = 0.25,
   compact = false,
-  previewClassName = 'h-56',
+  previewClassName = 'h-48',
 }) {
   return (
     <button
@@ -49,7 +49,9 @@ export default function TemplatePreviewCard({
       onClick={() => onSelect?.(template)}
       className={[
         'group w-full text-left transition duration-200',
-        'rounded-xl border bg-white p-3 shadow-sm hover:-translate-y-0.5 hover:shadow-lg',
+        compact
+          ? 'rounded-xl border bg-white p-2 shadow-sm hover:-translate-y-0.5 hover:shadow-lg'
+          : 'rounded-xl border bg-white p-3 shadow-sm hover:-translate-y-0.5 hover:shadow-lg',
         selected
           ? 'border-blue-500 ring-2 ring-blue-200'
           : 'border-slate-200 hover:border-blue-200',
@@ -72,7 +74,13 @@ export default function TemplatePreviewCard({
           </div>
         </div>
       </div>
-      <div className="mt-4 flex items-start justify-between gap-3">
+      <div
+        className={
+          compact
+            ? 'mt-3 flex items-start justify-between gap-3'
+            : 'mt-4 flex items-start justify-between gap-3'
+        }
+      >
         <div className="min-w-0">
           <div className="truncate text-sm font-extrabold text-slate-950">{template.name}</div>
           <div className="mt-1 truncate text-xs text-slate-500">

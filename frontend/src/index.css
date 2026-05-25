@@ -6,7 +6,7 @@ html {
 
 body {
   min-width: 320px;
-  background: #f1f5f9;
+  background: #e7edf7;
   color: #0f172a;
 }
 
@@ -29,8 +29,8 @@ textarea:focus-visible {
 
 .app-surface {
   background:
-    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 1)),
-    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.08), transparent 32%);
+    linear-gradient(180deg, rgba(226, 235, 249, 0.96) 0%, rgba(241, 245, 249, 1) 38%),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.08), rgba(37, 99, 235, 0.1));
 }
 
 .cv-editor-surface input,
