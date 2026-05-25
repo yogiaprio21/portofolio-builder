@@ -24,6 +24,17 @@ function smtpSummary() {
   };
 }
 
+function parseEmailIdentity(value) {
+  const input = String(value || '').trim();
+  const match = input.match(/^(.*?)\s*<([^>]+)>$/);
+  if (!match) return { email: input };
+  const name = match[1].trim().replace(/^"|"$/g, '');
+  return {
+    name: name || undefined,
+    email: match[2].trim()
+  };
+}
+
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -59,6 +70,32 @@ async function sendWithResend({ to, subject, html, text }) {
   return data;
 }
 
+async function sendWithBrevo({ to, subject, html, text }) {
+  if (!config.email.brevoApiKey) {
+    throw new Error('BREVO_API_KEY is required for EMAIL_PROVIDER=brevo');
+  }
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': config.email.brevoApiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: parseEmailIdentity(config.email.from),
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+      textContent: text
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.code || 'Brevo email failed');
+  }
+  return data;
+}
+
 async function sendVerificationEmail({ to, verificationUrl, requestId }) {
   const subject = 'Verify your Portfolio Builder account';
   const safeUrl = escapeHtml(verificationUrl);
@@ -72,6 +109,16 @@ async function sendVerificationEmail({ to, verificationUrl, requestId }) {
 
   if (config.email.provider === 'resend') {
     return await sendWithResend({ to, subject, html, text });
+  }
+
+  if (config.email.provider === 'brevo') {
+    logger.info('Sending verification email with Brevo API', {
+      to: maskEmail(to),
+      requestId,
+      from: config.email.from,
+      apiKeyConfigured: Boolean(config.email.brevoApiKey)
+    });
+    return await sendWithBrevo({ to, subject, html, text });
   }
 
   if (config.email.provider === 'smtp') {

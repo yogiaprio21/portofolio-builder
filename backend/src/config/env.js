@@ -88,6 +88,7 @@ module.exports = {
     provider: process.env.EMAIL_PROVIDER || 'log',
     from: process.env.EMAIL_FROM || 'Portfolio Builder <onboarding@resend.dev>',
     resendApiKey: process.env.RESEND_API_KEY || '',
+    brevoApiKey: process.env.BREVO_API_KEY || '',
     appUrl: stringFromEnv('APP_URL'),
     smtp: {
       host: stringFromEnv('SMTP_HOST'),
@@ -146,6 +147,10 @@ if (storageProvider === 'cloudinary') {
 
 if (process.env.EMAIL_PROVIDER === 'resend') {
   requireInProduction('RESEND_API_KEY');
+}
+
+if (process.env.EMAIL_PROVIDER === 'brevo') {
+  requireInProduction('BREVO_API_KEY');
 }
 
 if (process.env.EMAIL_PROVIDER === 'smtp') {
