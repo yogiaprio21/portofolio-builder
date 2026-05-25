@@ -5,7 +5,17 @@ const { DataTypes, QueryTypes } = require('sequelize');
 const migrationsDir = path.join(__dirname, 'migrations');
 const metaTable = 'SequelizeMeta';
 
+async function tableExists(queryInterface, tableName, transaction) {
+  try {
+    await queryInterface.describeTable(tableName, { transaction });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function ensureMetaTable(queryInterface, transaction) {
+  if (await tableExists(queryInterface, metaTable, transaction)) return;
   await queryInterface.createTable(
     metaTable,
     {
@@ -16,10 +26,7 @@ async function ensureMetaTable(queryInterface, transaction) {
       }
     },
     { transaction }
-  ).catch(async (err) => {
-    const message = String(err?.message || '');
-    if (!/already exists|there is already/i.test(message)) throw err;
-  });
+  );
 }
 
 function loadMigrations() {

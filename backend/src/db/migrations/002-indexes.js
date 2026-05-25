@@ -8,12 +8,9 @@ async function tableExists(queryInterface, tableName) {
 }
 
 async function addIndexIfMissing(queryInterface, tableName, fields, options) {
-  try {
-    await queryInterface.addIndex(tableName, fields, options);
-  } catch (err) {
-    const message = String(err?.message || '');
-    if (!/already exists|duplicate|exists/i.test(message)) throw err;
-  }
+  const existingIndexes = await queryInterface.showIndex(tableName, options);
+  if (existingIndexes.some((index) => index.name === options.name)) return;
+  await queryInterface.addIndex(tableName, fields, options);
 }
 
 module.exports = {

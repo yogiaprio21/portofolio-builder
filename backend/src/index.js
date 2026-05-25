@@ -25,7 +25,7 @@ async function start(){
     }
     server = app.listen(PORT, () => logger.info('Backend running', { port: PORT }));
   }catch(err){
-    logger.error('Backend startup failed', { error: err.message });
+    logger.error('Backend startup failed', { error: err.message, stack: err.stack });
     process.exit(1);
   }
 }

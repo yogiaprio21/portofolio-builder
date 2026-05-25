@@ -1,6 +1,6 @@
-async function tableExists(queryInterface, tableName) {
+async function tableExists(queryInterface, tableName, options) {
   try {
-    await queryInterface.describeTable(tableName);
+    await queryInterface.describeTable(tableName, options);
     return true;
   } catch {
     return false;
@@ -8,25 +8,22 @@ async function tableExists(queryInterface, tableName) {
 }
 
 async function ensureColumn(queryInterface, tableName, columnName, definition, options) {
-  const description = await queryInterface.describeTable(tableName);
+  const description = await queryInterface.describeTable(tableName, options);
   if (!description[columnName]) {
     await queryInterface.addColumn(tableName, columnName, definition, options);
   }
 }
 
 async function ensureTable(queryInterface, tableName, columns, options) {
-  if (!(await tableExists(queryInterface, tableName))) {
+  if (!(await tableExists(queryInterface, tableName, options))) {
     await queryInterface.createTable(tableName, columns, options);
   }
 }
 
 async function addIndexIfMissing(queryInterface, tableName, fields, options) {
-  try {
-    await queryInterface.addIndex(tableName, fields, options);
-  } catch (err) {
-    const message = String(err?.message || '');
-    if (!/already exists|duplicate|exists/i.test(message)) throw err;
-  }
+  const existingIndexes = await queryInterface.showIndex(tableName, options);
+  if (existingIndexes.some((index) => index.name === options.name)) return;
+  await queryInterface.addIndex(tableName, fields, options);
 }
 
 module.exports = {
@@ -44,11 +41,11 @@ module.exports = {
       }
     };
 
-    if (await tableExists(queryInterface, 'users')) {
+    if (await tableExists(queryInterface, 'users', { transaction })) {
       await ensureColumn(queryInterface, 'users', 'verification_sent_at', { type: DataTypes.DATE, allowNull: true }, { transaction });
     }
 
-    if (await tableExists(queryInterface, 'portfolio')) {
+    if (await tableExists(queryInterface, 'portfolio', { transaction })) {
       await ensureColumn(queryInterface, 'portfolio', 'image_provider', { type: DataTypes.STRING, allowNull: true }, { transaction });
       await ensureColumn(queryInterface, 'portfolio', 'image_public_id', { type: DataTypes.STRING, allowNull: true }, { transaction });
     }
@@ -59,7 +56,7 @@ module.exports = {
       {
         id: { type: DataTypes.INTEGER, allowNull: false, autoIncrement: true, primaryKey: true },
         user_id: { type: DataTypes.INTEGER, allowNull: false },
-        refresh_token_hash: { type: DataTypes.STRING, allowNull: false, unique: true },
+        refresh_token_hash: { type: DataTypes.STRING, allowNull: false },
         user_agent: { type: DataTypes.STRING, allowNull: true },
         ip_address: { type: DataTypes.STRING, allowNull: true },
         expires_at: { type: DataTypes.DATE, allowNull: false },
