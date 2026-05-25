@@ -21,13 +21,13 @@ export default function BuilderRail({
 
   return (
     <aside className="space-y-4 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-auto xl:pr-1">
-      <section className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm">
+      <section className="rounded-lg border border-slate-200 bg-white/95 p-4 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <Badge tone="blue">{activeGroup}</Badge>
             <h2 className="mt-3 text-lg font-black">Alur pengisian</h2>
           </div>
-          <div className="rounded-xl bg-blue-50 px-3 py-2 text-center">
+          <div className="rounded-lg bg-blue-50 px-3 py-2 text-center">
             <div className="text-sm font-black text-blue-700">{activeStepIndex + 1}</div>
             <div className="text-[10px] font-bold text-blue-500">step</div>
           </div>
@@ -35,7 +35,7 @@ export default function BuilderRail({
         <Stepper steps={stepperItems} currentIndex={activeStepIndex} onSelect={onSelectStep} />
       </section>
 
-      <section className="rounded-2xl border border-blue-100 bg-blue-50/80 p-4 shadow-sm">
+      <section className="rounded-lg border border-blue-100 bg-blue-50/80 p-4 shadow-sm">
         <div className="text-sm font-black text-slate-900">Mulai cepat</div>
         <p className="mt-1 text-xs leading-relaxed text-slate-500">
           Import CV lama, lalu rapikan hasilnya dengan AI sebelum lanjut mengisi manual.
@@ -49,7 +49,7 @@ export default function BuilderRail({
         </button>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm">
+      <section className="rounded-lg border border-slate-200 bg-white/95 p-4 shadow-sm">
         <div className="text-sm font-black text-slate-900">Template</div>
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">
           {selectedTemplate

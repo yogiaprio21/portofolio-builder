@@ -5,7 +5,7 @@ import Badge from '../components/ui/Badge.jsx';
 export default function Terms() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 text-slate-950 sm:px-6 lg:px-8">
-      <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
+      <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm md:p-10">
         <Badge tone="blue">Legal</Badge>
         <h1 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">Syarat & Ketentuan</h1>
         <p className="mt-2 text-sm text-slate-500">Terakhir diperbarui: 1 Maret 2026</p>

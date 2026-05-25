@@ -41,11 +41,11 @@ export default function Verify() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-68px)] max-w-lg items-center px-4 py-10 text-slate-950">
-      <section className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
+      <section className="w-full rounded-lg border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-xl font-black text-blue-700">
           {status === 'ok' ? '✓' : status === 'pending' ? '…' : '!'}
         </div>
-        <h1 className="text-2xl font-bold">{content[0]}</h1>
+        <h1 className="text-2xl font-black">{content[0]}</h1>
         <p className="mt-3 text-sm leading-relaxed text-slate-500">{content[1]}</p>
         {status === 'pending' && (
           <div className="mt-6 h-2 overflow-hidden rounded-full bg-slate-200">

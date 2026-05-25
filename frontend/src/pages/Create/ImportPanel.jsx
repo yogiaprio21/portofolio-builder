@@ -11,9 +11,9 @@ export default function ImportPanel({
   onEnhance,
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm sm:p-5">
+    <section className="rounded-lg border border-slate-200 bg-white p-4 text-slate-900 shadow-sm sm:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-xl border border-dashed border-blue-200 bg-blue-50/70 p-5">
+        <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/70 p-5">
           <Badge tone="blue">Import</Badge>
           <h3 className="mt-3 text-lg font-black">Import CV dari file</h3>
           <p className="mt-2 text-sm leading-relaxed text-slate-500">
@@ -36,7 +36,7 @@ export default function ImportPanel({
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
           <Badge tone="slate">AI assistant</Badge>
           <h3 className="mt-3 text-lg font-black">Rapikan konten dengan AI</h3>
           <p className="mt-2 min-h-10 text-sm leading-relaxed text-slate-500">

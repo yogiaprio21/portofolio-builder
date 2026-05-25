@@ -19,8 +19,13 @@ export default function ConfirmDialog({
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
     >
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl">
-        <h2 id="confirm-dialog-title" className="text-xl font-bold">
+      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl">
+        <div
+          className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${danger ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'} text-xl font-black`}
+        >
+          !
+        </div>
+        <h2 id="confirm-dialog-title" className="text-xl font-black">
           {title}
         </h2>
         {description && (

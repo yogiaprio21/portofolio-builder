@@ -6,8 +6,10 @@ html {
 
 body {
   min-width: 320px;
-  background: #e7edf7;
+  background: #f3f6fb;
   color: #0f172a;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -29,15 +31,16 @@ textarea:focus-visible {
 
 .app-surface {
   background:
-    linear-gradient(180deg, rgba(226, 235, 249, 0.96) 0%, rgba(241, 245, 249, 1) 38%),
-    linear-gradient(90deg, rgba(14, 165, 233, 0.08), rgba(37, 99, 235, 0.1));
+    linear-gradient(180deg, rgba(244, 247, 251, 0.98) 0%, rgba(248, 250, 252, 1) 46%),
+    linear-gradient(90deg, rgba(20, 184, 166, 0.08), rgba(37, 99, 235, 0.08));
 }
 
 .cv-editor-surface input,
 .cv-editor-surface textarea,
-.cv-editor-surface select {
-  border-radius: 0.75rem;
-  border-color: #cbd5e1;
+.cv-editor-surface select,
+.field-control {
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
   background: #ffffff;
   color: #0f172a;
   box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03);
@@ -45,15 +48,57 @@ textarea:focus-visible {
 
 .cv-editor-surface input:focus,
 .cv-editor-surface textarea:focus,
-.cv-editor-surface select:focus {
+.cv-editor-surface select:focus,
+.field-control:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   outline: none;
 }
 
 .cv-editor-surface label {
-  font-weight: 650;
+  font-weight: 700;
   color: #334155;
+}
+
+.field-control {
+  min-height: 3rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.textarea-control {
+  min-height: 8.5rem;
+  resize: vertical;
+}
+
+.surface-card {
+  border: 1px solid #d8e2f0;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.surface-muted {
+  border: 1px solid #d8e2f0;
+  background: #eef4ff;
+}
+
+.section-band {
+  border-block: 1px solid #d8e2f0;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.container-pad {
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-pad {
+    padding-inline: 1.5rem;
+  }
 }
 
 .line-clamp-1,

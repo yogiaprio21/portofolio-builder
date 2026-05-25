@@ -5,17 +5,17 @@ export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white pb-20 pt-8 text-slate-950 md:pb-8">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-6 flex flex-col items-center justify-between gap-6 md:flex-row">
+        <div className="mb-6 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <div className="text-center md:text-left">
             <BrandLogo
               to="/"
-              className="mb-3 justify-center md:justify-start"
+              className="mb-3 justify-start"
               markClassName="h-9 w-9"
               textClassName="text-slate-950"
             />
-            <p className="max-w-sm text-sm text-slate-500">
-              Membangun karier profesional Anda dengan satu klik. Buat CV dan Portofolio modern
-              dalam hitungan menit.
+            <p className="max-w-sm text-left text-sm leading-7 text-slate-500">
+              Workspace untuk membuat CV dan portfolio modern dengan alur yang jelas, rapi, dan siap
+              deploy.
             </p>
           </div>
 

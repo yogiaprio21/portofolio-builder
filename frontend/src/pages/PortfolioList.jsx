@@ -11,12 +11,10 @@ import Badge from '../components/ui/Badge.jsx';
 
 function getGradientFromText(text) {
   const gradients = [
-    'from-blue-600 to-cyan-400',
-    'from-emerald-600 to-teal-400',
-    'from-slate-800 to-blue-700',
-    'from-violet-600 to-blue-500',
-    'from-amber-500 to-red-500',
-    'from-fuchsia-600 to-rose-500',
+    'from-blue-700 to-teal-500',
+    'from-slate-900 to-blue-700',
+    'from-emerald-700 to-cyan-600',
+    'from-indigo-700 to-blue-600',
   ];
   let hash = 0;
   for (let i = 0; i < text.length; i += 1) {
@@ -50,13 +48,13 @@ function PortfolioCover({ item }) {
 
   return (
     <div className={`h-44 w-full bg-gradient-to-br ${gradientClass} p-4`}>
-      <div className="h-full rounded-xl bg-white/95 p-4 text-slate-900 shadow-xl">
+      <div className="h-full rounded-lg bg-white/96 p-4 text-slate-900 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
           <div className="min-w-0">
             <div className="line-clamp-2 text-lg font-black leading-tight">{title}</div>
             <div className="mt-1 text-xs text-slate-500">{formatDate(item.createdAt)}</div>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-black">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-black text-blue-700">
             {initial}
           </div>
         </div>
@@ -157,7 +155,7 @@ export default function PortfolioList() {
       }
       className="pb-24"
     >
-      <section className="mb-5 grid gap-4 rounded-2xl border border-blue-100 bg-blue-50/80 p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+      <section className="mb-5 grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <label htmlFor="portfolio-search" className="mb-2 block text-sm font-bold text-slate-700">
             Cari CV
@@ -167,7 +165,7 @@ export default function PortfolioList() {
             value={q}
             onChange={(event) => setQ(event.target.value)}
             placeholder="Cari berdasarkan judul atau deskripsi"
-            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+            className="field-control placeholder:text-slate-400"
           />
         </div>
         <div className="flex gap-2">
@@ -239,7 +237,7 @@ export default function PortfolioList() {
             return (
               <article
                 key={item.id}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white/95 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-xl"
+                className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-xl"
               >
                 <PortfolioCover item={item} />
                 <div className="flex min-h-52 flex-col p-4">

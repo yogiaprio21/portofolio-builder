@@ -2,7 +2,7 @@ export default function FormField({ id, label, error, hint, children, className 
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="mb-1.5 block text-sm font-bold text-slate-700">
           {label}
         </label>
       )}

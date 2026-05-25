@@ -42,6 +42,19 @@ const fallbackCv = {
   languageBySection: { summary: 'id', workExperience: 'id', skills: 'en', projects: 'id' },
 };
 
+const workflow = [
+  ['Import', 'Ambil data awal dari CV lama atau mulai manual.'],
+  ['Pilih desain', 'Bandingkan preview sample sebelum mengisi terlalu jauh.'],
+  ['Rapikan isi', 'Isi form bertahap dengan validasi dan bantuan AI.'],
+  ['Export', 'Cek preview web, mobile, PDF, lalu download dokumen.'],
+];
+
+const features = [
+  ['Form bertahap', 'Setiap section fokus pada satu jenis informasi agar user tidak tersesat.'],
+  ['Preview hidup', 'Template menampilkan sample CV yang relevan sebelum dipilih.'],
+  ['AI fallback', 'Backend bisa memakai beberapa provider dan tetap punya fallback heuristic.'],
+];
+
 export default function Landing() {
   const [templates, setTemplates] = useState([]);
 
@@ -61,23 +74,23 @@ export default function Landing() {
   const showcasedTemplates = templates.slice(0, 3);
 
   return (
-    <div className="bg-[#e7edf7] text-slate-950">
-      <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <BrandLogo to="/" markClassName="h-9 w-9" textClassName="text-white" />
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-white/68 md:flex">
-            <a href="#cara-kerja" className="hover:text-white">
+    <div className="bg-[#f3f6fb] text-slate-950">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/92 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <BrandLogo to="/" markClassName="h-9 w-9" />
+          <nav className="hidden items-center gap-6 text-sm font-bold text-slate-600 md:flex">
+            <a href="#cara-kerja" className="hover:text-slate-950">
               Cara kerja
             </a>
-            <a href="#template" className="hover:text-white">
+            <a href="#template" className="hover:text-slate-950">
               Template
             </a>
-            <a href="#fitur" className="hover:text-white">
+            <a href="#fitur" className="hover:text-slate-950">
               Fitur
             </a>
           </nav>
           <div className="flex gap-2">
-            <Button as={Link} to="/app/login" variant="ghostDark" size="sm">
+            <Button as={Link} to="/app/login" variant="ghost" size="sm">
               Masuk
             </Button>
             <Button as={Link} to="/app/register" size="sm">
@@ -88,52 +101,47 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="border-b border-slate-800 bg-slate-950 text-white">
-          <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.88fr_1.12fr] lg:py-12">
+        <section className="border-b border-slate-200">
+          <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 sm:px-6 md:py-12 lg:grid-cols-[0.86fr_1.14fr]">
             <div className="max-w-xl">
-              <Badge tone="blue">CV ATS dan portfolio builder</Badge>
-              <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-                Buat CV profesional tanpa merasa tersesat di form panjang.
+              <Badge tone="teal">CV ATS + portfolio workspace</Badge>
+              <h1 className="mt-4 text-4xl font-black leading-[1.05] tracking-tight text-slate-950 sm:text-5xl">
+                Buat CV siap kirim tanpa alur yang membingungkan.
               </h1>
-              <p className="mt-4 text-sm leading-7 text-white/70 sm:text-base">
-                PortoBuilder menggabungkan import CV, template preview hidup, bantuan AI, dan export
-                PDF ke dalam alur kerja yang jelas dari awal sampai siap kirim.
+              <p className="mt-5 text-base leading-8 text-slate-600">
+                PortoBuilder menyatukan import CV, template preview, form bertahap, bantuan AI, dan
+                export PDF dalam workspace yang rapi dari awal sampai final.
               </p>
-              <div className="mt-5 grid gap-3 sm:flex-row md:flex md:items-center">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Button as={Link} to="/app/register" size="lg">
                   Mulai Buat CV
                 </Button>
-                <Button as={Link} to="/app/login" variant="dark" size="lg">
+                <Button as={Link} to="/app/login" variant="secondary" size="lg">
                   Buka Workspace
                 </Button>
               </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="mt-7 grid grid-cols-3 gap-3">
                 {[
-                  ['30+', 'Template dengan preview sample'],
-                  ['ATS', 'Struktur mudah dipindai recruiter'],
-                  ['PDF', 'Preview dan download dari browser'],
+                  ['30+', 'Template'],
+                  ['ATS', 'Struktur'],
+                  ['PDF', 'Export'],
                 ].map(([value, label]) => (
-                  <div
-                    key={label}
-                    className="rounded-xl border border-white/10 bg-white/[0.06] p-3"
-                  >
-                    <div className="text-xl font-black text-white">{value}</div>
-                    <div className="mt-1 text-xs font-semibold leading-relaxed text-white/58">
-                      {label}
-                    </div>
+                  <div key={label} className="rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="text-2xl font-black text-slate-950">{value}</div>
+                    <div className="mt-1 text-xs font-bold text-slate-500">{label}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="relative hidden lg:block">
-              <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-white/[0.08] p-3 shadow-2xl shadow-black/20">
-                <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-950/10">
+                <div className="mb-3 flex items-center justify-between gap-3 px-1">
                   <div>
-                    <div className="text-sm font-extrabold text-white">
+                    <div className="text-sm font-black text-slate-950">
                       {primaryTemplate?.name || 'ATS Classic'}
                     </div>
-                    <div className="text-xs text-white/58">
+                    <div className="text-xs text-slate-500">
                       {primaryTemplate?.category || 'ATS'} preview
                     </div>
                   </div>
@@ -143,53 +151,51 @@ export default function Landing() {
                   template={primaryTemplate}
                   cv={previewCv}
                   compact
-                  scale={0.41}
-                  previewClassName="h-[360px]"
+                  scale={0.34}
+                  previewClassName="h-[300px] sm:h-[360px]"
                 />
               </div>
             </div>
           </div>
         </section>
 
-        <section id="cara-kerja" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-12">
-          <div className="max-w-2xl">
-            <Badge tone="slate">Alur jelas</Badge>
-            <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
-              Dari CV lama ke versi siap kirim.
-            </h2>
+        <section id="cara-kerja" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <Badge tone="slate">Alur jelas</Badge>
+              <h2 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">
+                Dari draft lama ke dokumen final.
+              </h2>
+            </div>
+            <p className="max-w-md text-sm leading-7 text-slate-600">
+              Setiap langkah punya tujuan yang jelas, jadi pengguna selalu tahu harus lanjut ke
+              mana.
+            </p>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ['Import', 'Upload CV lama atau mulai manual dari form bertahap.'],
-              ['Pilih template', 'Bandingkan desain dari preview sample yang hidup.'],
-              ['Rapikan konten', 'Isi section penting dengan validasi dan auto-save.'],
-              ['Export', 'Preview web, mobile, PDF, lalu download dokumen akhir.'],
-            ].map(([title, desc], index) => (
-              <article
-                key={title}
-                className="rounded-xl border border-blue-100 bg-white/95 p-4 shadow-sm"
-              >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white">
+            {workflow.map(([title, desc], index) => (
+              <article key={title} className="rounded-lg border border-slate-200 bg-white p-5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950 text-sm font-black text-white">
                   {index + 1}
                 </div>
-                <h3 className="mt-5 font-extrabold">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500">{desc}</p>
+                <h3 className="mt-5 font-black">{title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-600">{desc}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section id="template" className="border-y border-blue-100 bg-blue-50/75">
-          <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-12">
+        <section id="template" className="section-band">
+          <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <Badge tone="blue">Template preview</Badge>
-                <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
-                  Pilih desain sebelum mengisi terlalu jauh.
+                <h2 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">
+                  Pilih desain dari hasil yang terlihat nyata.
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
-                  Setiap template bisa membawa sample CV sendiri, sehingga user melihat hasil
-                  realistis sebelum memilih gaya yang cocok.
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                  Preview sample membantu pengguna menilai struktur, kerapian, dan kecocokan gaya
+                  sebelum mulai mengisi form.
                 </p>
               </div>
               <Button as={Link} to="/app/register" variant="secondary">
@@ -213,28 +219,12 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="fitur" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-12">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              [
-                'Form bertahap',
-                'Setiap section punya fokus sendiri, bukan satu halaman panjang yang melelahkan.',
-              ],
-              [
-                'Auto-save draft',
-                'Data tersimpan lokal saat proses edit agar pekerjaan tidak mudah hilang.',
-              ],
-              [
-                'AI fallback',
-                'Backend mendukung provider AI berantai, dengan heuristic saat provider lain tidak aktif.',
-              ],
-            ].map(([title, desc]) => (
-              <article
-                key={title}
-                className="rounded-xl border border-slate-200 bg-white/95 p-5 shadow-sm"
-              >
-                <h2 className="text-lg font-extrabold">{title}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-500">{desc}</p>
+        <section id="fitur" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            {features.map(([title, desc]) => (
+              <article key={title} className="rounded-lg border border-slate-200 bg-white p-5">
+                <h2 className="text-lg font-black">{title}</h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{desc}</p>
               </article>
             ))}
           </div>

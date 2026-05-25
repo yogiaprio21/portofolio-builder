@@ -17,7 +17,7 @@ export default function FormWorkspace({
   onNext,
 }) {
   return (
-    <section className="cv-editor-surface rounded-2xl border border-slate-200 bg-white/95 p-4 text-slate-900 shadow-sm sm:p-5">
+    <section className="cv-editor-surface rounded-lg border border-slate-200 bg-white/95 p-4 text-slate-900 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Badge tone={completion.isComplete ? 'emerald' : 'amber'}>
@@ -28,7 +28,7 @@ export default function FormWorkspace({
             Auto-save aktif. Error hanya muncul saat diperlukan.
           </p>
         </div>
-        <div className="max-w-xs rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-600">
+        <div className="max-w-xs rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-600">
           {completionLabel}
         </div>
       </div>
@@ -65,7 +65,7 @@ export default function FormWorkspace({
       </div>
 
       <div
-        className={`mt-5 transform-gpu rounded-xl border border-slate-200 bg-slate-50 p-4 transition-all duration-300 sm:p-5 ${
+        className={`mt-5 transform-gpu rounded-lg border border-slate-200 bg-slate-50 p-4 transition-all duration-300 sm:p-5 ${
           isAnimating ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100'
         }`}
       >

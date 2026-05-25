@@ -18,8 +18,8 @@ export default function Navbar() {
   const navClass = ({ isActive }) =>
     `inline-flex min-h-10 items-center justify-center rounded-lg px-3 py-2 text-sm font-bold transition ${
       isActive
-        ? 'bg-white text-slate-950 shadow-sm'
-        : 'text-white/72 hover:bg-white/10 hover:text-white'
+        ? 'bg-blue-50 text-blue-700'
+        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
     }`;
 
   const mobileNavClass = ({ isActive }) =>
@@ -41,7 +41,7 @@ export default function Navbar() {
       <button
         type="button"
         onClick={handleLogout}
-        className="min-h-10 rounded-lg px-3 py-2 text-sm font-bold text-red-200 transition hover:bg-red-500/15 hover:text-white"
+        className="min-h-10 rounded-lg px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:text-red-700"
       >
         Logout
       </button>
@@ -50,13 +50,7 @@ export default function Navbar() {
 
   const guestLinks = (
     <>
-      <Button
-        as={Link}
-        to="/app/login"
-        variant="ghostDark"
-        size="sm"
-        onClick={() => setOpen(false)}
-      >
+      <Button as={Link} to="/app/login" variant="ghost" size="sm" onClick={() => setOpen(false)}>
         Masuk
       </Button>
       <Button as={Link} to="/app/register" size="sm" onClick={() => setOpen(false)}>
@@ -67,12 +61,12 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed left-0 top-0 z-40 w-full border-b border-white/10 bg-slate-950/95 shadow-xl shadow-slate-950/10 backdrop-blur-xl">
+      <header className="fixed left-0 top-0 z-40 w-full border-b border-slate-200 bg-white/92 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <BrandLogo
             to={isAuthenticated ? '/app' : '/'}
             markClassName="h-9 w-9"
-            textClassName="text-white"
+            textClassName="text-slate-950"
           />
 
           <nav className="hidden items-center gap-2 md:flex">
@@ -81,7 +75,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white md:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm md:hidden"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-label="Buka navigasi"
@@ -91,7 +85,7 @@ export default function Navbar() {
         </div>
 
         {open && (
-          <div className="border-t border-white/10 bg-slate-950 px-4 py-4 shadow-lg md:hidden">
+          <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-lg md:hidden">
             <nav className="grid gap-2">{isAuthenticated ? authLinks : guestLinks}</nav>
           </div>
         )}

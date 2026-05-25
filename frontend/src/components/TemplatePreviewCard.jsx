@@ -43,15 +43,17 @@ export default function TemplatePreviewCard({
   compact = false,
   previewClassName = 'h-48',
 }) {
+  const interactive = typeof onSelect === 'function';
+  const Wrapper = interactive ? 'button' : 'article';
+
   return (
-    <button
-      type="button"
-      onClick={() => onSelect?.(template)}
+    <Wrapper
+      {...(interactive ? { type: 'button', onClick: () => onSelect(template) } : {})}
       className={[
         'group w-full text-left transition duration-200',
         compact
-          ? 'rounded-xl border bg-white p-2 shadow-sm hover:-translate-y-0.5 hover:shadow-lg'
-          : 'rounded-xl border bg-white p-3 shadow-sm hover:-translate-y-0.5 hover:shadow-lg',
+          ? 'rounded-lg border bg-white p-2 shadow-sm hover:-translate-y-0.5 hover:shadow-lg'
+          : 'rounded-lg border bg-white p-3 shadow-sm hover:-translate-y-0.5 hover:shadow-lg',
         selected
           ? 'border-blue-500 ring-2 ring-blue-200'
           : 'border-slate-200 hover:border-blue-200',
@@ -82,7 +84,9 @@ export default function TemplatePreviewCard({
         }
       >
         <div className="min-w-0">
-          <div className="truncate text-sm font-extrabold text-slate-950">{template.name}</div>
+          <div className="truncate text-sm font-black text-slate-950">
+            {template.name || 'Template CV'}
+          </div>
           <div className="mt-1 truncate text-xs text-slate-500">
             {template.category || 'Template'} · {template.metadata?.roleTarget || 'General'}
           </div>
@@ -94,6 +98,6 @@ export default function TemplatePreviewCard({
           {template.metadata.recommendedFor}
         </p>
       )}
-    </button>
+    </Wrapper>
   );
 }

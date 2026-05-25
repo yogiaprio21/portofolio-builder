@@ -28,7 +28,7 @@ function verificationLoginMessage(data) {
     return `Email belum diverifikasi. Tunggu ${data.retry_after || 60} detik sebelum kirim ulang.`;
   }
   if (data?.email_delivery === 'failed') {
-    return 'Email belum diverifikasi, dan pengiriman email belum berhasil. Cek konfigurasi SMTP lalu kirim ulang.';
+    return 'Email belum diverifikasi, dan pengiriman email belum berhasil. Cek konfigurasi email provider lalu kirim ulang.';
   }
   return authErrorMessage(data?.error, data?.status);
 }
@@ -89,7 +89,7 @@ export default function Login() {
         );
       } else if (data.code === 'EMAIL_DELIVERY_FAILED' || data.email_delivery === 'failed') {
         setError(
-          'Email verifikasi belum bisa dikirim. Pastikan SMTP Gmail di Render benar, lalu coba lagi.',
+          'Email verifikasi belum bisa dikirim. Pastikan provider email di Render benar, lalu coba lagi.',
         );
       } else {
         setError(data.error);
@@ -137,7 +137,7 @@ export default function Login() {
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             placeholder="nama@email.com"
-            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+            className="field-control"
           />
         </FormField>
 
@@ -149,7 +149,7 @@ export default function Login() {
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
             placeholder="Masukkan password"
-            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+            className="field-control"
           />
         </FormField>
 

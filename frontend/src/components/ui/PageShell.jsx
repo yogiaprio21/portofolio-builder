@@ -8,26 +8,24 @@ export default function PageShell({
 }) {
   return (
     <div
-      className={`mx-auto w-full max-w-6xl px-4 py-6 text-slate-950 sm:px-6 md:py-8 ${className}`}
+      className={`mx-auto w-full max-w-6xl px-4 py-5 text-slate-950 sm:px-6 md:py-7 ${className}`}
     >
       {(title || actions) && (
-        <div className="mb-5 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-950/10">
-          <div className="border-b border-white/10 bg-blue-600/10 px-5 py-3">
-            {eyebrow && (
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-200">
-                {eyebrow}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
+        <div className="mb-5 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              {eyebrow && (
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
+                  {eyebrow}
+                </p>
+              )}
               {title && (
-                <h1 className="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
+                <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
                   {title}
                 </h1>
               )}
               {description && (
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/68">
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
                   {description}
                 </p>
               )}

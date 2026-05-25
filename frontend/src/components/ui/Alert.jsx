@@ -7,14 +7,27 @@ const tones = {
 };
 
 export default function Alert({ tone = 'info', title, children, className = '' }) {
+  const icon = {
+    info: 'i',
+    success: '✓',
+    warning: '!',
+    error: '!',
+    dark: 'i',
+  }[tone];
+
   return (
     <div
-      className={`rounded-xl border p-4 text-sm leading-relaxed ${tones[tone] || tones.info} ${className}`}
+      className={`flex gap-3 rounded-lg border p-4 text-sm leading-relaxed ${tones[tone] || tones.info} ${className}`}
       role={tone === 'error' ? 'alert' : 'status'}
       aria-live="polite"
     >
-      {title && <div className="mb-1 font-semibold">{title}</div>}
-      <div>{children}</div>
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/70 text-xs font-black shadow-sm">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        {title && <div className="mb-1 font-bold">{title}</div>}
+        <div>{children}</div>
+      </div>
     </div>
   );
 }

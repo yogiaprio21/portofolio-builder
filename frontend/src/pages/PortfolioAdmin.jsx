@@ -108,10 +108,10 @@ export default function PortfolioAdmin() {
       description="Gunakan halaman ini untuk menambahkan karya atau project terpisah dari CV utama Anda."
       className="pb-24"
     >
-      <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
-        <SectionCard tone="light" className="space-y-4 p-6">
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <SectionCard tone="light" className="space-y-5 p-5 sm:p-6">
           <div>
-            <label htmlFor="portfolio-title" className="block text-sm">
+            <label htmlFor="portfolio-title" className="block text-sm font-bold text-slate-700">
               Judul
             </label>
             <input
@@ -119,12 +119,15 @@ export default function PortfolioAdmin() {
               value={form.title}
               onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
               aria-invalid={Boolean(errors.title)}
-              className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
+              className="field-control mt-1"
             />
             {errors.title && <div className="mt-1 text-sm text-red-600">{errors.title}</div>}
           </div>
           <div>
-            <label htmlFor="portfolio-description" className="block text-sm">
+            <label
+              htmlFor="portfolio-description"
+              className="block text-sm font-bold text-slate-700"
+            >
               Deskripsi
             </label>
             <textarea
@@ -133,21 +136,24 @@ export default function PortfolioAdmin() {
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
               aria-invalid={Boolean(errors.description)}
               rows={6}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
+              className="field-control textarea-control mt-1"
             />
             {errors.description && (
               <div className="mt-1 text-sm text-red-600">{errors.description}</div>
             )}
           </div>
           <div>
-            <label htmlFor="portfolio-project-url" className="block text-sm">
+            <label
+              htmlFor="portfolio-project-url"
+              className="block text-sm font-bold text-slate-700"
+            >
               Project URL
             </label>
             <input
               id="portfolio-project-url"
               value={form.project_url}
               onChange={(e) => setForm((p) => ({ ...p, project_url: e.target.value }))}
-              className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
+              className="field-control mt-1"
               placeholder="https://..."
             />
           </div>
@@ -161,8 +167,8 @@ export default function PortfolioAdmin() {
           </div>
           {formError && <Alert tone="error">{formError}</Alert>}
         </SectionCard>
-        <SectionCard tone="light" className="space-y-4 p-6">
-          <label htmlFor="portfolio-image" className="block text-sm">
+        <SectionCard tone="light" className="space-y-4 p-5 sm:p-6">
+          <label htmlFor="portfolio-image" className="block text-sm font-bold text-slate-700">
             Gambar
           </label>
           <input
@@ -179,14 +185,14 @@ export default function PortfolioAdmin() {
             />
           )}
           <div>
-            <label htmlFor="portfolio-image-url" className="block text-sm">
+            <label htmlFor="portfolio-image-url" className="block text-sm font-bold text-slate-700">
               Atau URL Gambar
             </label>
             <input
               id="portfolio-image-url"
               value={form.image_url}
               onChange={(e) => setForm((p) => ({ ...p, image_url: e.target.value }))}
-              className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2"
+              className="field-control mt-1"
               placeholder="https://..."
             />
           </div>

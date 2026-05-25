@@ -117,7 +117,7 @@ export default function Register() {
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             placeholder="nama@email.com"
-            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+            className="field-control"
           />
         </FormField>
 
@@ -133,7 +133,7 @@ export default function Register() {
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="new-password"
             placeholder="Buat password"
-            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+            className="field-control"
           />
           <div className="mt-3 flex items-center gap-3">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
@@ -164,7 +164,7 @@ export default function Register() {
             onChange={(event) => setConfirm(event.target.value)}
             autoComplete="new-password"
             placeholder="Ulangi password"
-            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+            className="field-control"
           />
         </FormField>
 

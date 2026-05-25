@@ -78,19 +78,19 @@ export default function Preview() {
 
   if (!portfolio) {
     return (
-      <div className="flex min-h-[calc(100vh-68px)] flex-col items-center bg-slate-100 p-4 sm:p-8">
+      <div className="flex min-h-[calc(100vh-68px)] flex-col items-center p-4 sm:p-8">
         <div className="w-full max-w-5xl">
           {error && (
             <Alert tone="error" className="mb-6">
               {error}
             </Alert>
           )}
-          <div className="flex justify-between items-center mb-6 animate-pulse">
-            <div className="h-8 w-40 bg-slate-200 rounded" />
-            <div className="h-10 w-32 bg-slate-200 rounded" />
+          <div className="mb-6 flex animate-pulse items-center justify-between">
+            <div className="h-8 w-40 rounded bg-slate-200" />
+            <div className="h-10 w-32 rounded bg-slate-200" />
           </div>
-          <div className="bg-white rounded-[12px] shadow-[0_0_35px_rgba(0,0,0,0.12)] p-10 w-full border border-gray-200 animate-pulse">
-            <div className="h-6 w-48 bg-slate-200 rounded mb-4" />
+          <div className="w-full animate-pulse rounded-lg border border-slate-200 bg-white p-10 shadow-xl">
+            <div className="mb-4 h-6 w-48 rounded bg-slate-200" />
             <div className="space-y-2">
               <div className="h-4 bg-slate-200 rounded" />
               <div className="h-4 bg-slate-200 rounded" />
@@ -107,8 +107,8 @@ export default function Preview() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-68px)] bg-slate-100 p-4 sm:p-8">
-      <div className="sticky top-[76px] z-20 mx-auto mb-6 flex w-full max-w-5xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur print:hidden sm:flex-row sm:items-center sm:justify-between">
+    <div className="min-h-[calc(100vh-68px)] p-4 sm:p-8">
+      <div className="sticky top-[76px] z-20 mx-auto mb-6 flex w-full max-w-5xl flex-col gap-3 rounded-lg border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur print:hidden sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           <Button as={Link} to={`/app/create/${id}`} variant="light" size="sm">
             Edit
@@ -128,20 +128,7 @@ export default function Preview() {
           ))}
         </div>
         <Button onClick={downloadPDF} disabled={pdfLoading} className="w-full sm:w-auto">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4"
-            />
-          </svg>
+          <span aria-hidden="true">↓</span>
           {pdfLoading ? 'Membuat PDF...' : 'Download PDF'}
         </Button>
       </div>
@@ -152,12 +139,12 @@ export default function Preview() {
       )}
 
       <div
-        className={`mx-auto w-full rounded-xl bg-white shadow-[0_0_35px_rgba(0,0,0,0.12)] transition-all ${
+        className={`mx-auto w-full rounded-lg bg-white shadow-[0_0_35px_rgba(15,23,42,0.12)] transition-all ${
           previewMode === 'pdf' ? 'p-0 border-0 shadow-none' : 'p-10 border border-gray-200'
         } ${previewWidth}`}
         style={{ minHeight: '1123px' }}
       >
-        <div ref={previewRef} className="w-full h-full bg-white relative">
+        <div ref={previewRef} className="relative h-full w-full bg-white">
           <Suspense
             fallback={
               <div className="h-[1123px] flex items-center justify-center text-slate-500">

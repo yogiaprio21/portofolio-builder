@@ -106,14 +106,14 @@ export default function PortfolioView() {
     >
       <div
         ref={containerRef}
-        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
       >
         {pdfError && <Alert tone="error">{pdfError}</Alert>}
         {item.image_url || item.imageUrl ? (
           <img
             alt={item.title}
             src={item.image_url || item.imageUrl}
-            className="w-full max-w-2xl rounded-lg border border-slate-200"
+            className="w-full max-w-3xl rounded-lg border border-slate-200 object-cover"
           />
         ) : null}
         <p className="max-w-3xl leading-relaxed text-slate-600">{item.description}</p>

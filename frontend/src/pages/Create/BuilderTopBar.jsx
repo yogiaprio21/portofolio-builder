@@ -11,10 +11,10 @@ export default function BuilderTopBar({
   onSubmit,
 }) {
   return (
-    <header className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-950/10">
+    <header className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-950/10">
       <div className="grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
         <div className="min-w-0">
-          <Badge tone="blue">CV Builder</Badge>
+          <Badge tone="dark">CV Builder</Badge>
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Buat CV</h1>
             <span className="pb-1 text-sm font-semibold text-white/58">{activeStepLabel}</span>
@@ -24,7 +24,7 @@ export default function BuilderTopBar({
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-[auto_auto] sm:items-center">
-          <div className="rounded-xl border border-white/10 bg-white/[0.07] px-4 py-3">
+          <div className="rounded-lg border border-white/10 bg-white/[0.07] px-4 py-3">
             <div className="flex items-center justify-between gap-4">
               <span className="text-xs font-bold uppercase tracking-[0.12em] text-blue-200">
                 Progress

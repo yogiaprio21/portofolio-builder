@@ -96,12 +96,12 @@ export default function Home() {
       className="space-y-6 pb-24"
     >
       <section className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <SectionCard tone="tint" className="overflow-hidden">
+        <SectionCard tone="light" className="overflow-hidden">
           <div className="grid gap-5 p-5 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <Badge tone="blue">Next best action</Badge>
-              <h2 className="mt-4 text-2xl font-black tracking-tight">
-                Mulai dari langkah paling cepat.
+              <Badge tone="teal">Rekomendasi langkah</Badge>
+              <h2 className="mt-4 text-2xl font-black tracking-tight text-slate-950">
+                Pilih jalur paling cepat untuk CV Anda.
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
                 Upload CV lama untuk mengambil data, pilih template dengan preview sample, lalu
@@ -126,14 +126,14 @@ export default function Home() {
           </div>
         </SectionCard>
 
-        <SectionCard tone="dark" className="p-5">
-          <p className="text-sm font-semibold text-white/55">Masuk sebagai</p>
-          <div className="mt-2 break-all text-lg font-bold">{user?.email}</div>
-          <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.05] p-4">
-            <div className="text-xs font-bold uppercase tracking-[0.12em] text-blue-200">
-              Status
+        <SectionCard tone="light" className="p-5">
+          <p className="text-sm font-semibold text-slate-500">Masuk sebagai</p>
+          <div className="mt-2 break-all text-lg font-black">{user?.email}</div>
+          <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
+            <div className="text-xs font-black uppercase tracking-[0.12em] text-emerald-700">
+              Session aktif
             </div>
-            <div className="mt-2 text-sm leading-relaxed text-white/65">
+            <div className="mt-2 text-sm leading-relaxed text-emerald-900/75">
               Session aktif. Semua aksi penting tetap divalidasi backend.
             </div>
           </div>
@@ -163,9 +163,9 @@ export default function Home() {
             ].map(([title, desc], index) => (
               <div
                 key={title}
-                className="flex gap-4 rounded-xl border border-blue-100 bg-blue-50 p-4"
+                className="flex gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-950 text-sm font-black text-white">
                   {index + 1}
                 </span>
                 <div>
@@ -217,7 +217,7 @@ export default function Home() {
                 return (
                   <article
                     key={item.id}
-                    className="rounded-xl border border-slate-200 bg-white/95 p-4 shadow-sm"
+                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md"
                   >
                     <div className="text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
                       {formatDate(item.createdAt)}
