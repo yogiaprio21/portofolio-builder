@@ -1,4 +1,4 @@
-export default function SectionCard({ children, className = '', tone = 'dark' }) {
+export default function SectionCard({ children, className = '', tone = 'light' }) {
   const toneClass =
     tone === 'light'
       ? 'border-slate-200 bg-white text-slate-900'

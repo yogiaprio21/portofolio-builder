@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getTemplates } from '../api';
 import Footer from '../components/Footer';
 import BrandLogo from '../components/BrandLogo.jsx';
 import Button from '../components/ui/Button.jsx';
 import Badge from '../components/ui/Badge.jsx';
 import TemplatePreviewCard from '../components/TemplatePreviewCard.jsx';
-
-const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const fallbackCv = {
   personal: {
@@ -90,18 +88,18 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="overflow-hidden border-b border-slate-200 bg-slate-50">
-          <div className="mx-auto grid min-h-[calc(100vh-64px)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+        <section className="border-b border-slate-200 bg-slate-50">
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 md:py-14 lg:min-h-[calc(100vh-64px)] lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
             <div className="max-w-2xl">
               <Badge tone="blue">CV ATS dan portfolio builder</Badge>
-              <h1 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              <h1 className="mt-5 text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
                 Buat CV profesional tanpa merasa tersesat di form panjang.
               </h1>
-              <p className="mt-6 text-lg leading-8 text-slate-600">
+              <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
                 PortoBuilder menggabungkan import CV, template preview hidup, bantuan AI, dan export
                 PDF ke dalam alur kerja yang jelas dari awal sampai siap kirim.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 grid gap-3 sm:flex-row md:flex md:items-center">
                 <Button as={Link} to="/app/register" size="lg">
                   Mulai Buat CV
                 </Button>
@@ -109,7 +107,7 @@ export default function Landing() {
                   Buka Workspace
                 </Button>
               </div>
-              <div className="mt-10 grid gap-3 sm:grid-cols-3">
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
                   ['30+', 'Template dengan preview sample'],
                   ['ATS', 'Struktur mudah dipindai recruiter'],
@@ -125,7 +123,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative hidden lg:block">
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
@@ -138,28 +136,26 @@ export default function Landing() {
                   </div>
                   <Badge tone="emerald">ATS-safe</Badge>
                 </div>
-                <div className="max-h-[660px] overflow-hidden rounded-xl border border-slate-200 bg-white p-6">
-                  <Suspense fallback={<div className="h-[520px] animate-pulse bg-slate-100" />}>
-                    <TemplateRenderer
-                      data={{ cv: previewCv, theme: {} }}
-                      template={primaryTemplate || {}}
-                      sectionsOrder={primaryTemplate?.sections || []}
-                    />
-                  </Suspense>
-                </div>
+                <TemplatePreviewCard
+                  template={primaryTemplate}
+                  cv={previewCv}
+                  compact
+                  scale={0.58}
+                  previewClassName="h-[520px]"
+                />
               </div>
             </div>
           </div>
         </section>
 
-        <section id="cara-kerja" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <section id="cara-kerja" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
           <div className="max-w-2xl">
             <Badge tone="slate">Alur jelas</Badge>
-            <h2 className="mt-4 text-3xl font-black tracking-tight">
+            <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
               Dari CV lama ke versi siap kirim.
             </h2>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ['Import', 'Upload CV lama atau mulai manual dari form bertahap.'],
               ['Pilih template', 'Bandingkan desain dari preview sample yang hidup.'],
@@ -181,11 +177,11 @@ export default function Landing() {
         </section>
 
         <section id="template" className="border-y border-slate-200 bg-slate-50">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <Badge tone="blue">Template preview</Badge>
-                <h2 className="mt-4 text-3xl font-black tracking-tight">
+                <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
                   Pilih desain sebelum mengisi terlalu jauh.
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
@@ -197,7 +193,7 @@ export default function Landing() {
                 Coba Template
               </Button>
             </div>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {(showcasedTemplates.length ? showcasedTemplates : [primaryTemplate]).map(
                 (template) => (
                   <TemplatePreviewCard
@@ -213,8 +209,8 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="fitur" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="grid gap-5 md:grid-cols-3">
+        <section id="fitur" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
               [
                 'Form bertahap',

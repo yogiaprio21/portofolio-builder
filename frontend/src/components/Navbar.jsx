@@ -16,8 +16,17 @@ export default function Navbar() {
   };
 
   const navClass = ({ isActive }) =>
-    `min-h-10 px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
-      isActive ? 'bg-white/12 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
+    `inline-flex min-h-10 items-center justify-center rounded-lg px-3 py-2 text-sm font-bold transition ${
+      isActive
+        ? 'bg-blue-50 text-blue-700'
+        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+    }`;
+
+  const mobileNavClass = ({ isActive }) =>
+    `flex min-h-12 flex-col items-center justify-center rounded-xl px-2 text-[11px] font-bold transition ${
+      isActive
+        ? 'bg-blue-50 text-blue-700'
+        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-950'
     }`;
 
   const authLinks = (
@@ -34,7 +43,7 @@ export default function Navbar() {
       <button
         type="button"
         onClick={handleLogout}
-        className="min-h-10 rounded-lg px-3 py-2 text-sm font-medium text-red-300 transition hover:bg-red-400/10 hover:text-red-200"
+        className="min-h-10 rounded-lg px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
       >
         Logout
       </button>
@@ -43,13 +52,7 @@ export default function Navbar() {
 
   const guestLinks = (
     <>
-      <Button
-        as={Link}
-        to="/app/login"
-        variant="ghostDark"
-        size="sm"
-        onClick={() => setOpen(false)}
-      >
+      <Button as={Link} to="/app/login" variant="ghost" size="sm" onClick={() => setOpen(false)}>
         Masuk
       </Button>
       <Button as={Link} to="/app/register" size="sm" onClick={() => setOpen(false)}>
@@ -60,9 +63,9 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed left-0 top-0 z-40 w-full border-b border-white/10 bg-slate-950/90 shadow-lg backdrop-blur-xl">
+      <header className="fixed left-0 top-0 z-40 w-full border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <BrandLogo to={isAuthenticated ? '/app' : '/'} />
+          <BrandLogo to={isAuthenticated ? '/app' : '/'} markClassName="h-9 w-9" />
 
           <nav className="hidden items-center gap-2 md:flex">
             {isAuthenticated ? authLinks : guestLinks}
@@ -70,31 +73,31 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white md:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-900 md:hidden"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-label="Buka navigasi"
           >
-            <span className="text-xl">{open ? '×' : '☰'}</span>
+            <span className="text-xl leading-none">{open ? '×' : '☰'}</span>
           </button>
         </div>
 
         {open && (
-          <div className="border-t border-white/10 bg-slate-950 px-4 py-4 md:hidden">
+          <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-lg md:hidden">
             <nav className="grid gap-2">{isAuthenticated ? authLinks : guestLinks}</nav>
           </div>
         )}
       </header>
 
       {isAuthenticated && (
-        <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-3 border-t border-white/10 bg-slate-950/95 px-2 py-2 text-xs text-white shadow-2xl backdrop-blur-xl md:hidden">
-          <NavLink to="/app" end className={navClass}>
+        <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-3 border-t border-slate-200 bg-white/95 px-2 py-2 text-slate-700 shadow-2xl backdrop-blur-xl md:hidden">
+          <NavLink to="/app" end className={mobileNavClass}>
             Dashboard
           </NavLink>
-          <NavLink to="/app/portfolios" className={navClass}>
+          <NavLink to="/app/portfolios" className={mobileNavClass}>
             Koleksi
           </NavLink>
-          <NavLink to="/app/create" className={navClass}>
+          <NavLink to="/app/create" className={mobileNavClass}>
             Buat CV
           </NavLink>
         </nav>

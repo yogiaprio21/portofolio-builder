@@ -4,9 +4,8 @@ import BrandLogo from './BrandLogo.jsx';
 export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white pb-24 pt-12 text-slate-950 md:pb-8">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-          {/* Brand & Slogan */}
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="mb-8 flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="text-center md:text-left">
             <BrandLogo
               to="/"
@@ -20,8 +19,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div className="flex gap-6 text-sm font-medium text-slate-500">
+          <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-slate-500">
             <Link to="/app" className="transition-colors hover:text-blue-700">
               Beranda
             </Link>

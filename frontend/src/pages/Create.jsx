@@ -486,10 +486,10 @@ export default function Create() {
 
   const previewWidth =
     previewMode === 'mobile'
-      ? 'max-w-[420px]'
+      ? 'w-full max-w-[420px]'
       : previewMode === 'pdf'
-        ? 'max-w-[794px]'
-        : 'max-w-4xl';
+        ? 'w-full max-w-[794px]'
+        : 'w-full max-w-4xl';
 
   const completion = useMemo(() => {
     const missing = [];
@@ -1064,9 +1064,106 @@ export default function Create() {
   };
 
   return (
-    <div className="min-h-screen p-4 pb-28 pt-8 text-slate-950 sm:p-6 sm:pb-10">
+    <div className="min-h-screen p-4 pb-24 pt-6 text-slate-950 sm:p-6 sm:pb-10">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 xl:grid-cols-[1.05fr_1.95fr]">
-        <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+        <div className="space-y-4 xl:hidden">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Badge tone="blue">Builder</Badge>
+                <h1 className="mt-3 text-2xl font-black tracking-tight">Buat CV</h1>
+                <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                  Isi langkah aktif, lalu lanjutkan. Template dan preview ada di bawah form.
+                </p>
+              </div>
+              <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
+                <div className="text-lg font-black text-blue-700">{progressPercent}%</div>
+                <div className="text-[11px] font-bold text-slate-500">lengkap</div>
+              </div>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-blue-600"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+              {stepperItems.map((step, index) => (
+                <button
+                  key={step.key}
+                  type="button"
+                  onClick={() => setActiveStepIndex(index)}
+                  className={`min-h-9 shrink-0 rounded-full px-3 text-xs font-bold ${
+                    index === activeStepIndex
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-slate-200 bg-white text-slate-600'
+                  }`}
+                >
+                  {index + 1}. {step.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <details className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <summary className="cursor-pointer text-sm font-black text-slate-900">
+              Atur section dan tampilan
+            </summary>
+            <div className="mt-4 grid gap-4">
+              <div>
+                <h4 className="mb-2 text-sm font-black">Urutan Section</h4>
+                <div className="grid gap-2">
+                  {sectionsOrder.map((key) => (
+                    <div
+                      key={key}
+                      draggable
+                      onDragStart={() => handleDragStart(key)}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={() => handleDrop(key)}
+                      className={`cursor-move rounded-lg border px-3 py-2 text-xs font-semibold ${
+                        dragKey === key
+                          ? 'border-blue-500 bg-blue-50 text-blue-900'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      {stepLabels[key] || key}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Warna Aksen
+                  <input
+                    type="color"
+                    value={theme.accentColor}
+                    onChange={(event) =>
+                      setTheme((prev) => ({ ...prev, accentColor: event.target.value }))
+                    }
+                    className="mt-2 h-10 w-full rounded"
+                  />
+                </label>
+                <label className="text-sm font-semibold text-slate-700">
+                  Layout
+                  <select
+                    value={theme.layout}
+                    onChange={(event) =>
+                      setTheme((prev) => ({ ...prev, layout: event.target.value }))
+                    }
+                    className="mt-2 min-h-10 w-full rounded border border-slate-300 bg-white px-3 text-slate-950"
+                  >
+                    <option value="single">Single Column</option>
+                    <option value="sidebar-left">Sidebar Left</option>
+                    <option value="sidebar-right">Sidebar Right</option>
+                    <option value="split">Split</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <aside className="hidden space-y-5 xl:sticky xl:top-24 xl:block xl:self-start">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4">
               <Badge tone="blue">Builder</Badge>
@@ -1203,8 +1300,8 @@ export default function Create() {
           </div>
         </aside>
 
-        <section className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="flex flex-col gap-6">
+          <div className="order-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Badge tone={selectedTemplate ? 'emerald' : 'amber'}>
@@ -1260,7 +1357,7 @@ export default function Create() {
               </div>
             )}
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="order-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 xl:order-2">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
                 <h2 className="text-2xl font-black">Preview langsung</h2>
@@ -1283,15 +1380,17 @@ export default function Create() {
               </Suspense>
             </div>
           </div>
-          <ImportPanel
-            importMessage={importMessage}
-            onFileSelected={handleImportFile}
-            aiMessage={aiMessage}
-            aiLoading={aiLoading}
-            canEnhance={Boolean(lastImportedText)}
-            onEnhance={handleEnhanceWithAI}
-          />
-          <div className="cv-editor-surface space-y-6 rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-sm sm:p-6">
+          <div className="order-2 xl:order-3">
+            <ImportPanel
+              importMessage={importMessage}
+              onFileSelected={handleImportFile}
+              aiMessage={aiMessage}
+              aiLoading={aiLoading}
+              canEnhance={Boolean(lastImportedText)}
+              onEnhance={handleEnhanceWithAI}
+            />
+          </div>
+          <div className="cv-editor-surface order-3 space-y-6 rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-sm sm:p-6 xl:order-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Badge tone={completion.isComplete ? 'emerald' : 'amber'}>
@@ -1364,31 +1463,6 @@ export default function Create() {
             </div>
           </div>
         </section>
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white p-3 shadow-2xl md:hidden">
-        <div className="mb-2 flex items-center justify-between text-xs text-slate-600">
-          <span>{stepLabels[activeStepKey] || activeStepKey}</span>
-          <span>{progressPercent}%</span>
-        </div>
-        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
-          <div
-            className="h-full rounded-full bg-blue-600"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant="light"
-            onClick={handleStepBack}
-            disabled={activeStepIndex === 0}
-          >
-            Kembali
-          </Button>
-          <Button type="button" onClick={handleStepNext}>
-            {activeStepIndex === stepKeys.length - 1 ? 'Simpan' : 'Lanjut'}
-          </Button>
-        </div>
       </div>
     </div>
   );

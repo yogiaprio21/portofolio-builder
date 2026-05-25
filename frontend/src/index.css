@@ -36,28 +36,24 @@ textarea:focus-visible {
 .cv-editor-surface input,
 .cv-editor-surface textarea,
 .cv-editor-surface select {
-  border-radius: 0.75rem !important;
-  border-color: #cbd5e1 !important;
-  background: #ffffff !important;
-  color: #0f172a !important;
+  border-radius: 0.75rem;
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
   box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03);
 }
 
 .cv-editor-surface input:focus,
 .cv-editor-surface textarea:focus,
 .cv-editor-surface select:focus {
-  border-color: #2563eb !important;
+  border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   outline: none;
 }
 
 .cv-editor-surface label {
   font-weight: 650;
-  color: #334155 !important;
-}
-
-.cv-editor-surface button:not([class*='bg-']):not([class*='text-']) {
-  color: #1d4ed8;
+  color: #334155;
 }
 
 .line-clamp-1,
