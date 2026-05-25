@@ -61,7 +61,16 @@ module.exports = {
     provider: process.env.EMAIL_PROVIDER || 'log',
     from: process.env.EMAIL_FROM || 'Portfolio Builder <onboarding@resend.dev>',
     resendApiKey: process.env.RESEND_API_KEY || '',
-    appUrl: process.env.APP_URL || ''
+    appUrl: process.env.APP_URL || '',
+    smtp: {
+      host: process.env.SMTP_HOST || '',
+      port: intFromEnv('SMTP_PORT', 587),
+      secure: boolFromEnv('SMTP_SECURE', false),
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
+      rejectUnauthorized: boolFromEnv('SMTP_REJECT_UNAUTHORIZED', true),
+      ehloName: process.env.SMTP_EHLO_NAME || 'portfolio-builder.local'
+    }
   },
   corsOrigins: csv(process.env.CORS_ORIGIN),
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || '1mb',
@@ -90,4 +99,14 @@ if (storageProvider === 'cloudinary') {
   requireInProduction('CLOUDINARY_CLOUD_NAME');
   requireInProduction('CLOUDINARY_API_KEY');
   requireInProduction('CLOUDINARY_API_SECRET');
+}
+
+if (process.env.EMAIL_PROVIDER === 'resend') {
+  requireInProduction('RESEND_API_KEY');
+}
+
+if (process.env.EMAIL_PROVIDER === 'smtp') {
+  requireInProduction('SMTP_HOST');
+  requireInProduction('SMTP_USER');
+  requireInProduction('SMTP_PASS');
 }

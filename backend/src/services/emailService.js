@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const config = require('../config/env');
 const logger = require('../utils/logger');
+const { sendSmtpMail } = require('./smtpClient');
 
 function escapeHtml(value) {
   return String(value || '')
@@ -50,6 +51,17 @@ async function sendVerificationEmail({ to, verificationUrl, requestId }) {
 
   if (config.email.provider === 'resend') {
     return await sendWithResend({ to, subject, html, text });
+  }
+
+  if (config.email.provider === 'smtp') {
+    return await sendSmtpMail({
+      smtp: config.email.smtp,
+      from: config.email.from,
+      to,
+      subject,
+      html,
+      text
+    });
   }
 
   logger.info('Verification email delivery skipped', {

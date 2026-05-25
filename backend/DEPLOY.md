@@ -59,6 +59,28 @@ Local development uses `EMAIL_PROVIDER=log`, which logs verification links. For 
 - `RESEND_API_KEY=<resend api key>`
 - `EMAIL_FROM=Portfolio Builder <verify@your-domain.com>`
 
+### Gmail SMTP alternative
+
+Gmail SMTP is supported through `EMAIL_PROVIDER=smtp`. This is useful for testing or small early deployments, but transactional providers such as Resend/Brevo are still better for production deliverability.
+
+For Gmail:
+
+- Enable 2-Step Verification on the Google account.
+- Create a Google App Password.
+- Use the App Password as `SMTP_PASS`; do not use your normal Gmail password.
+
+Render environment variables:
+
+- `EMAIL_PROVIDER=smtp`
+- `EMAIL_FROM=Portfolio Builder <yourgmail@gmail.com>`
+- `SMTP_HOST=smtp.gmail.com`
+- `SMTP_PORT=587`
+- `SMTP_SECURE=false`
+- `SMTP_USER=yourgmail@gmail.com`
+- `SMTP_PASS=<16-character Google app password>`
+- `SMTP_REJECT_UNAUTHORIZED=true`
+- `SMTP_EHLO_NAME=portfolio-builder.local`
+
 ## Important follow-up
 
 Schema changes now run through `src/db/migrations`. Add future schema updates as new numbered migration files and run `npm run migrate` during deploy/pre-deploy when needed.
