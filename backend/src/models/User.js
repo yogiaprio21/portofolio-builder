@@ -7,7 +7,8 @@ const User = sequelize.define('User', {
   role: { type: DataTypes.STRING, allowNull: false, defaultValue: 'user' },
   emailVerified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false, field: 'email_verified' },
   verificationToken: { type: DataTypes.STRING, allowNull: true, field: 'verification_token' },
-  verificationExpires: { type: DataTypes.DATE, allowNull: true, field: 'verification_expires' }
+  verificationExpires: { type: DataTypes.DATE, allowNull: true, field: 'verification_expires' },
+  verificationSentAt: { type: DataTypes.DATE, allowNull: true, field: 'verification_sent_at' }
 }, {
   tableName: 'users',
   timestamps: true

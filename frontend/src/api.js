@@ -1,19 +1,86 @@
 import { env } from './shared/config/env';
 
+const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN';
+const USER_KEY = 'USER';
+let refreshPromise = null;
+
 function authHeaders(token) {
   const headers = { 'Content-Type': 'application/json' };
   const t =
-    token || (typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '');
+    token || (typeof window !== 'undefined' ? window.localStorage.getItem(ACCESS_TOKEN_KEY) : '');
   if (t) headers['Authorization'] = `Bearer ${t}`;
   return headers;
 }
 
-async function fetchJson(url, options) {
-  const res = await fetch(url, options);
+function persistSession(data) {
+  if (typeof window === 'undefined' || !data) return;
+  if (data.token) window.localStorage.setItem(ACCESS_TOKEN_KEY, data.token);
+  if (data.user) window.localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+}
+
+export function clearSession() {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  window.localStorage.removeItem(USER_KEY);
+}
+
+export function getStoredUser() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getStoredToken() {
+  if (typeof window === 'undefined') return '';
+  return window.localStorage.getItem(ACCESS_TOKEN_KEY) || '';
+}
+
+async function rawFetchJson(url, options = {}) {
+  const res = await fetch(url, { credentials: 'include', ...options });
   const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+async function refreshSession() {
+  if (!refreshPromise) {
+    refreshPromise = rawFetchJson(`${env.apiBase}/auth/refresh`, { method: 'POST' })
+      .then(({ res, data }) => {
+        if (!res.ok) {
+          clearSession();
+          return null;
+        }
+        persistSession(data);
+        return data;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+async function fetchJson(url, options = {}, { retryAuth = true } = {}) {
+  let { res, data } = await rawFetchJson(url, options);
+  if (res.status === 401 && retryAuth) {
+    const refreshed = await refreshSession();
+    if (refreshed?.token) {
+      const nextOptions = { ...options };
+      nextOptions.headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${refreshed.token}`,
+      };
+      ({ res, data } = await rawFetchJson(url, nextOptions));
+    }
+  }
   if (!res.ok) {
+    if (res.status === 401) clearSession();
     return { error: data.error || 'Request failed', status: res.status };
   }
+  persistSession(data);
   return data;
 }
 
@@ -52,7 +119,7 @@ export async function login(payload) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-  });
+  }, { retryAuth: false });
 }
 
 export async function register(payload) {
@@ -61,6 +128,29 @@ export async function register(payload) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
+
+export async function logout() {
+  const data = await fetchJson(`${env.apiBase}/auth/logout`, {
+    method: 'POST',
+    headers: authHeaders(),
+  }, { retryAuth: false });
+  clearSession();
+  return data;
+}
+
+export async function getMe() {
+  return await fetchJson(`${env.apiBase}/auth/me`, {
+    headers: authHeaders(),
+  });
+}
+
+export async function resendVerification(payload) {
+  return await fetchJson(`${env.apiBase}/auth/resend-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }, { retryAuth: false });
 }
 
 export async function verifyEmail(token) {
@@ -124,12 +214,14 @@ export async function uploadImage(file) {
   form.append('image', file);
   return await fetchJson(`${env.apiBase}/upload/image`, {
     method: 'POST',
+    headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : undefined,
     body: form,
   });
 }
 
-export async function listMyPortfolioItems({ limit, offset } = {}) {
+export async function listMyPortfolioItems({ q, limit, offset } = {}) {
   const url = new URL(`${env.apiBase}/api/my/portfolios`);
+  if (q) url.searchParams.set('q', q);
   if (limit != null) url.searchParams.set('limit', String(limit));
   if (offset != null) url.searchParams.set('offset', String(offset));
   return await fetchJson(url, { headers: authHeaders() });

@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
+const config = require('./env');
 
-const databaseUrl = process.env.DATABASE_URL || 'sqlite:./database.sqlite';
+const databaseUrl = config.databaseUrl;
 const isPostgres = databaseUrl.startsWith('postgres');
 const sequelize = new Sequelize(databaseUrl, {
   logging: false,

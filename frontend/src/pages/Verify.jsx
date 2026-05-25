@@ -23,10 +23,21 @@ export default function Verify() {
 
   return (
     <div className="container mx-auto px-6 pt-8 pb-24 text-white max-w-md">
-      <h1 className="text-2xl font-bold mb-6">Verifikasi Email</h1>
-      {status === 'pending' && <div>Memverifikasi…</div>}
-      {status === 'missing' && <div>Token tidak ditemukan</div>}
-      {status === 'error' && <div>Verifikasi gagal</div>}
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+        <h1 className="text-2xl font-bold mb-6">Verifikasi Email</h1>
+        {status === 'pending' && <div>Memverifikasi email Anda...</div>}
+        {status === 'missing' && <div className="text-yellow-300">Token tidak ditemukan.</div>}
+        {status === 'error' && (
+          <div className="space-y-4">
+            <div className="text-red-300">Verifikasi gagal atau token sudah kedaluwarsa.</div>
+            <button
+              onClick={() => navigate('/app/login')}
+              className="px-4 py-2 rounded-lg bg-blue-600"
+            >
+              Kembali ke Login
+            </button>
+          </div>
+        )}
       {status === 'ok' && (
         <div>
           <div className="mb-4">Verifikasi berhasil. Silakan login.</div>
@@ -35,6 +46,7 @@ export default function Verify() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

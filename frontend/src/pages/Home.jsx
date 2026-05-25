@@ -1,210 +1,167 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { listMyPortfolioItems } from '../api';
+import { useAuth } from '../auth/useAuth.js';
 
-const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
+function formatDate(value) {
+  if (!value) return 'Belum tersedia';
+  try {
+    return new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(value));
+  } catch {
+    return 'Belum tersedia';
+  }
+}
 
 export default function Home() {
-  const navigate = useNavigate();
-  const [latestCv, setLatestCv] = useState(null);
+  const { user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
-    async function fetchLatest() {
-      const token =
-        typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
-      if (!token) {
-        setLoading(false);
-        return;
+    let active = true;
+    async function load() {
+      setLoading(true);
+      const data = await listMyPortfolioItems({ limit: 4, offset: 0 });
+      if (!active) return;
+      if (data?.error) {
+        setNotice(data.error);
+        setItems([]);
+        setTotal(0);
+      } else {
+        const rows = Array.isArray(data) ? data : data.items || [];
+        setItems(rows);
+        setTotal(Number.isInteger(data?.total) ? data.total : rows.length);
+        setNotice('');
       }
-      try {
-        const res = await listMyPortfolioItems({ limit: 1 });
-        if (res.items && res.items.length > 0) {
-          setLatestCv(res.items[0]);
-        } else if (Array.isArray(res) && res.length > 0) {
-          setLatestCv(res[0]);
-        }
-      } catch (err) {
-        console.error('Failed to fetch latest CV for preview', err);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-    fetchLatest();
+    load();
+    return () => {
+      active = false;
+    };
   }, []);
 
+  const latest = items[0];
+  const stats = useMemo(
+    () => [
+      { label: 'Total CV', value: total },
+      { label: 'Terakhir dibuat', value: latest ? formatDate(latest.createdAt) : '-' },
+      { label: 'Status akun', value: user?.email ? 'Aktif' : '-' },
+    ],
+    [latest, total, user],
+  );
+
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-[calc(100vh-6rem)]">
-      <main className="pt-8 container mx-auto px-6 pb-24">
-        {/* HERO SECTION */}
-        <section className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* LEFT SECTION */}
-          <div className="space-y-8 text-center lg:text-left">
-            <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-              Karier Cemerlang Dimulai dari
-              <span className="block mt-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
-                Portofolio Cerdas.
-              </span>
+    <div className="min-h-[calc(100vh-76px)] bg-slate-950 text-white">
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+        <section className="grid lg:grid-cols-[1.4fr_0.8fr] gap-6 items-stretch">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+            <p className="text-sm text-blue-300 mb-2">Dashboard</p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Kelola CV Anda dengan lebih rapi.
             </h1>
-
-            <p className="text-gray-300 text-xl max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Platform revolusioner untuk membangun CV dan Portofolio berstandar industri secara
-              otomatis. Tingkatkan peluang Anda direkrut hingga 300%.
+            <p className="mt-3 max-w-2xl text-white/65">
+              Buat, edit, preview, dan ekspor CV dari satu tempat. Data tersimpan di akun Anda dan
+              bisa dilanjutkan kapan saja.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 to="/app/create"
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition-all rounded-xl text-lg font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-1"
+                className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold"
               >
-                Buat CV Sekarang
+                Buat CV Baru
               </Link>
-              <button
-                onClick={() => navigate('/app/portfolios')}
-                className="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 transition-all rounded-xl text-lg font-bold backdrop-blur-sm"
+              <Link
+                to="/app/portfolios"
+                className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-semibold"
               >
                 Lihat Koleksi
-              </button>
+              </Link>
             </div>
           </div>
-
-          {/* RIGHT SECTION: PREVIEW CARD */}
-          <div className="relative w-full max-w-md mx-auto lg:max-w-none">
-            {/* Glow Effect Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-3xl rounded-full transform scale-90"></div>
-
-            <div className="relative rounded-2xl shadow-2xl bg-white/5 backdrop-blur-xl border border-white/20 p-4 lg:p-6 transform hover:scale-[1.02] hover:-translate-y-2 transition-all duration-500 group">
-              {/* Browser-like Header */}
-              <div className="flex items-center gap-2 mb-4 px-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                <div className="ml-4 text-xs text-white/40 font-mono tracking-widest uppercase">
-                  Preview Mode
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+            <p className="text-sm text-white/55">Masuk sebagai</p>
+            <div className="mt-2 text-lg font-semibold break-all">{user?.email}</div>
+            <div className="mt-6 grid gap-3">
+              {stats.map((stat) => (
+                <div key={stat.label} className="rounded-xl bg-white/[0.04] p-4">
+                  <div className="text-xs text-white/50">{stat.label}</div>
+                  <div className="mt-1 text-xl font-bold">{stat.value}</div>
                 </div>
-              </div>
-
-              {/* Live Preview Container (CSS SCALED) */}
-              <div className="h-[400px] lg:h-[500px] w-full rounded-xl overflow-hidden bg-white relative">
-                {loading ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                  </div>
-                ) : latestCv ? (
-                  // REAL CV PREVIEW
-                  <div
-                    className="absolute top-0 left-0 w-[800px] h-[1131px] origin-top-left"
-                    style={{ transform: 'scale(0.40) lg:scale(0.50)' }}
-                  >
-                    {/* We use inline styles for dynamic scaling based on parent container logic loosely, but CSS transforms are tricky responsive-wise. 
-                        Let's force an exact scale for simplicity that fits the parent h-400 container. 
-                        A4 Ratio is 1:1.414. width 800px -> height 1131px. 
-                        To fit 500px height: scale = 500 / 1131 = 0.44.
-                    */}
-                    <div
-                      className="absolute top-0 left-0 w-[800px] h-[1131px] origin-top-left"
-                      style={{ transform: 'scale(0.442)' }}
-                    >
-                      <Suspense
-                        fallback={<div className="p-10 text-black">Memuat Pratinjau...</div>}
-                      >
-                        <TemplateRenderer
-                          data={latestCv.data || {}}
-                          template={latestCv.template || {}}
-                          sectionsOrder={latestCv.sectionsOrder || []}
-                        />
-                      </Suspense>
-                    </div>
-                  </div>
-                ) : (
-                  // ANIMATED PREMIUM SKELETON (NO CV / LOGGED OUT)
-                  <div className="w-full h-full bg-white p-6 flex flex-col gap-6 animate-pulse">
-                    {/* Header Skeleton */}
-                    <div className="flex gap-4 items-center">
-                      <div className="w-20 h-20 rounded-full bg-gray-200"></div>
-                      <div className="space-y-3 flex-1">
-                        <div className="h-6 bg-gray-200 rounded-md w-3/4"></div>
-                        <div className="h-4 bg-gray-200 rounded-md w-1/2"></div>
-                        <div className="h-3 bg-gray-200 rounded-md w-1/3"></div>
-                      </div>
-                    </div>
-                    <div className="h-px w-full bg-gray-100"></div>
-
-                    {/* Body Skeleton 1 */}
-                    <div className="space-y-3">
-                      <div className="h-5 bg-gray-200 rounded-md w-1/4 mb-4"></div>
-                      <div className="h-3 bg-gray-200 rounded-md w-full"></div>
-                      <div className="h-3 bg-gray-200 rounded-md w-full"></div>
-                      <div className="h-3 bg-gray-200 rounded-md w-5/6"></div>
-                    </div>
-
-                    {/* Body Skeleton 2 */}
-                    <div className="space-y-3 mt-4">
-                      <div className="h-5 bg-gray-200 rounded-md w-1/3 mb-4"></div>
-                      <div className="flex gap-4">
-                        <div className="h-10 w-10 bg-gray-200 rounded-md"></div>
-                        <div className="space-y-2 flex-1">
-                          <div className="h-4 bg-gray-200 rounded-md w-3/4"></div>
-                          <div className="h-3 bg-gray-200 rounded-md w-1/2"></div>
-                        </div>
-                      </div>
-                      <div className="flex gap-4">
-                        <div className="h-10 w-10 bg-gray-200 rounded-md"></div>
-                        <div className="space-y-2 flex-1">
-                          <div className="h-4 bg-gray-200 rounded-md w-2/3"></div>
-                          <div className="h-3 bg-gray-200 rounded-md w-1/2"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* FEATURES */}
-        <section className="mt-32">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Fitur Unggulan</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Kami merancang setiap alat untuk memaksimalkan potensi Anda menembus seleksi
-              perusahaan idaman.
-            </p>
+        {notice && (
+          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-yellow-200">
+            {notice}
+          </div>
+        )}
+
+        <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+          <div className="flex items-center justify-between gap-4 mb-5">
+            <div>
+              <h2 className="text-xl font-bold">CV Terbaru</h2>
+              <p className="text-sm text-white/55">Lanjutkan pekerjaan terakhir Anda.</p>
+            </div>
+            <Link to="/app/portfolios" className="text-sm text-blue-300 hover:text-blue-200">
+              Lihat semua
+            </Link>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              [
-                '⚡',
-                'Template Cerdas',
-                'Sistem cerdas yang menyesuaikan panjang konten dengan otomatisasi tata letak yang sempurna tanpa perlu mendesain manual.',
-              ],
-              [
-                '📄',
-                'Ramah ATS (PDF)',
-                'Download dengan format PDF bersih, rapih, dan terstruktur yang mampu dibaca oleh mesin pelacak pelamar (ATS).',
-              ],
-              [
-                '🔗',
-                'Link Koleksi',
-                'Simpan puluhan variasi portofolio di cloud dan kirimkan tautan langsung ke perekrut hanya dengan satu kali klik.',
-              ],
-            ].map(([icon, title, desc], i) => (
-              <div
-                key={i}
-                className="p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-xl hover:-translate-y-2 hover:bg-white/10 transition-all duration-300 group"
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-40 rounded-xl bg-white/[0.06] animate-pulse" />
+              ))}
+            </div>
+          ) : items.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/15 p-8 text-center">
+              <div className="text-lg font-semibold">Belum ada CV tersimpan.</div>
+              <p className="mt-2 text-white/55">Mulai dari import CV lama atau isi form manual.</p>
+              <Link
+                to="/app/create"
+                className="inline-flex mt-5 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold"
               >
-                <div className="text-4xl mb-6 transform group-hover:scale-110 transition-transform origin-left">
-                  {icon}
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-                <p className="text-gray-400 leading-relaxed text-sm">{desc}</p>
-              </div>
-            ))}
-          </div>
+                Buat CV Pertama
+              </Link>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {items.map((item) => (
+                <article key={item.id} className="rounded-xl border border-white/10 bg-slate-900 p-4">
+                  <div className="text-sm text-white/50">{formatDate(item.createdAt)}</div>
+                  <h3 className="mt-2 font-semibold line-clamp-1">{item.title || 'CV Tanpa Judul'}</h3>
+                  <p className="mt-2 text-sm text-white/55 line-clamp-2">
+                    {item.description || 'CV pribadi'}
+                  </p>
+                  <div className="mt-4 flex gap-2">
+                    <Link
+                      to={`/app/preview/${item.portfolioId}?mode=pdf`}
+                      className="flex-1 text-center rounded-lg bg-white/10 px-3 py-2 text-sm"
+                    >
+                      Lihat
+                    </Link>
+                    <Link
+                      to={`/app/create/${item.portfolioId}`}
+                      className="flex-1 text-center rounded-lg bg-blue-600 px-3 py-2 text-sm"
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }

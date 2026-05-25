@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.stubGlobal(
   'fetch',
   vi.fn(async (url, opts) => {
-    if (String(url).includes('/api/portfolios') && (!opts || opts.method === 'GET')) {
+    if (String(url).includes('/api/portfolios') && (!opts?.method || opts.method === 'GET')) {
       return { ok: true, json: async () => [{ id: 1, title: 'A', description: 'B' }] };
     }
     return { ok: true, json: async () => ({ id: 1 }) };

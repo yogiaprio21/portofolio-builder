@@ -13,7 +13,15 @@ function validate({ title, description }) {
 export default function PortfolioAdmin() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: '', description: '', image_url: '', project_url: '' });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    image_url: '',
+    image_provider: '',
+    image_public_id: '',
+    upload_asset_id: '',
+    project_url: '',
+  });
   const [errors, setErrors] = useState({});
   const [previewUrl, setPreviewUrl] = useState('');
   const [saving, setSaving] = useState(false);
@@ -27,6 +35,9 @@ export default function PortfolioAdmin() {
             title: data.title || '',
             description: data.description || '',
             image_url: data.image_url || data.imageUrl || '',
+            image_provider: data.image_provider || data.imageProvider || '',
+            image_public_id: data.image_public_id || data.imagePublicId || '',
+            upload_asset_id: '',
             project_url: data.project_url || data.projectUrl || '',
           });
           setPreviewUrl(data.image_url || data.imageUrl || '');
@@ -44,7 +55,13 @@ export default function PortfolioAdmin() {
       if (res?.error) {
         setFormError(res.error);
       } else if (res.url) {
-        setForm((prev) => ({ ...prev, image_url: res.url }));
+        setForm((prev) => ({
+          ...prev,
+          image_url: res.url,
+          image_provider: res.provider || '',
+          image_public_id: res.public_id || '',
+          upload_asset_id: res.upload_asset_id || '',
+        }));
         setPreviewUrl(res.url);
       }
     } catch {

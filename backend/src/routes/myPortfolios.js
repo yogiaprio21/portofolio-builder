@@ -2,34 +2,53 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/jwtAuth');
 const PortfolioItem = require('../models/PortfolioItem');
+const { Op } = require('sequelize');
+const { integerQuery } = require('../middleware/validate');
+const logger = require('../utils/logger');
 
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const { limit, offset } = req.query || {};
-    const parsedLimit = Number.isInteger(Number(limit)) ? Math.min(Number(limit), 100) : null;
-    const parsedOffset = Number.isInteger(Number(offset)) ? Math.max(Number(offset), 0) : null;
-    if (parsedLimit != null || parsedOffset != null) {
+    const { q, limit, offset } = req.query || {};
+    const parsedLimit = integerQuery(limit, { min: 1, max: 100, fallback: null });
+    const parsedOffset = integerQuery(offset, { min: 0, max: 100000, fallback: null });
+    if (parsedLimit.error || parsedOffset.error) {
+      return res.status(400).json({ error: 'Invalid pagination query' });
+    }
+    const search = String(q || '').trim().slice(0, 100);
+    const where = {
+      userId: req.user.sub,
+      ...(search
+        ? {
+            [Op.or]: [
+              { title: { [Op.like]: `%${search}%` } },
+              { description: { [Op.like]: `%${search}%` } }
+            ]
+          }
+        : {})
+    };
+
+    if (parsedLimit.value != null || parsedOffset.value != null) {
       const result = await PortfolioItem.findAndCountAll({
-        where: { userId: req.user.sub },
+        where,
         order: [['createdAt', 'DESC']],
-        limit: parsedLimit ?? 20,
-        offset: parsedOffset ?? 0
+        limit: parsedLimit.value ?? 20,
+        offset: parsedOffset.value ?? 0
       });
       res.json({
         items: result.rows,
         total: result.count,
-        limit: parsedLimit ?? 20,
-        offset: parsedOffset ?? 0
+        limit: parsedLimit.value ?? 20,
+        offset: parsedOffset.value ?? 0
       });
       return;
     }
     const items = await PortfolioItem.findAll({
-      where: { userId: req.user.sub },
+      where,
       order: [['createdAt', 'DESC']]
     });
     res.json(items);
   } catch (err) {
-    console.error('List my portfolios error:', err);
+    logger.error('List my portfolios error', { requestId: req.requestId, error: err.message });
     res.status(500).json({ error: 'Server error' });
   }
 });

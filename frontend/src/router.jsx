@@ -13,16 +13,26 @@ const Verify = lazy(() => import('./pages/Verify'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 import AppLayout from './layouts/AppLayout.jsx';
+import ProtectedRoute from './auth/ProtectedRoute.jsx';
+
+const withSuspense = (element) => (
+  <Suspense
+    fallback={
+      <div className="min-h-[50vh] flex items-center justify-center text-white">
+        <div className="h-9 w-9 rounded-full border-2 border-white/20 border-t-blue-400 animate-spin" />
+      </div>
+    }
+  >
+    {element}
+  </Suspense>
+);
+
+const protectedPage = (element) => <ProtectedRoute>{withSuspense(element)}</ProtectedRoute>;
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <Suspense fallback={<div />}>
-        {' '}
-        <Landing />{' '}
-      </Suspense>
-    ),
+    element: withSuspense(<Landing />),
   },
 
   {
@@ -31,120 +41,55 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Home />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<Home />),
       },
       {
         path: 'login',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Login />{' '}
-          </Suspense>
-        ),
+        element: withSuspense(<Login />),
       },
       {
         path: 'register',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Register />{' '}
-          </Suspense>
-        ),
+        element: withSuspense(<Register />),
       },
       {
         path: 'verify',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Verify />{' '}
-          </Suspense>
-        ),
+        element: withSuspense(<Verify />),
       },
       {
         path: 'create',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Create />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<Create />),
       },
       {
         path: 'create/:id',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Create />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<Create />),
       },
       {
         path: 'preview/:id',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Preview />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<Preview />),
       },
       {
         path: 'portfolios',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <PortfolioList />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<PortfolioList />),
       },
       {
         path: 'portfolios/new',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <PortfolioAdmin />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<PortfolioAdmin />),
       },
       {
         path: 'portfolios/:id',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <PortfolioView />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<PortfolioView />),
       },
       {
         path: 'portfolios/:id/edit',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <PortfolioAdmin />{' '}
-          </Suspense>
-        ),
+        element: protectedPage(<PortfolioAdmin />),
       },
       {
         path: 'privacy',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Privacy />{' '}
-          </Suspense>
-        ),
+        element: withSuspense(<Privacy />),
       },
       {
         path: 'terms',
-        element: (
-          <Suspense fallback={<div />}>
-            {' '}
-            <Terms />{' '}
-          </Suspense>
-        ),
+        element: withSuspense(<Terms />),
       },
     ],
   },

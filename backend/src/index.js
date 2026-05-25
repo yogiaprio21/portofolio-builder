@@ -1,52 +1,47 @@
 require('dotenv').config();
 const app = require('./app');
 const { sequelize } = require('./config/sequelize');
+const config = require('./config/env');
+const { runMigrations } = require('./db/migrator');
 const Template = require('./models/Template');
 require('./models/PortfolioItem');
-const User = require('./models/User');
+require('./models/User');
+require('./models/Session');
+require('./models/UploadAsset');
 const templateSeeds = require('./data/templates');
+const logger = require('./utils/logger');
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
+let server;
 
 async function start(){
   try{
-    await sequelize.sync();
-    const qi = sequelize.getQueryInterface();
-    try {
-      const desc = await qi.describeTable('portfolio');
-      if (!desc.user_id) {
-        await qi.addColumn('portfolio', 'user_id', { type: require('sequelize').DataTypes.INTEGER, allowNull: true });
-      }
-      if (!desc.portfolio_id) {
-        await qi.addColumn('portfolio', 'portfolio_id', { type: require('sequelize').DataTypes.INTEGER, allowNull: true });
-      }
-    } catch (e) {
-      console.error('Table introspection/addColumn error:', e);
-    }
-    try {
-      const portfolioTableCandidates = ['Portfolios', 'portfolios'];
-      for (const tableName of portfolioTableCandidates) {
-        try {
-          const desc = await qi.describeTable(tableName);
-          if (!desc.user_id) {
-            await qi.addColumn(tableName, 'user_id', { type: require('sequelize').DataTypes.INTEGER, allowNull: true });
-          }
-          break;
-        } catch {}
-      }
-    } catch (e) {
-      console.error('Portfolio table addColumn error:', e);
-    }
+    await runMigrations(sequelize);
     for (const seed of templateSeeds) {
       const existing = await Template.findByPk(seed.id);
       if (!existing) {
         await Template.create(seed);
       }
     }
-    app.listen(PORT, ()=> console.log(`Backend running on ${PORT}`));
+    server = app.listen(PORT, () => logger.info('Backend running', { port: PORT }));
   }catch(err){
-    console.error(err);
+    logger.error('Backend startup failed', { error: err.message });
+    process.exit(1);
   }
 }
 
 start();
+
+async function shutdown(signal) {
+  logger.info('Shutdown requested', { signal });
+  if (server) {
+    await new Promise((resolve) => server.close(resolve));
+  }
+  await sequelize.close().catch((err) => {
+    logger.error('Failed to close database connection', { error: err.message });
+  });
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

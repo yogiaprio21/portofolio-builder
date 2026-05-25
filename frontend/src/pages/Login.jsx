@@ -1,16 +1,23 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../api';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { resendVerification } from '../api';
+import { useAuth } from '../auth/useAuth.js';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [canResend, setCanResend] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { login } = useAuth();
 
   const submit = async () => {
     setError('');
+    setNotice('');
+    setCanResend(false);
     if (!email || !password) {
       setError('Email dan password wajib diisi');
       return;
@@ -20,16 +27,27 @@ export default function Login() {
       const data = await login({ email, password });
       if (data?.error) {
         setError(data.error || 'Gagal login');
+        if (data.error === 'email not verified') setCanResend(true);
       } else {
-        window.localStorage.setItem('ACCESS_TOKEN', data.token);
-        window.localStorage.setItem('USER', JSON.stringify(data.user));
-        navigate('/app/portfolios');
+        navigate(searchParams.get('next') || '/app/portfolios');
       }
     } catch {
       setError('Terjadi kesalahan jaringan');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResend = async () => {
+    setError('');
+    setNotice('');
+    if (!email) {
+      setError('Masukkan email terlebih dahulu');
+      return;
+    }
+    const data = await resendVerification({ email });
+    if (data?.error) setError(data.error);
+    else setNotice('Jika akun perlu verifikasi, email verifikasi sudah dikirim.');
   };
 
   return (
@@ -87,6 +105,23 @@ export default function Login() {
                 aria-live="polite"
               >
                 {error}
+                {canResend && (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    className="block mt-2 text-blue-300 underline underline-offset-4"
+                  >
+                    Kirim ulang email verifikasi
+                  </button>
+                )}
+              </div>
+            )}
+            {notice && (
+              <div
+                className="text-emerald-300 text-sm bg-emerald-400/10 p-3 rounded-lg border border-emerald-400/20"
+                aria-live="polite"
+              >
+                {notice}
               </div>
             )}
 

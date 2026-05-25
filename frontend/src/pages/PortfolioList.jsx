@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { listMyPortfolioItems, deletePortfolioItem } from '../api';
 
@@ -28,60 +28,28 @@ export default function PortfolioList() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
   const [total, setTotal] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const navigate = useNavigate();
-  const pageRef = useRef(null);
-  const gridRef = useRef(null);
 
   const filtered = useMemo(() => items, [items]);
-
-  useEffect(() => {
-    // ENFORCE LOGIN: Bounce unauthenticated users immediately
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
-    if (!token) {
-      navigate('/app/login?next=/app/portfolios');
-    }
-  }, [navigate]);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const load = async () => {
     setLoading(true);
     try {
       const offset = (page - 1) * pageSize;
-      // STRICTLY fetch only the logged-in user's private items
-      const data = await listMyPortfolioItems({ limit: pageSize, offset });
+      const data = await listMyPortfolioItems({ q, limit: pageSize, offset });
       if (data?.error) {
         setNotice(data.error || 'Gagal memuat data portofolio Anda.');
         setItems([]);
         setTotal(0);
-      } else if (Array.isArray(data)) {
-        setNotice('');
-
-        // Frontend filtering for search query `q` on private feed
-        const searchFiltered = q
-          ? data.filter(
-              (it) =>
-                (it.title && it.title.toLowerCase().includes(q.toLowerCase())) ||
-                (it.description && it.description.toLowerCase().includes(q.toLowerCase())),
-            )
-          : data;
-
-        setItems(searchFiltered);
-        setTotal(searchFiltered.length);
       } else {
         setNotice('');
-
         const rawItems = Array.isArray(data.items) ? data.items : [];
-        const searchFiltered = q
-          ? rawItems.filter(
-              (it) =>
-                (it.title && it.title.toLowerCase().includes(q.toLowerCase())) ||
-                (it.description && it.description.toLowerCase().includes(q.toLowerCase())),
-            )
-          : rawItems;
-
-        setItems(searchFiltered);
-        setTotal(q ? searchFiltered.length : Number.isInteger(data.total) ? data.total : 0);
+        setItems(Array.isArray(data) ? data : rawItems);
+        setTotal(Number.isInteger(data.total) ? data.total : rawItems.length);
       }
-    } catch (err) {
+    } catch {
       setNotice('Terjadi kesalahan koneksi.');
       setItems([]);
     } finally {
@@ -90,10 +58,10 @@ export default function PortfolioList() {
   };
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
-    if (token) {
+    const t = setTimeout(() => {
       load();
-    }
+    }, 250);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, page, pageSize]);
 
@@ -101,33 +69,33 @@ export default function PortfolioList() {
     setPage(1);
   }, [q]);
 
-  const handleDelete = async (id, title) => {
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
     const token = typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
     if (!token) {
       setNotice('Anda harus login untuk menghapus portofolio.');
       return;
     }
 
-    if (window.confirm(`Apakah Anda yakin ingin menghapus CV "${title}" secara permanen?`)) {
-      setLoading(true);
-      try {
-        const res = await deletePortfolioItem(id, token);
-        if (res?.error) {
-          setNotice(res.error || 'Gagal menghapus portofolio.');
-        } else {
-          load();
-        }
-      } catch (err) {
-        setNotice('Terjadi kesalahan koneksi saat menghapus.');
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const res = await deletePortfolioItem(deleteTarget.id, token);
+      if (res?.error) {
+        setNotice(res.error || 'Gagal menghapus portofolio.');
+      } else {
+        setDeleteTarget(null);
+        load();
       }
+    } catch {
+      setNotice('Terjadi kesalahan koneksi saat menghapus.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container mx-auto px-6 pt-8 pb-24 text-white">
-      <div className="flex items-center justify-between mb-8" ref={pageRef}>
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight">Koleksi CV Saya</h1>
         <button
           onClick={() => navigate('/app/create')}
@@ -157,7 +125,9 @@ export default function PortfolioList() {
 
       {total > 0 && (
         <div className="flex items-center justify-between mb-6 text-sm">
-          <div className="opacity-70 font-medium">Menampilkan {total} CV</div>
+          <div className="opacity-70 font-medium">
+            Menampilkan {filtered.length} dari {total} CV
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -167,10 +137,10 @@ export default function PortfolioList() {
               Sebelumnya
             </button>
             <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-              Hal {page}
+              Hal {page} / {totalPages}
             </div>
             <button
-              onClick={() => setPage((p) => (p * pageSize < total ? p + 1 : p))}
+              onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
               disabled={page * pageSize >= total}
               className={`px-4 py-1.5 rounded-lg transition-colors ${page * pageSize >= total ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}`}
             >
@@ -211,7 +181,7 @@ export default function PortfolioList() {
           </div>
         </div>
       ) : (
-        <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filtered.map((it) => {
             const title = it.title || 'CV Tanpa Judul';
             const displayImage = it.image_url || it.imageUrl;
@@ -261,7 +231,7 @@ export default function PortfolioList() {
                       Edit
                     </Link>
                     <button
-                      onClick={() => handleDelete(it.id, title)}
+                      onClick={() => setDeleteTarget({ id: it.id, title })}
                       className="px-3 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 hover:border-red-500 text-sm font-semibold transition-all"
                       title="Hapus Portofolio"
                     >
@@ -285,6 +255,27 @@ export default function PortfolioList() {
               </div>
             );
           })}
+        </div>
+      )}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-950 p-6 shadow-2xl">
+            <h2 className="text-xl font-bold">Hapus CV?</h2>
+            <p className="mt-3 text-white/65">
+              CV "{deleteTarget.title}" akan dihapus permanen dari koleksi Anda.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15"
+              >
+                Batal
+              </button>
+              <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500">
+                Hapus
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

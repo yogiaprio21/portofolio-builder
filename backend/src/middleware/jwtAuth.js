@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config/env');
+const { parseCookies } = require('../utils/cookies');
 
 function getJwtSecret() {
-  const secret = process.env.JWT_SECRET;
+  const secret = config.jwtSecret;
   if (!secret) return null;
   return secret;
 }
@@ -10,7 +12,8 @@ function requireAuth(req, res, next) {
   const secret = getJwtSecret();
   if (!secret) return res.status(500).json({ error: 'Server not configured' });
   const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  const cookies = parseCookies(req.headers.cookie);
+  const token = header.startsWith('Bearer ') ? header.slice(7) : cookies[config.authCookieName] || '';
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const payload = jwt.verify(token, secret);

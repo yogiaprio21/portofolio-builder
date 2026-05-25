@@ -15,6 +15,16 @@ const PortfolioItem = sequelize.define('PortfolioItem', {
     allowNull: true,
     field: 'image_url'
   },
+  imageProvider: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'image_provider'
+  },
+  imagePublicId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'image_public_id'
+  },
   projectUrl: {
     type: DataTypes.STRING,
     allowNull: true,

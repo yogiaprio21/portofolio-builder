@@ -23,6 +23,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [verifyLink, setVerifyLink] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const emailOk = useMemo(() => validateEmail(email), [email]);
   const passStrength = useMemo(() => strength(password), [password]);
@@ -52,6 +53,11 @@ export default function Register() {
         setError(data.error || 'Gagal register');
       } else {
         setVerifyLink(data.verification_url || '');
+        setSuccessMessage(
+          data.verification_url
+            ? 'Akun dibuat. Gunakan tautan verifikasi berikut untuk development.'
+            : data.message || 'Akun dibuat. Silakan cek email Anda untuk verifikasi.',
+        );
       }
     } catch {
       setError('Terjadi kesalahan jaringan');
@@ -179,7 +185,7 @@ export default function Register() {
             {verifyLink && (
               <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                 <p className="text-sm text-emerald-300 mb-2 font-medium">
-                  Verifikasi email Anda dengan membuka tautan ini:
+                  {successMessage}
                 </p>
                 <a
                   href={verifyLink}
@@ -190,6 +196,18 @@ export default function Register() {
                 <button
                   onClick={() => navigate('/app/login')}
                   className="w-full mt-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-colors"
+                >
+                  Lanjut ke Login
+                </button>
+              </div>
+            )}
+
+            {successMessage && !verifyLink && (
+              <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <p className="text-sm text-emerald-300 mb-3 font-medium">{successMessage}</p>
+                <button
+                  onClick={() => navigate('/app/login')}
+                  className="w-full py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-colors"
                 >
                   Lanjut ke Login
                 </button>
