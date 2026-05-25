@@ -121,7 +121,7 @@ export default function PortfolioAdmin() {
               aria-invalid={Boolean(errors.title)}
               className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
             />
-            {errors.title && <div className="text-red-300 text-sm mt-1">{errors.title}</div>}
+            {errors.title && <div className="mt-1 text-sm text-red-600">{errors.title}</div>}
           </div>
           <div>
             <label htmlFor="portfolio-description" className="block text-sm">
@@ -136,7 +136,7 @@ export default function PortfolioAdmin() {
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
             />
             {errors.description && (
-              <div className="text-red-300 text-sm mt-1">{errors.description}</div>
+              <div className="mt-1 text-sm text-red-600">{errors.description}</div>
             )}
           </div>
           <div>
@@ -155,13 +155,13 @@ export default function PortfolioAdmin() {
             <Button onClick={handleSubmit} disabled={saving}>
               {saving ? 'Menyimpan…' : 'Simpan'}
             </Button>
-            <Button type="button" variant="light" onClick={() => navigate('/app/portfolios')}>
+            <Button type="button" variant="secondary" onClick={() => navigate('/app/portfolios')}>
               Kembali
             </Button>
           </div>
           {formError && <Alert tone="error">{formError}</Alert>}
         </SectionCard>
-        <SectionCard className="space-y-4 p-6">
+        <SectionCard tone="light" className="space-y-4 p-6">
           <label htmlFor="portfolio-image" className="block text-sm">
             Gambar
           </label>
@@ -175,7 +175,7 @@ export default function PortfolioAdmin() {
             <img
               alt="preview"
               src={previewUrl}
-              className="w-full h-64 object-cover rounded-lg border border-white/20"
+              className="h-64 w-full rounded-lg border border-slate-200 object-cover"
             />
           )}
           <div>
@@ -186,7 +186,7 @@ export default function PortfolioAdmin() {
               id="portfolio-image-url"
               value={form.image_url}
               onChange={(e) => setForm((p) => ({ ...p, image_url: e.target.value }))}
-              className="mt-1 min-h-11 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2"
+              className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2"
               placeholder="https://..."
             />
           </div>

@@ -6,7 +6,8 @@ html {
 
 body {
   min-width: 320px;
-  background: #020617;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 button,
@@ -24,6 +25,59 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 2px solid #60a5fa;
   outline-offset: 2px;
+}
+
+.app-surface {
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 1)),
+    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.08), transparent 32%);
+}
+
+.cv-editor-surface input,
+.cv-editor-surface textarea,
+.cv-editor-surface select {
+  border-radius: 0.75rem !important;
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03);
+}
+
+.cv-editor-surface input:focus,
+.cv-editor-surface textarea:focus,
+.cv-editor-surface select:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  outline: none;
+}
+
+.cv-editor-surface label {
+  font-weight: 650;
+  color: #334155 !important;
+}
+
+.cv-editor-surface button:not([class*='bg-']):not([class*='text-']) {
+  color: #1d4ed8;
+}
+
+.line-clamp-1,
+.line-clamp-2,
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-1 {
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  -webkit-line-clamp: 3;
 }
 
 /* Fallback for html2canvas/html2pdf which doesn't support oklch colors */

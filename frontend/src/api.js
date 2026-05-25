@@ -148,6 +148,7 @@ export async function logout() {
 }
 
 export async function getMe() {
+  if (!getStoredToken()) return { user: null, anonymous: true };
   return await fetchJson(`${env.apiBase}/auth/me`, {
     headers: authHeaders(),
   });

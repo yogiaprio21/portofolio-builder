@@ -27,6 +27,9 @@ import ReferencesList from '../features/cv/components/ReferencesList';
 import AdditionalForm from '../features/cv/components/AdditionalForm';
 import Button from '../components/ui/Button.jsx';
 import Stepper from '../components/ui/Stepper.jsx';
+import Badge from '../components/ui/Badge.jsx';
+import Alert from '../components/ui/Alert.jsx';
+import TemplatePreviewCard from '../components/TemplatePreviewCard.jsx';
 const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const defaultSections = [
@@ -305,8 +308,8 @@ export default function Create() {
     if (!message) return;
     if (type === 'success') toast.success(message);
     else if (type === 'error') toast.error(message);
-    else if (type === 'info') toast(message, { icon: 'ℹ️' });
-    else if (type === 'warning') toast(message, { icon: '⚠️' });
+    else if (type === 'info') toast(message);
+    else if (type === 'warning') toast(message);
     else toast(message);
   }, []);
 
@@ -1061,13 +1064,14 @@ export default function Create() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 pb-28 pt-8 text-white sm:p-6 sm:pb-10">
+    <div className="min-h-screen p-4 pb-28 pt-8 text-slate-950 sm:p-6 sm:pb-10">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 xl:grid-cols-[1.05fr_1.95fr]">
         <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4">
-              <h1 className="text-2xl font-bold">Buat CV</h1>
-              <p className="mt-1 text-sm text-white/60">
+              <Badge tone="blue">Builder</Badge>
+              <h1 className="mt-3 text-2xl font-black tracking-tight">Buat CV</h1>
+              <p className="mt-1 text-sm leading-relaxed text-slate-500">
                 Ikuti langkahnya, preview akan ikut berubah saat Anda mengisi data.
               </p>
             </div>
@@ -1078,8 +1082,11 @@ export default function Create() {
             />
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
-            <h4 className="font-semibold text-blue-300 mb-4">Urutan Section</h4>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h4 className="mb-2 font-black">Urutan Section</h4>
+            <p className="mb-4 text-xs leading-relaxed text-slate-500">
+              Drag section untuk mengatur prioritas yang muncul di CV.
+            </p>
             <div className="space-y-2">
               {sectionsOrder.map((key) => (
                 <div
@@ -1088,31 +1095,31 @@ export default function Create() {
                   onDragStart={() => handleDragStart(key)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(key)}
-                  className={`px-4 py-2 rounded-lg border cursor-move ${
+                  className={`cursor-move rounded-lg border px-4 py-2 text-sm font-semibold ${
                     dragKey === key
-                      ? 'border-blue-400 bg-blue-500/20'
-                      : 'border-white/20 bg-white/5'
+                      ? 'border-blue-500 bg-blue-50 text-blue-900'
+                      : 'border-slate-200 bg-slate-50 text-slate-600'
                   }`}
                 >
-                  {key}
+                  {stepLabels[key] || key}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl space-y-4">
-            <h4 className="font-semibold text-blue-300">Kustomisasi</h4>
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h4 className="font-black">Kustomisasi</h4>
             <div className="grid gap-3">
-              <label className="text-sm text-gray-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Warna Aksen
                 <input
                   type="color"
                   value={theme.accentColor}
                   onChange={(e) => setTheme((prev) => ({ ...prev, accentColor: e.target.value }))}
-                  className="w-full h-10 mt-2 rounded"
+                  className="mt-2 h-10 w-full rounded"
                 />
               </label>
-              <label className="text-sm text-gray-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Warna Latar
                 <input
                   type="color"
@@ -1120,24 +1127,24 @@ export default function Create() {
                   onChange={(e) =>
                     setTheme((prev) => ({ ...prev, backgroundColor: e.target.value }))
                   }
-                  className="w-full h-10 mt-2 rounded"
+                  className="mt-2 h-10 w-full rounded"
                 />
               </label>
-              <label className="text-sm text-gray-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Warna Teks
                 <input
                   type="color"
                   value={theme.textColor}
                   onChange={(e) => setTheme((prev) => ({ ...prev, textColor: e.target.value }))}
-                  className="w-full h-10 mt-2 rounded"
+                  className="mt-2 h-10 w-full rounded"
                 />
               </label>
-              <label className="text-sm text-gray-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Font
                 <select
                   value={theme.fontFamily}
                   onChange={(e) => setTheme((prev) => ({ ...prev, fontFamily: e.target.value }))}
-                  className="w-full mt-2 p-2 rounded text-black"
+                  className="mt-2 w-full rounded border border-slate-300 bg-white p-2 text-slate-950"
                 >
                   {fontOptions.map((font) => (
                     <option key={font} value={font}>
@@ -1146,12 +1153,12 @@ export default function Create() {
                   ))}
                 </select>
               </label>
-              <label className="text-sm text-gray-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Layout
                 <select
                   value={theme.layout}
                   onChange={(e) => setTheme((prev) => ({ ...prev, layout: e.target.value }))}
-                  className="w-full mt-2 p-2 rounded text-black"
+                  className="mt-2 w-full rounded border border-slate-300 bg-white p-2 text-slate-950"
                 >
                   <option value="single">Single Column</option>
                   <option value="sidebar-left">Sidebar Left</option>
@@ -1159,14 +1166,14 @@ export default function Create() {
                   <option value="split">Split</option>
                 </select>
               </label>
-              <label className="text-sm text-gray-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Posisi Profil
                 <select
                   value={theme.profileAlignment || 'left'}
                   onChange={(e) =>
                     setTheme((prev) => ({ ...prev, profileAlignment: e.target.value }))
                   }
-                  className="w-full mt-2 p-2 rounded text-black mb-1"
+                  className="mb-1 mt-2 w-full rounded border border-slate-300 bg-white p-2 text-slate-950"
                 >
                   <option value="left">Rata Kiri</option>
                   <option value="center">Rata Tengah</option>
@@ -1176,15 +1183,17 @@ export default function Create() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
-            <h4 className="font-semibold text-blue-300 mb-4">Mode Preview</h4>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h4 className="mb-4 font-black">Mode Preview</h4>
             <div className="grid grid-cols-3 gap-2">
               {['web', 'pdf', 'mobile'].map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setPreviewMode(mode)}
-                  className={`py-2 rounded-lg text-sm font-semibold ${
-                    previewMode === mode ? 'bg-blue-600' : 'bg-white/10'
+                  className={`rounded-lg py-2 text-sm font-semibold ${
+                    previewMode === mode
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-slate-200 bg-slate-50 text-slate-600'
                   }`}
                 >
                   {mode.toUpperCase()}
@@ -1195,22 +1204,22 @@ export default function Create() {
         </aside>
 
         <section className="space-y-6">
-          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl sm:p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-bold text-blue-300">Template</h2>
-                <p className="text-sm text-blue-100/80">
+                <Badge tone={selectedTemplate ? 'emerald' : 'amber'}>
+                  {selectedTemplate ? 'Template dipilih' : 'Pilih template'}
+                </Badge>
+                <h2 className="mt-3 text-2xl font-black">Template CV</h2>
+                <p className="mt-1 text-sm text-slate-500">
                   {selectedTemplate
                     ? `${selectedTemplate.name} • ${selectedTemplate.category || 'Template'}`
                     : 'Belum ada template dipilih'}
                 </p>
               </div>
-              <button
-                onClick={() => setShowTemplatePicker((prev) => !prev)}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold"
-              >
+              <Button type="button" onClick={() => setShowTemplatePicker((prev) => !prev)}>
                 {showTemplatePicker ? 'Tutup Pilihan' : 'Pilih Template'}
-              </button>
+              </Button>
             </div>
             {showTemplatePicker && (
               <div className="mt-5 space-y-4">
@@ -1220,10 +1229,10 @@ export default function Create() {
                       key={category}
                       type="button"
                       onClick={() => setTemplateCategory(category)}
-                      className={`min-h-9 shrink-0 rounded-lg px-3 text-sm font-semibold ${
+                      className={`min-h-9 shrink-0 rounded-full px-3 text-sm font-bold ${
                         templateCategory === category
                           ? 'bg-blue-600 text-white'
-                          : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
+                          : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
                       }`}
                     >
                       {category}
@@ -1231,69 +1240,31 @@ export default function Create() {
                   ))}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {templates.length === 0 && (
-                    <div className="text-sm text-blue-100/80">Template belum tersedia.</div>
-                  )}
+                  {templates.length === 0 && <Alert tone="warning">Template belum tersedia.</Alert>}
                   {visibleTemplates.map((template) => {
-                    const isSelected = template.id === selectedId;
                     return (
-                      <button
+                      <TemplatePreviewCard
                         key={template.id}
-                        onClick={() => {
-                          applyTemplate(template);
+                        template={template}
+                        cv={templatePreviewCv(template)}
+                        selected={template.id === selectedId}
+                        onSelect={(nextTemplate) => {
+                          applyTemplate(nextTemplate);
                           setShowTemplatePicker(false);
                         }}
-                        className={`text-left rounded-xl border p-3 transition ${
-                          isSelected
-                            ? 'border-blue-400 bg-blue-500/20'
-                            : 'border-white/10 bg-white/5 hover:bg-white/10'
-                        }`}
-                      >
-                        <div className="h-48 overflow-hidden rounded-lg bg-white shadow-inner">
-                          <div className="h-[680px] w-[920px] origin-top-left scale-[0.29] p-8">
-                            <Suspense
-                              fallback={
-                                <div className="h-full w-full animate-pulse bg-slate-100" />
-                              }
-                            >
-                              <TemplateRenderer
-                                data={{ cv: templatePreviewCv(template), theme: {} }}
-                                template={template}
-                                sectionsOrder={template.sections || []}
-                              />
-                            </Suspense>
-                          </div>
-                        </div>
-                        <div className="mt-3 flex items-start justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-white">{template.name}</div>
-                            <div className="text-xs text-blue-100/80">
-                              {template.category} • {template.metadata?.roleTarget || 'General'}
-                            </div>
-                          </div>
-                          {template.metadata?.isAtsSafe && (
-                            <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[11px] font-semibold text-emerald-100">
-                              ATS
-                            </span>
-                          )}
-                        </div>
-                        {template.metadata?.recommendedFor && (
-                          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-blue-100/75">
-                            {template.metadata.recommendedFor}
-                          </p>
-                        )}
-                      </button>
+                        scale={0.25}
+                      />
                     );
                   })}
                 </div>
               </div>
             )}
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl sm:p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-blue-300">Preview</h2>
-                <p className="text-sm text-blue-100/80">
+                <h2 className="text-2xl font-black">Preview langsung</h2>
+                <p className="text-sm text-slate-500">
                   {selectedTemplate
                     ? `${selectedTemplate.name} • ${selectedTemplate.category || 'Template'}`
                     : 'Belum ada template dipilih'}
@@ -1301,7 +1272,7 @@ export default function Create() {
               </div>
             </div>
             <div
-              className={`overflow-auto rounded-xl border bg-white p-4 shadow-inner sm:p-6 ${previewWidth}`}
+              className={`overflow-auto rounded-xl border border-slate-200 bg-white p-4 shadow-inner sm:p-6 ${previewWidth}`}
             >
               <Suspense fallback={<div className="h-96 animate-pulse" />}>
                 <TemplateRenderer
@@ -1320,13 +1291,18 @@ export default function Create() {
             canEnhance={Boolean(lastImportedText)}
             onEnhance={handleEnhanceWithAI}
           />
-          <div className="rounded-xl bg-white p-5 text-slate-900 shadow-xl sm:p-6 space-y-6">
+          <div className="cv-editor-surface space-y-6 rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-sm sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold">Form Editor</h2>
+                <Badge tone={completion.isComplete ? 'emerald' : 'amber'}>
+                  {completion.isComplete ? 'Siap disimpan' : 'Masih perlu dilengkapi'}
+                </Badge>
+                <h2 className="mt-3 text-xl font-black">Form Editor</h2>
                 <p className="text-sm text-slate-500">Auto-save aktif agar data tetap aman.</p>
               </div>
-              <div className="text-xs text-slate-500">{completionLabel}</div>
+              <div className="max-w-xs rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-600">
+                {completionLabel}
+              </div>
             </div>
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between text-xs text-slate-500">
@@ -1347,7 +1323,7 @@ export default function Create() {
                     key={`${key}-${index}`}
                     type="button"
                     onClick={() => setActiveStepIndex(index)}
-                    className={`min-h-8 rounded-full px-3 text-xs font-semibold ${
+                    className={`min-h-8 rounded-full px-3 text-xs font-bold ${
                       index === activeStepIndex
                         ? 'bg-blue-600 text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1359,7 +1335,7 @@ export default function Create() {
               </div>
             </div>
             <div
-              className={`rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 transform-gpu ${
+              className={`transform-gpu rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 ${
                 isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
               }`}
             >
@@ -1368,7 +1344,7 @@ export default function Create() {
                   {stepLabels[activeStepKey] || activeStepKey}
                 </div>
                 <div className="text-xs text-slate-500">
-                  Lengkapi bagian ini sebelum melanjutkan.
+                  Lengkapi bagian ini sebelum melanjutkan. Error hanya muncul saat diperlukan.
                 </div>
               </div>
               {renderStepContent()}

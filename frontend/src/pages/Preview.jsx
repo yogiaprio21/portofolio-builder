@@ -80,7 +80,11 @@ export default function Preview() {
     return (
       <div className="flex min-h-[calc(100vh-68px)] flex-col items-center bg-slate-100 p-4 sm:p-8">
         <div className="w-full max-w-5xl">
-          {error && <Alert tone="error" className="mb-6 text-red-100">{error}</Alert>}
+          {error && (
+            <Alert tone="error" className="mb-6">
+              {error}
+            </Alert>
+          )}
           <div className="flex justify-between items-center mb-6 animate-pulse">
             <div className="h-8 w-40 bg-slate-200 rounded" />
             <div className="h-10 w-32 bg-slate-200 rounded" />
@@ -104,7 +108,7 @@ export default function Preview() {
 
   return (
     <div className="min-h-[calc(100vh-68px)] bg-slate-100 p-4 sm:p-8">
-      <div className="sticky top-[76px] z-20 mx-auto mb-6 flex w-full max-w-5xl flex-col gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur print:hidden sm:flex-row sm:items-center sm:justify-between">
+      <div className="sticky top-[76px] z-20 mx-auto mb-6 flex w-full max-w-5xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur print:hidden sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           <Button as={Link} to={`/app/create/${id}`} variant="light" size="sm">
             Edit
@@ -113,19 +117,17 @@ export default function Preview() {
             <button
               key={mode}
               onClick={() => setPreviewMode(mode)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold ${
-                previewMode === mode ? 'bg-blue-600 text-white' : 'bg-white border'
+              className={`min-h-9 rounded-lg px-4 text-sm font-semibold transition ${
+                previewMode === mode
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
               }`}
             >
               {mode.toUpperCase()}
             </button>
           ))}
         </div>
-        <Button
-          onClick={downloadPDF}
-          disabled={pdfLoading}
-          className="w-full sm:w-auto"
-        >
+        <Button onClick={downloadPDF} disabled={pdfLoading} className="w-full sm:w-auto">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-5 h-5"
@@ -140,10 +142,14 @@ export default function Preview() {
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4"
             />
           </svg>
-          {pdfLoading ? 'Membuat PDF…' : 'Download PDF'}
+          {pdfLoading ? 'Membuat PDF...' : 'Download PDF'}
         </Button>
       </div>
-      {pdfError && <Alert tone="error" className="mx-auto mb-4 max-w-5xl">{pdfError}</Alert>}
+      {pdfError && (
+        <Alert tone="error" className="mx-auto mb-4 max-w-5xl">
+          {pdfError}
+        </Alert>
+      )}
 
       <div
         className={`mx-auto w-full rounded-xl bg-white shadow-[0_0_35px_rgba(0,0,0,0.12)] transition-all ${

@@ -42,7 +42,7 @@ export default function PortfolioView() {
   if (loading) {
     return (
       <PageShell>
-        <div className="h-80 animate-pulse rounded-xl bg-white/[0.06]" />
+        <div className="h-80 animate-pulse rounded-xl bg-slate-200" />
       </PageShell>
     );
   }
@@ -104,22 +104,25 @@ export default function PortfolioView() {
         </>
       }
     >
-      <div ref={containerRef} className="space-y-6">
+      <div
+        ref={containerRef}
+        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
         {pdfError && <Alert tone="error">{pdfError}</Alert>}
         {item.image_url || item.imageUrl ? (
           <img
             alt={item.title}
             src={item.image_url || item.imageUrl}
-            className="w-full max-w-2xl rounded-lg border border-white/20"
+            className="w-full max-w-2xl rounded-lg border border-slate-200"
           />
         ) : null}
-        <p className="max-w-3xl opacity-90">{item.description}</p>
+        <p className="max-w-3xl leading-relaxed text-slate-600">{item.description}</p>
         {item.project_url || item.projectUrl ? (
           <a
             href={item.project_url || item.projectUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-blue-300 underline"
+            className="font-semibold text-blue-700 underline"
           >
             Lihat Project
           </a>

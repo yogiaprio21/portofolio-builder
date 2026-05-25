@@ -1,3 +1,7 @@
+import Alert from '../../components/ui/Alert.jsx';
+import Button from '../../components/ui/Button.jsx';
+import Badge from '../../components/ui/Badge.jsx';
+
 export default function ImportPanel({
   importMessage,
   onFileSelected,
@@ -7,37 +11,48 @@ export default function ImportPanel({
   onEnhance,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 text-slate-900 shadow-xl sm:p-6 space-y-6">
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
-        <div>
-          <h3 className="text-lg font-semibold">Import CV dari File</h3>
-          <p className="text-sm text-slate-500">Dukung .json, .txt, dan .pdf sederhana</p>
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-sm sm:p-6">
+      <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-xl border border-dashed border-blue-200 bg-blue-50/70 p-5">
+          <Badge tone="blue">Import</Badge>
+          <h3 className="mt-3 text-lg font-black">Import CV dari file</h3>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500">
+            Gunakan file `.json`, `.txt`, atau `.pdf` sederhana sebagai titik awal. Setelah import,
+            data tetap bisa diedit manual.
+          </p>
+          <label className="mt-5 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white shadow-sm shadow-blue-600/20 hover:bg-blue-500">
+            Pilih File
+            <input
+              type="file"
+              accept=".json,.txt,.pdf"
+              onChange={(event) => event.target.files?.[0] && onFileSelected(event.target.files[0])}
+              className="sr-only"
+            />
+          </label>
+          {importMessage && (
+            <Alert tone="success" className="mt-4">
+              {importMessage}
+            </Alert>
+          )}
         </div>
-        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-semibold hover:bg-slate-100">
-          Pilih File
-          <input
-            type="file"
-            accept=".json,.txt,.pdf"
-            onChange={(e) => e.target.files?.[0] && onFileSelected(e.target.files[0])}
-            className="sr-only"
-          />
-        </label>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <Badge tone="slate">AI assistant</Badge>
+          <h3 className="mt-3 text-lg font-black">Rapikan konten dengan AI</h3>
+          <p className="mt-2 min-h-10 text-sm leading-relaxed text-slate-500">
+            {aiMessage || 'AI akan membaca teks import dan membantu menyusun section CV.'}
+          </p>
+          <Button
+            type="button"
+            onClick={onEnhance}
+            disabled={aiLoading || !canEnhance}
+            variant={canEnhance ? 'primary' : 'secondary'}
+            className="mt-5 w-full"
+          >
+            {aiLoading ? 'Memproses AI...' : 'Tingkatkan dengan AI'}
+          </Button>
+        </div>
       </div>
-      {importMessage && <div className="text-xs text-emerald-600">{importMessage}</div>}
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-        <div className="text-sm text-slate-500">{aiMessage}</div>
-        <button
-          onClick={onEnhance}
-          disabled={aiLoading || !canEnhance}
-          className={`px-3 py-2 rounded-lg text-sm font-semibold ${
-            aiLoading || !canEnhance
-              ? 'bg-slate-300 text-slate-600 cursor-not-allowed'
-              : 'bg-purple-600 hover:bg-purple-700 text-white'
-          }`}
-        >
-          {aiLoading ? 'Memproses AI…' : 'Tingkatkan dengan AI'}
-        </button>
-      </div>
-    </div>
+    </section>
   );
 }

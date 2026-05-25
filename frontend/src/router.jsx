@@ -18,8 +18,8 @@ import ProtectedRoute from './auth/ProtectedRoute.jsx';
 const withSuspense = (element) => (
   <Suspense
     fallback={
-      <div className="min-h-[50vh] flex items-center justify-center text-white">
-        <div className="h-9 w-9 rounded-full border-2 border-white/20 border-t-blue-400 animate-spin" />
+      <div className="flex min-h-[50vh] items-center justify-center text-slate-950">
+        <div className="h-9 w-9 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
       </div>
     }
   >

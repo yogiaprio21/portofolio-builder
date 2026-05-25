@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { clearSession, getMe, getStoredUser, login as loginRequest, logout as logoutRequest } from '../api';
+import {
+  clearSession,
+  getMe,
+  getStoredToken,
+  getStoredUser,
+  login as loginRequest,
+  logout as logoutRequest,
+} from '../api';
 import { AuthContext } from './context.js';
 
 export function AuthProvider({ children }) {
@@ -9,6 +16,13 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let active = true;
     async function checkSession() {
+      if (!getStoredToken()) {
+        clearSession();
+        if (!active) return;
+        setUser(null);
+        setStatus('anonymous');
+        return;
+      }
       const data = await getMe();
       if (!active) return;
       if (data?.user) {

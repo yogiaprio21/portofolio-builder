@@ -1,14 +1,15 @@
 const tones = {
-  info: 'border-blue-400/25 bg-blue-400/10 text-blue-100',
-  success: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100',
-  warning: 'border-yellow-400/25 bg-yellow-400/10 text-yellow-100',
-  error: 'border-red-400/25 bg-red-400/10 text-red-100',
+  info: 'border-blue-200 bg-blue-50 text-blue-800',
+  success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+  warning: 'border-amber-200 bg-amber-50 text-amber-800',
+  error: 'border-red-200 bg-red-50 text-red-800',
+  dark: 'border-white/10 bg-white/[0.06] text-white/75',
 };
 
 export default function Alert({ tone = 'info', title, children, className = '' }) {
   return (
     <div
-      className={`rounded-lg border p-4 text-sm ${tones[tone] || tones.info} ${className}`}
+      className={`rounded-xl border p-4 text-sm leading-relaxed ${tones[tone] || tones.info} ${className}`}
       role={tone === 'error' ? 'alert' : 'status'}
       aria-live="polite"
     >

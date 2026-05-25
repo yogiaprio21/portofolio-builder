@@ -7,20 +7,19 @@ import Alert from '../components/ui/Alert.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import SkeletonCard from '../components/ui/SkeletonCard.jsx';
+import Badge from '../components/ui/Badge.jsx';
 
-// Helper to generate a consistent gradient color based on a string (like a title or ID)
 function getGradientFromText(text) {
   const gradients = [
-    'from-rose-400 to-orange-300',
-    'from-emerald-400 to-cyan-400',
-    'from-blue-500 to-indigo-500',
-    'from-violet-500 to-purple-500',
-    'from-amber-400 to-orange-500',
-    'from-fuchsia-500 to-pink-500',
-    'from-teal-400 to-emerald-500',
+    'from-blue-600 to-cyan-400',
+    'from-emerald-600 to-teal-400',
+    'from-slate-800 to-blue-700',
+    'from-violet-600 to-blue-500',
+    'from-amber-500 to-red-500',
+    'from-fuchsia-600 to-rose-500',
   ];
   let hash = 0;
-  for (let i = 0; i < text.length; i++) {
+  for (let i = 0; i < text.length; i += 1) {
     hash = text.charCodeAt(i) + ((hash << 5) - hash);
   }
   return gradients[Math.abs(hash) % gradients.length];
@@ -37,6 +36,40 @@ function formatDate(value) {
   } catch {
     return 'Belum tersedia';
   }
+}
+
+function PortfolioCover({ item }) {
+  const title = item.title || 'CV Tanpa Judul';
+  const displayImage = item.image_url || item.imageUrl;
+  const gradientClass = getGradientFromText(title + item.id);
+  const initial = title.charAt(0).toUpperCase();
+
+  if (displayImage) {
+    return <img alt={title} src={displayImage} className="h-52 w-full object-cover" />;
+  }
+
+  return (
+    <div className={`h-52 w-full bg-gradient-to-br ${gradientClass} p-5`}>
+      <div className="h-full rounded-xl bg-white/95 p-4 text-slate-900 shadow-xl">
+        <div className="mb-4 flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
+          <div className="min-w-0">
+            <div className="line-clamp-2 text-lg font-black leading-tight">{title}</div>
+            <div className="mt-1 text-xs text-slate-500">{formatDate(item.createdAt)}</div>
+          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-black">
+            {initial}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="h-2 rounded bg-slate-200" />
+          <div className="h-2 w-4/5 rounded bg-slate-200" />
+          <div className="mt-4 h-2 w-1/2 rounded bg-slate-300" />
+          <div className="h-2 w-3/4 rounded bg-slate-200" />
+          <div className="h-2 w-2/3 rounded bg-slate-200" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function PortfolioList() {
@@ -77,10 +110,10 @@ export default function PortfolioList() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       load();
     }, 250);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, page, pageSize]);
 
@@ -114,9 +147,9 @@ export default function PortfolioList() {
 
   return (
     <PageShell
-      eyebrow="Koleksi"
-      title="Koleksi CV Saya"
-      description="Cari, lanjutkan edit, preview, atau hapus CV yang sudah tersimpan."
+      eyebrow="Koleksi CV"
+      title="Semua dokumen yang sedang Anda bangun"
+      description="Cari, lanjutkan edit, preview PDF, atau hapus CV yang sudah tidak dipakai."
       actions={
         <Button type="button" onClick={() => navigate('/app/create')}>
           Buat CV Baru
@@ -124,18 +157,25 @@ export default function PortfolioList() {
       }
       className="pb-24"
     >
-      <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.05] p-4">
-        <label htmlFor="portfolio-search" className="mb-2 block text-sm font-medium text-white/75">
-          Cari CV
-        </label>
-        <input
-          id="portfolio-search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Cari CV berdasarkan judul atau deskripsi…"
-          className="min-h-11 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 outline-none transition placeholder:text-white/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
-        />
-      </div>
+      <section className="mb-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <label htmlFor="portfolio-search" className="mb-2 block text-sm font-bold text-slate-700">
+            Cari CV
+          </label>
+          <input
+            id="portfolio-search"
+            value={q}
+            onChange={(event) => setQ(event.target.value)}
+            placeholder="Cari berdasarkan judul atau deskripsi"
+            className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button type="button" variant="secondary" onClick={() => setQ('')}>
+            Reset
+          </Button>
+        </div>
+      </section>
 
       {notice && (
         <Alert tone="warning" className="mb-6">
@@ -143,37 +183,41 @@ export default function PortfolioList() {
         </Alert>
       )}
 
-      {total > 0 && (
-        <div className="flex items-center justify-between mb-6 text-sm">
-          <div className="opacity-70 font-medium">
-            Menampilkan {filtered.length} dari {total} CV
-          </div>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <Badge tone="blue">{total} CV tersimpan</Badge>
+          <Badge tone="slate">
+            Halaman {page} dari {totalPages}
+          </Badge>
+        </div>
+        {total > 0 && (
           <div className="flex gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
               disabled={page <= 1}
-              className={`px-4 py-1.5 rounded-lg transition-colors ${page <= 1 ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}`}
             >
               Sebelumnya
-            </button>
-            <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-              Hal {page} / {totalPages}
-            </div>
-            <button
-              onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage((value) => (value < totalPages ? value + 1 : value))}
               disabled={page * pageSize >= total}
-              className={`px-4 py-1.5 rounded-lg transition-colors ${page * pageSize >= total ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}`}
             >
               Berikutnya
-            </button>
+            </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {loading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
-            <SkeletonCard key={index} className="h-80" />
+            <SkeletonCard key={index} className="h-96" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -188,93 +232,53 @@ export default function PortfolioList() {
           onAction={q ? () => setQ('') : () => navigate('/app/create')}
         />
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filtered.map((it) => {
-            const title = it.title || 'CV Tanpa Judul';
-            const displayImage = it.image_url || it.imageUrl;
-            const gradientClass = getGradientFromText(title + it.id);
-            const initial = title.charAt(0).toUpperCase();
-
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((item) => {
+            const title = item.title || 'CV Tanpa Judul';
+            const portfolioId = item.portfolioId || item.id;
             return (
-              <div
-                key={it.id}
-                className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-1"
+              <article
+                key={item.id}
+                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-xl"
               >
-                {/* Auto-Generated Covers vs Image */}
-                {displayImage ? (
-                  <img
-                    alt={title}
-                    src={displayImage}
-                    className="w-full h-48 object-cover border-b border-white/10"
-                  />
-                ) : (
-                  <div className={`h-48 w-full bg-gradient-to-br ${gradientClass} p-5`}>
-                    <div className="h-full rounded-lg bg-white/90 p-4 text-slate-800 shadow-xl">
-                      <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
-                        <div>
-                          <div className="text-lg font-bold leading-tight">{title}</div>
-                          <div className="text-xs text-slate-500">{formatDate(it.createdAt)}</div>
-                        </div>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold">
-                          {initial}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-2 rounded bg-slate-200" />
-                        <div className="h-2 w-4/5 rounded bg-slate-200" />
-                        <div className="mt-4 h-2 w-1/2 rounded bg-slate-300" />
-                        <div className="h-2 w-3/4 rounded bg-slate-200" />
-                      </div>
-                    </div>
+                <PortfolioCover item={item} />
+                <div className="flex min-h-56 flex-col p-5">
+                  <div className="mb-2 text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
+                    {formatDate(item.createdAt)}
                   </div>
-                )}
-
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="font-bold text-lg mb-1 line-clamp-1">{title}</div>
-                  <div className="text-sm text-white/60 line-clamp-2 mb-6 flex-grow">
-                    {it.description || 'CV Pribadi'}
-                  </div>
-
-                  <div className="flex gap-2 mt-auto">
-                    <Link
-                      to={`/app/preview/${it.portfolioId}?mode=pdf`}
-                      className="flex-1 text-center px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors"
+                  <h2 className="line-clamp-1 text-lg font-black">{title}</h2>
+                  <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-500">
+                    {item.description || 'CV pribadi'}
+                  </p>
+                  <div className="mt-5 grid grid-cols-[1fr_1fr_auto] gap-2">
+                    <Button
+                      as={Link}
+                      to={`/app/preview/${portfolioId}?mode=pdf`}
+                      variant="secondary"
+                      size="sm"
                     >
                       Lihat
-                    </Link>
-                    <Link
-                      to={`/app/create/${it.portfolioId}`}
-                      className="flex-1 text-center px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-sm font-semibold transition-colors shadow-lg shadow-blue-500/20"
-                    >
+                    </Button>
+                    <Button as={Link} to={`/app/create/${portfolioId}`} size="sm">
                       Edit
-                    </Link>
-                    <button
-                      onClick={() => setDeleteTarget({ id: it.id, title })}
-                      className="px-3 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 hover:border-red-500 text-sm font-semibold transition-all"
-                      title="Hapus Portofolio"
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      size="sm"
+                      aria-label={`Hapus ${title}`}
+                      onClick={() => setDeleteTarget({ id: item.id, title })}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mx-auto"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                      ×
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
       )}
+
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Hapus CV?"

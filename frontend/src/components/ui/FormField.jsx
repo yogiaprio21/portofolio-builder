@@ -1,11 +1,4 @@
-export default function FormField({
-  id,
-  label,
-  error,
-  hint,
-  children,
-  className = '',
-}) {
+export default function FormField({ id, label, error, hint, children, className = '' }) {
   return (
     <div className={className}>
       {label && (

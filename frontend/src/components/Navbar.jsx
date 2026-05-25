@@ -43,7 +43,13 @@ export default function Navbar() {
 
   const guestLinks = (
     <>
-      <Button as={Link} to="/app/login" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+      <Button
+        as={Link}
+        to="/app/login"
+        variant="ghostDark"
+        size="sm"
+        onClick={() => setOpen(false)}
+      >
         Masuk
       </Button>
       <Button as={Link} to="/app/register" size="sm" onClick={() => setOpen(false)}>

@@ -14,7 +14,7 @@ export default function AppLayout() {
           <div className="h-full w-1/3 animate-pulse bg-blue-400" />
         </div>
       )}
-      <main className="min-h-screen bg-slate-950 pt-[68px]">
+      <main className="app-surface min-h-screen pt-[68px]">
         <Outlet />
       </main>
       <Footer />

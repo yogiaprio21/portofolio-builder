@@ -1,100 +1,56 @@
 import { Link } from 'react-router-dom';
+import Button from '../components/ui/Button.jsx';
+import Badge from '../components/ui/Badge.jsx';
 
 export default function Terms() {
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
-      <main className="container mx-auto px-6 pt-8 pb-24">
-        <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl">
-          <div className="mb-10 border-b border-white/10 pb-8">
-            <h1 className="text-3xl md:text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 tracking-tight">
-              Syarat & Ketentuan Layanan
-            </h1>
-            <p className="text-white/60">Terakhir diperbarui: 1 Maret 2026</p>
-          </div>
+    <main className="mx-auto max-w-4xl px-4 py-10 text-slate-950 sm:px-6 lg:px-8">
+      <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
+        <Badge tone="blue">Legal</Badge>
+        <h1 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">Syarat & Ketentuan</h1>
+        <p className="mt-2 text-sm text-slate-500">Terakhir diperbarui: 1 Maret 2026</p>
 
-          <div className="space-y-8 text-gray-300 leading-relaxed text-lg">
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">1. Penerimaan Syarat</h2>
-              <p>
-                Dengan mengakses dan menggunakan platform PortoBuilder, Anda setuju untuk terikat
-                dengan Syarat dan Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari
-                syarat ini, harap jangan gunakan layanan kami.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">2. Deskripsi Layanan</h2>
-              <p>
-                PortoBuilder adalah platform perangkat lunak sebagai layanan (SaaS) yang
-                memungkinkan pengguna membuat, mengelola, dan membagikan Curriculum Vitae (CV) dan
-                Portofolio profesional, termasuk kemampuan menghasilkan dokumen berformat PDF
-                (ATS-friendly).
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">3. Kewajiban Pengguna</h2>
-              <p>Sebagai pengguna platform, Anda setuju untuk:</p>
-              <ul className="list-disc pl-6 space-y-2 mt-2">
-                <li>Memberikan informasi yang akurat dan jujur di dalam CV dan portofolio Anda.</li>
-                <li>
-                  Menjaga kerahasiaan kata sandi dan bertanggung jawab atas semua aktivitas di bawah
-                  akun Anda.
-                </li>
-                <li>
-                  Tidak mengunggah materi yang melanggar hak cipta, ilegal, menyinggung, atau
-                  mengandung virus/perangkat lunak berbahaya.
-                </li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">4. Kepemilikan Konten</h2>
-              <p>
-                <strong>Konten Anda:</strong> Anda mempertahankan seluruh hak kepemilikan atas teks,
-                gambar, dan dokumen yang Anda unggah. Anda hanya memberikan lisensi kepada
-                PortoBuilder untuk memproses dan menampilkan konten tersebut sesuai fungsionalitas
-                aplikasi.
-              </p>
-              <p className="mt-4">
-                <strong>Konten Kami:</strong> Desain antarmuka, *template* presentasi CV, kode
-                sumber, dan merek PortoBuilder adalah hak milik intelektual eksklusif kami dan
-                dilindungi oleh hukum.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">5. Penghentian Layanan</h2>
-              <p>
-                Kami berhak untuk menangguhkan atau menghentikan akun Anda jika kami menemukan
-                pelanggaran terhadap Syarat dan Ketentuan ini, termasuk penyalahgunaan layanan untuk
-                tujuan spam, penipuan, atau peretasan.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                6. Penafian Jaminan (Disclaimer)
-              </h2>
-              <p>
-                Layanan disediakan "apa adanya". Kami tidak menjamin bahwa layanan tidak akan
-                mengalami gangguan (uninterrupted) atau sepenuhnya bebas dari kesalahan sistem. Kami
-                juga tidak menjamin bahwa penggunaan platform ini pasti akan membuahkan hasil
-                perekrutan / pekerjaan untuk Anda.
-              </p>
-            </section>
-
-            <div className="pt-8 mt-8 border-t border-white/10 flex justify-center">
-              <Link
-                to="/app"
-                className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl font-semibold transition-all duration-300"
-              >
-                Kembali ke Beranda
-              </Link>
-            </div>
-          </div>
+        <div className="mt-10 space-y-8 text-base leading-relaxed text-slate-600">
+          <section>
+            <h2 className="mb-3 text-xl font-black text-slate-950">1. Penerimaan Syarat</h2>
+            <p>
+              Dengan menggunakan PortoBuilder, Anda menyetujui ketentuan penggunaan layanan ini.
+            </p>
+          </section>
+          <section>
+            <h2 className="mb-3 text-xl font-black text-slate-950">2. Deskripsi Layanan</h2>
+            <p>
+              PortoBuilder adalah aplikasi untuk membuat, mengelola, preview, dan export CV atau
+              portofolio profesional.
+            </p>
+          </section>
+          <section>
+            <h2 className="mb-3 text-xl font-black text-slate-950">3. Kewajiban Pengguna</h2>
+            <ul className="list-disc space-y-2 pl-6">
+              <li>Memberikan informasi yang akurat dan tidak menyesatkan.</li>
+              <li>Menjaga keamanan akun dan password.</li>
+              <li>Tidak mengunggah konten ilegal, berbahaya, atau melanggar hak cipta.</li>
+            </ul>
+          </section>
+          <section>
+            <h2 className="mb-3 text-xl font-black text-slate-950">4. Kepemilikan Konten</h2>
+            <p>
+              Anda tetap memiliki konten CV dan portofolio yang dibuat. PortoBuilder hanya memproses
+              konten tersebut untuk menyediakan fitur aplikasi.
+            </p>
+          </section>
+          <section>
+            <h2 className="mb-3 text-xl font-black text-slate-950">5. Penafian</h2>
+            <p>Layanan disediakan apa adanya dan tidak menjamin hasil perekrutan atau pekerjaan.</p>
+          </section>
         </div>
-      </main>
-    </div>
+
+        <div className="mt-10 border-t border-slate-200 pt-6">
+          <Button as={Link} to="/app" variant="secondary">
+            Kembali ke Dashboard
+          </Button>
+        </div>
+      </article>
+    </main>
   );
 }

@@ -3,7 +3,7 @@ import BrandLogo from './BrandLogo.jsx';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-slate-900 pb-24 pt-12 md:pb-8">
+    <footer className="border-t border-slate-200 bg-white pb-24 pt-12 text-slate-950 md:pb-8">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           {/* Brand & Slogan */}
@@ -12,34 +12,35 @@ export default function Footer() {
               to="/"
               className="mb-3 justify-center md:justify-start"
               markClassName="h-9 w-9"
+              textClassName="text-slate-950"
             />
-            <p className="text-white/50 text-sm max-w-sm">
+            <p className="max-w-sm text-sm text-slate-500">
               Membangun karier profesional Anda dengan satu klik. Buat CV dan Portofolio modern
               dalam hitungan menit.
             </p>
           </div>
 
           {/* Quick Links */}
-          <div className="flex gap-6 text-sm text-white/50 font-medium">
-            <Link to="/app" className="hover:text-blue-400 transition-colors">
+          <div className="flex gap-6 text-sm font-medium text-slate-500">
+            <Link to="/app" className="transition-colors hover:text-blue-700">
               Beranda
             </Link>
-            <Link to="/app/portfolios" className="hover:text-blue-400 transition-colors">
+            <Link to="/app/portfolios" className="transition-colors hover:text-blue-700">
               Koleksi
             </Link>
-            <Link to="/app/create" className="hover:text-blue-400 transition-colors">
+            <Link to="/app/create" className="transition-colors hover:text-blue-700">
               Buat CV
             </Link>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/40">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-xs text-slate-400 md:flex-row">
           <p>© {new Date().getFullYear()} PortoBuilder. Hak Cipta Dilindungi.</p>
           <div className="flex gap-4">
-            <Link to="/app/privacy" className="hover:text-white transition-colors">
+            <Link to="/app/privacy" className="transition-colors hover:text-slate-900">
               Kebijakan Privasi
             </Link>
-            <Link to="/app/terms" className="hover:text-white transition-colors">
+            <Link to="/app/terms" className="transition-colors hover:text-slate-900">
               Syarat & Ketentuan
             </Link>
           </div>
