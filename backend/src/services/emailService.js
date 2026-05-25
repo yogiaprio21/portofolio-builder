@@ -3,6 +3,27 @@ const config = require('../config/env');
 const logger = require('../utils/logger');
 const { sendSmtpMail } = require('./smtpClient');
 
+function maskEmail(value) {
+  const input = String(value || '');
+  const [name, domain] = input.split('@');
+  if (!domain) return input ? '***' : '';
+  return `${name.slice(0, 2)}***@${domain}`;
+}
+
+function smtpSummary() {
+  return {
+    host: config.email.smtp.host,
+    port: config.email.smtp.port,
+    secure: config.email.smtp.secure,
+    user: maskEmail(config.email.smtp.user),
+    from: config.email.from,
+    passConfigured: Boolean(config.email.smtp.pass),
+    passLength: config.email.smtp.pass ? config.email.smtp.pass.length : 0,
+    ehloName: config.email.smtp.ehloName,
+    rejectUnauthorized: config.email.smtp.rejectUnauthorized
+  };
+}
+
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -54,6 +75,11 @@ async function sendVerificationEmail({ to, verificationUrl, requestId }) {
   }
 
   if (config.email.provider === 'smtp') {
+    logger.info('Sending verification email with SMTP', {
+      to: maskEmail(to),
+      requestId,
+      smtp: smtpSummary()
+    });
     return await sendSmtpMail({
       smtp: config.email.smtp,
       from: config.email.from,
