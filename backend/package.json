@@ -12,7 +12,8 @@
     "seed": "node scripts/seed.js",
     "db:setup": "node scripts/seed.js",
     "test:integration": "node scripts/integration-test.js",
-    "verify:backend": "node scripts/verify-backend.js"
+    "verify:backend": "node scripts/verify-backend.js",
+    "verify:smtp": "node scripts/verify-smtp.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

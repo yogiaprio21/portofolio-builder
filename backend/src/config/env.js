@@ -20,6 +20,22 @@ function boolFromEnv(name, fallback) {
   return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
 }
 
+function stringFromEnv(name, fallback = '') {
+  const value = process.env[name];
+  if (value == null) return fallback;
+  return String(value).trim();
+}
+
+function secretFromEnv(name, fallback = '') {
+  const value = process.env[name];
+  if (value == null) return fallback;
+  const normalized = String(value).trim();
+  if (boolFromEnv('SMTP_STRIP_PASSWORD_SPACES', true)) {
+    return normalized.replace(/\s+/g, '');
+  }
+  return normalized;
+}
+
 function requireInProduction(name) {
   if (!isProduction) return;
   if (!process.env[name]) {
@@ -72,15 +88,15 @@ module.exports = {
     provider: process.env.EMAIL_PROVIDER || 'log',
     from: process.env.EMAIL_FROM || 'Portfolio Builder <onboarding@resend.dev>',
     resendApiKey: process.env.RESEND_API_KEY || '',
-    appUrl: process.env.APP_URL || '',
+    appUrl: stringFromEnv('APP_URL'),
     smtp: {
-      host: process.env.SMTP_HOST || '',
+      host: stringFromEnv('SMTP_HOST'),
       port: intFromEnv('SMTP_PORT', 587),
       secure: boolFromEnv('SMTP_SECURE', false),
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
+      user: stringFromEnv('SMTP_USER'),
+      pass: secretFromEnv('SMTP_PASS'),
       rejectUnauthorized: boolFromEnv('SMTP_REJECT_UNAUTHORIZED', true),
-      ehloName: process.env.SMTP_EHLO_NAME || 'portfolio-builder.local'
+      ehloName: stringFromEnv('SMTP_EHLO_NAME', 'portfolio-builder.local')
     }
   },
   ai: {
