@@ -25,11 +25,12 @@ import CertificationsList from '../features/cv/components/CertificationsList';
 import AchievementsList from '../features/cv/components/AchievementsList';
 import ReferencesList from '../features/cv/components/ReferencesList';
 import AdditionalForm from '../features/cv/components/AdditionalForm';
-import Button from '../components/ui/Button.jsx';
-import Stepper from '../components/ui/Stepper.jsx';
-import Badge from '../components/ui/Badge.jsx';
-import Alert from '../components/ui/Alert.jsx';
-import TemplatePreviewCard from '../components/TemplatePreviewCard.jsx';
+import BuilderTopBar from './Create/BuilderTopBar.jsx';
+import BuilderRail from './Create/BuilderRail.jsx';
+import PreviewPanel from './Create/PreviewPanel.jsx';
+import FormWorkspace from './Create/FormWorkspace.jsx';
+import MobileBuilderPanel from './Create/MobileBuilderPanel.jsx';
+import TemplatePickerDialog from './Create/TemplatePickerDialog.jsx';
 const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const defaultSections = [
@@ -1065,405 +1066,110 @@ export default function Create() {
 
   return (
     <div className="min-h-screen p-4 pb-24 pt-5 text-slate-950 sm:p-5 sm:pb-8">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 xl:grid-cols-[0.9fr_1.75fr]">
-        <div className="space-y-4 xl:hidden">
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-white shadow-xl shadow-slate-950/10">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <Badge tone="blue">Builder</Badge>
-                <h1 className="mt-3 text-2xl font-black tracking-tight">Buat CV</h1>
-                <p className="mt-1 text-sm leading-relaxed text-white/68">
-                  Isi langkah aktif, lalu lanjutkan. Template dan preview ada di bawah form.
-                </p>
-              </div>
-              <div className="shrink-0 rounded-xl border border-white/10 bg-white/[0.08] px-3 py-2 text-center">
-                <div className="text-lg font-black text-blue-200">{progressPercent}%</div>
-                <div className="text-[11px] font-bold text-white/58">lengkap</div>
-              </div>
-            </div>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12">
-              <div
-                className="h-full rounded-full bg-blue-600"
-                style={{ width: `${progressPercent}%` }}
+      <div className="mx-auto max-w-[1440px] space-y-5">
+        <BuilderTopBar
+          progressPercent={progressPercent}
+          activeStepLabel={stepLabels[activeStepKey] || activeStepKey}
+          remainingSteps={remainingSteps}
+          completionLabel={completionLabel}
+          selectedTemplate={selectedTemplate}
+          onOpenTemplate={() => setShowTemplatePicker(true)}
+          onSubmit={handleSubmit}
+        />
+
+        <MobileBuilderPanel
+          progressPercent={progressPercent}
+          stepperItems={stepperItems}
+          activeStepIndex={activeStepIndex}
+          onSelectStep={setActiveStepIndex}
+          sectionsOrder={sectionsOrder}
+          stepLabels={stepLabels}
+          dragKey={dragKey}
+          onDragStart={handleDragStart}
+          onDrop={handleDrop}
+          theme={theme}
+          setTheme={setTheme}
+          fontOptions={fontOptions}
+        />
+
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[280px_minmax(0,1fr)_420px]">
+          <div className="hidden xl:block">
+            <BuilderRail
+              stepperItems={stepperItems}
+              activeStepIndex={activeStepIndex}
+              activeStepKey={activeStepKey}
+              onSelectStep={setActiveStepIndex}
+              selectedTemplate={selectedTemplate}
+              onOpenTemplate={() => setShowTemplatePicker(true)}
+              onScrollToImport={() =>
+                document
+                  .getElementById('create-import-panel')
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }
+            />
+          </div>
+
+          <main className="space-y-5">
+            <div id="create-import-panel">
+              <ImportPanel
+                importMessage={importMessage}
+                onFileSelected={handleImportFile}
+                aiMessage={aiMessage}
+                aiLoading={aiLoading}
+                canEnhance={Boolean(lastImportedText)}
+                onEnhance={handleEnhanceWithAI}
               />
             </div>
-            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-              {stepperItems.map((step, index) => (
-                <button
-                  key={step.key}
-                  type="button"
-                  onClick={() => setActiveStepIndex(index)}
-                  className={`min-h-9 shrink-0 rounded-full px-3 text-xs font-bold ${
-                    index === activeStepIndex
-                      ? 'bg-blue-600 text-white'
-                      : 'border border-slate-200 bg-white text-slate-600'
-                  }`}
-                >
-                  {index + 1}. {step.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <details className="rounded-2xl border border-blue-100 bg-blue-50/85 p-4 shadow-sm">
-            <summary className="cursor-pointer text-sm font-black text-slate-900">
-              Atur section dan tampilan
-            </summary>
-            <div className="mt-4 grid gap-4">
-              <div>
-                <h4 className="mb-2 text-sm font-black">Urutan Section</h4>
-                <div className="grid gap-2">
-                  {sectionsOrder.map((key) => (
-                    <div
-                      key={key}
-                      draggable
-                      onDragStart={() => handleDragStart(key)}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDrop={() => handleDrop(key)}
-                      className={`cursor-move rounded-lg border px-3 py-2 text-xs font-semibold ${
-                        dragKey === key
-                          ? 'border-blue-500 bg-blue-50 text-blue-900'
-                          : 'border-slate-200 bg-slate-50 text-slate-600'
-                      }`}
-                    >
-                      {stepLabels[key] || key}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  Warna Aksen
-                  <input
-                    type="color"
-                    value={theme.accentColor}
-                    onChange={(event) =>
-                      setTheme((prev) => ({ ...prev, accentColor: event.target.value }))
-                    }
-                    className="mt-2 h-10 w-full rounded"
-                  />
-                </label>
-                <label className="text-sm font-semibold text-slate-700">
-                  Layout
-                  <select
-                    value={theme.layout}
-                    onChange={(event) =>
-                      setTheme((prev) => ({ ...prev, layout: event.target.value }))
-                    }
-                    className="mt-2 min-h-10 w-full rounded border border-slate-300 bg-white px-3 text-slate-950"
-                  >
-                    <option value="single">Single Column</option>
-                    <option value="sidebar-left">Sidebar Left</option>
-                    <option value="sidebar-right">Sidebar Right</option>
-                    <option value="split">Split</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </details>
+            <FormWorkspace
+              activeStepIndex={activeStepIndex}
+              stepKeys={stepKeys}
+              activeStepKey={activeStepKey}
+              stepLabels={stepLabels}
+              remainingSteps={remainingSteps}
+              progressPercent={progressPercent}
+              completion={completion}
+              completionLabel={completionLabel}
+              isAnimating={isAnimating}
+              renderStepContent={renderStepContent}
+              onSelectStep={setActiveStepIndex}
+              onBack={handleStepBack}
+              onNext={handleStepNext}
+            />
+          </main>
+
+          <PreviewPanel
+            TemplateRenderer={TemplateRenderer}
+            previewCv={previewCv}
+            theme={theme}
+            selectedTemplate={selectedTemplate}
+            sectionsOrder={sectionsOrder}
+            previewMode={previewMode}
+            setPreviewMode={setPreviewMode}
+            previewWidth={previewWidth}
+            stepLabels={stepLabels}
+            dragKey={dragKey}
+            onDragStart={handleDragStart}
+            onDrop={handleDrop}
+            setTheme={setTheme}
+            fontOptions={fontOptions}
+            onSubmit={handleSubmit}
+          />
         </div>
-
-        <aside className="hidden space-y-4 xl:sticky xl:top-24 xl:block xl:self-start">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-4">
-              <Badge tone="blue">Builder</Badge>
-              <h1 className="mt-3 text-2xl font-black tracking-tight">Buat CV</h1>
-              <p className="mt-1 text-sm leading-relaxed text-slate-500">
-                Ikuti langkahnya, preview akan ikut berubah saat Anda mengisi data.
-              </p>
-            </div>
-            <Stepper
-              steps={stepperItems}
-              currentIndex={activeStepIndex}
-              onSelect={setActiveStepIndex}
-            />
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h4 className="mb-2 font-black">Urutan Section</h4>
-            <p className="mb-4 text-xs leading-relaxed text-slate-500">
-              Drag section untuk mengatur prioritas yang muncul di CV.
-            </p>
-            <div className="space-y-2">
-              {sectionsOrder.map((key) => (
-                <div
-                  key={key}
-                  draggable
-                  onDragStart={() => handleDragStart(key)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(key)}
-                  className={`cursor-move rounded-lg border px-4 py-2 text-sm font-semibold ${
-                    dragKey === key
-                      ? 'border-blue-500 bg-blue-50 text-blue-900'
-                      : 'border-slate-200 bg-slate-50 text-slate-600'
-                  }`}
-                >
-                  {stepLabels[key] || key}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h4 className="font-black">Kustomisasi</h4>
-            <div className="grid gap-3">
-              <label className="text-sm font-semibold text-slate-700">
-                Warna Aksen
-                <input
-                  type="color"
-                  value={theme.accentColor}
-                  onChange={(e) => setTheme((prev) => ({ ...prev, accentColor: e.target.value }))}
-                  className="mt-2 h-10 w-full rounded"
-                />
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                Warna Latar
-                <input
-                  type="color"
-                  value={theme.backgroundColor}
-                  onChange={(e) =>
-                    setTheme((prev) => ({ ...prev, backgroundColor: e.target.value }))
-                  }
-                  className="mt-2 h-10 w-full rounded"
-                />
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                Warna Teks
-                <input
-                  type="color"
-                  value={theme.textColor}
-                  onChange={(e) => setTheme((prev) => ({ ...prev, textColor: e.target.value }))}
-                  className="mt-2 h-10 w-full rounded"
-                />
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                Font
-                <select
-                  value={theme.fontFamily}
-                  onChange={(e) => setTheme((prev) => ({ ...prev, fontFamily: e.target.value }))}
-                  className="mt-2 w-full rounded border border-slate-300 bg-white p-2 text-slate-950"
-                >
-                  {fontOptions.map((font) => (
-                    <option key={font} value={font}>
-                      {font.split(',')[0]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                Layout
-                <select
-                  value={theme.layout}
-                  onChange={(e) => setTheme((prev) => ({ ...prev, layout: e.target.value }))}
-                  className="mt-2 w-full rounded border border-slate-300 bg-white p-2 text-slate-950"
-                >
-                  <option value="single">Single Column</option>
-                  <option value="sidebar-left">Sidebar Left</option>
-                  <option value="sidebar-right">Sidebar Right</option>
-                  <option value="split">Split</option>
-                </select>
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                Posisi Profil
-                <select
-                  value={theme.profileAlignment || 'left'}
-                  onChange={(e) =>
-                    setTheme((prev) => ({ ...prev, profileAlignment: e.target.value }))
-                  }
-                  className="mb-1 mt-2 w-full rounded border border-slate-300 bg-white p-2 text-slate-950"
-                >
-                  <option value="left">Rata Kiri</option>
-                  <option value="center">Rata Tengah</option>
-                  <option value="right">Rata Kanan</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h4 className="mb-4 font-black">Mode Preview</h4>
-            <div className="grid grid-cols-3 gap-2">
-              {['web', 'pdf', 'mobile'].map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setPreviewMode(mode)}
-                  className={`rounded-lg py-2 text-sm font-semibold ${
-                    previewMode === mode
-                      ? 'bg-blue-600 text-white'
-                      : 'border border-slate-200 bg-slate-50 text-slate-600'
-                  }`}
-                >
-                  {mode.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        <section className="flex flex-col gap-5">
-          <div className="order-1 rounded-2xl border border-blue-100 bg-blue-50/85 p-4 shadow-sm sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <Badge tone={selectedTemplate ? 'emerald' : 'amber'}>
-                  {selectedTemplate ? 'Template dipilih' : 'Pilih template'}
-                </Badge>
-                <h2 className="mt-3 text-2xl font-black">Template CV</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {selectedTemplate
-                    ? `${selectedTemplate.name} • ${selectedTemplate.category || 'Template'}`
-                    : 'Belum ada template dipilih'}
-                </p>
-              </div>
-              <Button type="button" onClick={() => setShowTemplatePicker((prev) => !prev)}>
-                {showTemplatePicker ? 'Tutup Pilihan' : 'Pilih Template'}
-              </Button>
-            </div>
-            {showTemplatePicker && (
-              <div className="mt-5 space-y-4">
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {templateCategories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setTemplateCategory(category)}
-                      className={`min-h-9 shrink-0 rounded-full px-3 text-sm font-bold ${
-                        templateCategory === category
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {templates.length === 0 && <Alert tone="warning">Template belum tersedia.</Alert>}
-                  {visibleTemplates.map((template) => {
-                    return (
-                      <TemplatePreviewCard
-                        key={template.id}
-                        template={template}
-                        cv={templatePreviewCv(template)}
-                        selected={template.id === selectedId}
-                        onSelect={(nextTemplate) => {
-                          applyTemplate(nextTemplate);
-                          setShowTemplatePicker(false);
-                        }}
-                        scale={0.25}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="order-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm sm:p-5 xl:order-2">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <div>
-                <h2 className="text-2xl font-black">Preview langsung</h2>
-                <p className="text-sm text-slate-500">
-                  {selectedTemplate
-                    ? `${selectedTemplate.name} • ${selectedTemplate.category || 'Template'}`
-                    : 'Belum ada template dipilih'}
-                </p>
-              </div>
-            </div>
-            <div
-              className={`overflow-auto rounded-xl border border-slate-200 bg-white p-4 shadow-inner sm:p-6 ${previewWidth}`}
-            >
-              <Suspense fallback={<div className="h-96 animate-pulse" />}>
-                <TemplateRenderer
-                  data={{ cv: previewCv, theme }}
-                  template={selectedTemplate || {}}
-                  sectionsOrder={sectionsOrder}
-                />
-              </Suspense>
-            </div>
-          </div>
-          <div className="order-2 xl:order-3">
-            <ImportPanel
-              importMessage={importMessage}
-              onFileSelected={handleImportFile}
-              aiMessage={aiMessage}
-              aiLoading={aiLoading}
-              canEnhance={Boolean(lastImportedText)}
-              onEnhance={handleEnhanceWithAI}
-            />
-          </div>
-          <div className="cv-editor-surface order-3 space-y-5 rounded-2xl border border-slate-200 bg-white/95 p-4 text-slate-900 shadow-sm sm:p-5 xl:order-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <Badge tone={completion.isComplete ? 'emerald' : 'amber'}>
-                  {completion.isComplete ? 'Siap disimpan' : 'Masih perlu dilengkapi'}
-                </Badge>
-                <h2 className="mt-3 text-xl font-black">Form Editor</h2>
-                <p className="text-sm text-slate-500">Auto-save aktif agar data tetap aman.</p>
-              </div>
-              <div className="max-w-xs rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-600">
-                {completionLabel}
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between text-xs text-slate-500">
-                <span>
-                  Langkah {activeStepIndex + 1} dari {stepKeys.length}
-                </span>
-                <span>{remainingSteps} langkah tersisa</span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {stepKeys.map((key, index) => (
-                  <button
-                    key={`${key}-${index}`}
-                    type="button"
-                    onClick={() => setActiveStepIndex(index)}
-                    className={`min-h-8 rounded-full px-3 text-xs font-bold ${
-                      index === activeStepIndex
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    {index + 1}. {stepLabels[key] || key}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div
-              className={`transform-gpu rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 ${
-                isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
-              }`}
-            >
-              <div className="mb-4">
-                <div className="text-lg font-semibold text-slate-900">
-                  {stepLabels[activeStepKey] || activeStepKey}
-                </div>
-                <div className="text-xs text-slate-500">
-                  Lengkapi bagian ini sebelum melanjutkan. Error hanya muncul saat diperlukan.
-                </div>
-              </div>
-              {renderStepContent()}
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Button
-                type="button"
-                variant="light"
-                onClick={handleStepBack}
-                disabled={activeStepIndex === 0}
-              >
-                Kembali
-              </Button>
-              <Button type="button" onClick={handleStepNext}>
-                {activeStepIndex === stepKeys.length - 1 ? 'Simpan & Lanjutkan' : 'Selanjutnya'}
-              </Button>
-            </div>
-          </div>
-        </section>
       </div>
+
+      <TemplatePickerDialog
+        open={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        templates={templates}
+        visibleTemplates={visibleTemplates}
+        templateCategories={templateCategories}
+        templateCategory={templateCategory}
+        setTemplateCategory={setTemplateCategory}
+        selectedId={selectedId}
+        templatePreviewCv={templatePreviewCv}
+        onSelectTemplate={applyTemplate}
+      />
     </div>
   );
 }
