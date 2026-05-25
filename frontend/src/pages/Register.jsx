@@ -29,6 +29,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [verifyLink, setVerifyLink] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [successTone, setSuccessTone] = useState('success');
 
   const emailOk = useMemo(() => validateEmail(email), [email]);
   const passStrength = useMemo(() => strength(password), [password]);
@@ -64,10 +65,13 @@ export default function Register() {
         setError(data.error || 'Gagal register.');
       } else {
         setVerifyLink(data.verification_url || '');
+        setSuccessTone(data.email_delivery === 'failed' ? 'warning' : 'success');
         setSuccessMessage(
-          data.verification_url
-            ? 'Akun dibuat. Gunakan tautan verifikasi berikut untuk development.'
-            : data.message || 'Akun dibuat. Silakan cek email Anda untuk verifikasi.',
+          data.email_delivery === 'failed'
+            ? 'Akun berhasil dibuat, tetapi email verifikasi belum berhasil dikirim. Coba login lalu gunakan tombol kirim ulang verifikasi.'
+            : data.verification_url
+              ? 'Akun dibuat. Gunakan tautan verifikasi berikut untuk development.'
+              : data.message || 'Akun dibuat. Silakan cek email Anda untuk verifikasi.',
         );
       }
     } catch {
@@ -91,7 +95,7 @@ export default function Register() {
       <form onSubmit={submit} className="space-y-5">
         {error && <Alert tone="error">{error}</Alert>}
         {successMessage && (
-          <Alert tone="success">
+          <Alert tone={successTone}>
             {successMessage}
             {verifyLink && (
               <a href={verifyLink} className="mt-2 block break-all font-semibold underline">

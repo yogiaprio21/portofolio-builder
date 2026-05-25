@@ -29,6 +29,15 @@ function hashRefreshToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
+function buildVerificationUrl(req, tokenValue) {
+  if (config.email.appUrl) {
+    const url = new URL('/app/verify', config.email.appUrl);
+    url.searchParams.set('token', tokenValue);
+    return url.toString();
+  }
+  return `${req.protocol}://${req.get('host')}/auth/verify?token=${tokenValue}`;
+}
+
 function appendCookie(res, cookie) {
   const existing = res.getHeader('Set-Cookie');
   if (!existing) {
@@ -98,11 +107,11 @@ async function sendVerification(user, req) {
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
   await user.update({
     verificationToken: tokenHash,
-    verificationExpires: expires,
-    verificationSentAt: new Date()
+    verificationExpires: expires
   });
-  const verificationUrl = `${req.protocol}://${req.get('host')}/auth/verify?token=${tokenValue}`;
+  const verificationUrl = buildVerificationUrl(req, tokenValue);
   await sendVerificationEmail({ to: user.email, verificationUrl, requestId: req.requestId });
+  await user.update({ verificationSentAt: new Date() });
   return verificationUrl;
 }
 
@@ -114,15 +123,38 @@ exports.register = async (req, res) => {
     if (existing) return res.status(409).json({ error: 'email already registered' });
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ email, passwordHash, role: 'user', emailVerified: false });
-    const verificationUrl = await sendVerification(user, req);
+    let verificationUrl = '';
+    let emailDelivery = 'sent';
+    try {
+      verificationUrl = await sendVerification(user, req);
+    } catch (emailErr) {
+      emailDelivery = 'failed';
+      logger.error('Verification email delivery failed', {
+        userId: user.id,
+        requestId: req.requestId,
+        error: emailErr.message
+      });
+    }
     if (config.isProduction) {
       logger.info('Email verification token created', { userId: user.id, requestId: req.requestId });
-      return res.status(201).json({
-        message: 'Registration successful. Please verify your email.',
+      return res.status(emailDelivery === 'sent' ? 201 : 202).json({
+        message:
+          emailDelivery === 'sent'
+            ? 'Registration successful. Please verify your email.'
+            : 'Registration successful, but verification email could not be sent. Please request a new verification email.',
+        email_delivery: emailDelivery,
         user: { id: user.id, email: user.email, role: user.role }
       });
     }
-    res.status(201).json({ verification_url: verificationUrl, user: { id: user.id, email: user.email, role: user.role } });
+    res.status(emailDelivery === 'sent' ? 201 : 202).json({
+      verification_url: verificationUrl,
+      email_delivery: emailDelivery,
+      message:
+        emailDelivery === 'sent'
+          ? 'Registration successful. Please verify your email.'
+          : 'Registration successful, but verification email could not be sent. Please request a new verification email.',
+      user: { id: user.id, email: user.email, role: user.role }
+    });
   } catch (err) {
     logger.error('Register error', { requestId: req.requestId, error: err.message });
     res.status(500).json({ error: 'Server error' });
@@ -230,8 +262,8 @@ exports.resendVerification = async (req, res) => {
     }
 
     const verificationUrl = await sendVerification(user, req);
-    if (config.isProduction) return res.json(generic);
-    return res.json({ ...generic, verification_url: verificationUrl });
+    if (config.isProduction) return res.json({ ...generic, email_delivery: 'sent' });
+    return res.json({ ...generic, verification_url: verificationUrl, email_delivery: 'sent' });
   } catch (err) {
     logger.error('Resend verification error', { requestId: req.requestId, error: err.message });
     res.status(500).json({ error: 'Server error' });

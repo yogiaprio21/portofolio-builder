@@ -7,6 +7,19 @@ import Button from '../components/ui/Button.jsx';
 import Alert from '../components/ui/Alert.jsx';
 import FormField from '../components/ui/FormField.jsx';
 
+function authErrorMessage(error, status) {
+  if (error === 'email not verified') {
+    return 'Email belum diverifikasi. Silakan cek inbox atau kirim ulang email verifikasi.';
+  }
+  if (error === 'invalid credentials') {
+    return 'Email atau password tidak sesuai.';
+  }
+  if (status === 429) {
+    return 'Terlalu banyak percobaan. Tunggu beberapa saat lalu coba lagi.';
+  }
+  return error || 'Gagal login.';
+}
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +45,7 @@ export default function Login() {
     try {
       const data = await login({ email, password });
       if (data?.error) {
-        setError(data.error || 'Gagal login.');
+        setError(authErrorMessage(data.error, data.status));
         if (data.error === 'email not verified') setCanResend(true);
       } else {
         navigate(nextPath);
@@ -52,8 +65,17 @@ export default function Login() {
       return;
     }
     const data = await resendVerification({ email });
-    if (data?.error) setError(data.error);
-    else setNotice('Jika akun perlu verifikasi, email verifikasi sudah dikirim.');
+    if (data?.error) {
+      if (data.status === 429) {
+        setError('Mohon tunggu sebelum meminta email verifikasi lagi.');
+      } else {
+        setError(data.error);
+      }
+    } else if (data?.email_delivery === 'sent') {
+      setNotice('Email verifikasi baru sudah dikirim. Silakan cek inbox atau folder spam.');
+    } else {
+      setNotice('Jika akun perlu verifikasi, email verifikasi akan dikirim.');
+    }
   };
 
   return (
