@@ -44,6 +44,104 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function buildVerificationEmail(verificationUrl) {
+  const safeUrl = escapeHtml(verificationUrl);
+  const subject = 'Verifikasi akun PortoBuilder Anda';
+  const text = [
+    'Verifikasi akun PortoBuilder Anda',
+    '',
+    'Terima kasih sudah membuat akun PortoBuilder.',
+    'Klik tautan berikut untuk mengaktifkan workspace CV Anda:',
+    verificationUrl,
+    '',
+    'Tautan ini berlaku selama 24 jam. Abaikan email ini jika Anda tidak membuat akun PortoBuilder.'
+  ].join('\n');
+  const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${escapeHtml(subject)}</title>
+  </head>
+  <body style="margin:0;background:#e7edf7;padding:0;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#e7edf7;margin:0;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border:1px solid #dbe5f0;border-radius:18px;overflow:hidden;box-shadow:0 18px 45px rgba(15,23,42,0.12);">
+            <tr>
+              <td style="background:#020617;padding:28px 28px 24px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td>
+                      <div style="display:inline-block;width:42px;height:42px;border-radius:12px;background:#2563eb;color:#ffffff;text-align:center;line-height:42px;font-size:18px;font-weight:800;">PB</div>
+                    </td>
+                    <td align="right" style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#93c5fd;">
+                      CV Workspace
+                    </td>
+                  </tr>
+                </table>
+                <h1 style="margin:28px 0 0;font-size:30px;line-height:1.15;color:#ffffff;font-weight:800;">
+                  Verifikasi email untuk mulai membangun CV Anda.
+                </h1>
+                <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#cbd5e1;">
+                  Aktifkan akun PortoBuilder agar draft CV, template, dan export PDF tersimpan aman di workspace Anda.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px 28px 10px;">
+                <p style="margin:0;font-size:16px;line-height:1.7;color:#334155;">
+                  Terima kasih sudah mendaftar. Klik tombol di bawah ini untuk memverifikasi email dan membuka workspace PortoBuilder.
+                </p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px 0 24px;">
+                  <tr>
+                    <td bgcolor="#2563eb" style="border-radius:12px;">
+                      <a href="${safeUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:12px;">
+                        Verifikasi Email
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p style="margin:0;font-size:13px;line-height:1.6;color:#1e3a8a;">
+                        Tautan ini berlaku selama <strong>24 jam</strong>. Jika tombol tidak berfungsi, salin tautan di bawah ini ke browser Anda.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#64748b;word-break:break-all;">
+                  ${safeUrl}
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 28px 30px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e2e8f0;">
+                  <tr>
+                    <td style="padding-top:18px;">
+                      <p style="margin:0;font-size:12px;line-height:1.7;color:#94a3b8;">
+                        Jika Anda tidak membuat akun PortoBuilder, abaikan email ini. Akun tidak akan aktif sebelum email diverifikasi.
+                      </p>
+                      <p style="margin:14px 0 0;font-size:12px;color:#64748b;font-weight:700;">
+                        PortoBuilder
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  return { subject, html, text };
+}
+
 async function sendWithResend({ to, subject, html, text }) {
   if (!config.email.resendApiKey) {
     throw new Error('RESEND_API_KEY is required for EMAIL_PROVIDER=resend');
@@ -97,15 +195,7 @@ async function sendWithBrevo({ to, subject, html, text }) {
 }
 
 async function sendVerificationEmail({ to, verificationUrl, requestId }) {
-  const subject = 'Verify your Portfolio Builder account';
-  const safeUrl = escapeHtml(verificationUrl);
-  const html = `
-    <p>Thanks for registering with Portfolio Builder.</p>
-    <p><a href="${safeUrl}">Verify your email address</a></p>
-    <p>If the button does not work, open this link:</p>
-    <p>${safeUrl}</p>
-  `;
-  const text = `Verify your email address: ${verificationUrl}`;
+  const { subject, html, text } = buildVerificationEmail(verificationUrl);
 
   if (config.email.provider === 'resend') {
     return await sendWithResend({ to, subject, html, text });
