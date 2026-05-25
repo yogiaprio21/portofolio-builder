@@ -1,6 +1,6 @@
 import { env } from './shared/config/env';
 
-const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN';
+export const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN';
 const USER_KEY = 'USER';
 let refreshPromise = null;
 
@@ -115,11 +115,15 @@ export async function getTemplate(id) {
 }
 
 export async function login(payload) {
-  return await fetchJson(`${env.apiBase}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  }, { retryAuth: false });
+  return await fetchJson(
+    `${env.apiBase}/auth/login`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+    { retryAuth: false },
+  );
 }
 
 export async function register(payload) {
@@ -131,10 +135,14 @@ export async function register(payload) {
 }
 
 export async function logout() {
-  const data = await fetchJson(`${env.apiBase}/auth/logout`, {
-    method: 'POST',
-    headers: authHeaders(),
-  }, { retryAuth: false });
+  const data = await fetchJson(
+    `${env.apiBase}/auth/logout`,
+    {
+      method: 'POST',
+      headers: authHeaders(),
+    },
+    { retryAuth: false },
+  );
   clearSession();
   return data;
 }
@@ -146,11 +154,15 @@ export async function getMe() {
 }
 
 export async function resendVerification(payload) {
-  return await fetchJson(`${env.apiBase}/auth/resend-verification`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  }, { retryAuth: false });
+  return await fetchJson(
+    `${env.apiBase}/auth/resend-verification`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+    { retryAuth: false },
+  );
 }
 
 export async function verifyEmail(token) {

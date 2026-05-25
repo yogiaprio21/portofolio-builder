@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../auth/useAuth.js';
 import Button from './ui/Button.jsx';
+import BrandLogo from './BrandLogo.jsx';
 
 export default function Navbar() {
   const { isAuthenticated, logout } = useAuth();
@@ -55,10 +56,7 @@ export default function Navbar() {
     <>
       <header className="fixed left-0 top-0 z-40 w-full border-b border-white/10 bg-slate-950/90 shadow-lg backdrop-blur-xl">
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to={isAuthenticated ? '/app' : '/'} className="text-xl font-extrabold tracking-tight">
-            <span className="text-blue-300">Porto</span>
-            <span className="text-white">Builder</span>
-          </Link>
+          <BrandLogo to={isAuthenticated ? '/app' : '/'} />
 
           <nav className="hidden items-center gap-2 md:flex">
             {isAuthenticated ? authLinks : guestLinks}

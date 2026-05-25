@@ -1,0 +1,24 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PortoBuilder preview</title>
+  <desc id="desc">Social sharing image for PortoBuilder CV and portfolio builder.</desc>
+  <rect width="1200" height="630" fill="#020617"/>
+  <rect x="72" y="72" width="1056" height="486" rx="36" fill="#0F172A" stroke="#1E40AF" stroke-width="2"/>
+  <rect x="118" y="124" width="116" height="116" rx="26" fill="#F8FAFC"/>
+  <path d="M142 148H183C202 148 214 159 214 176C214 193 202 204 183 204H164V226H142V148ZM164 167V185H181C188 185 193 182 193 176C193 170 188 167 181 167H164Z" fill="#0F172A"/>
+  <path d="M174 205H203C220 205 231 214 231 229C231 244 220 254 203 254H174V205ZM194 222V237H202C208 237 212 234 212 229C212 225 208 222 202 222H194Z" fill="#2563EB"/>
+  <text x="272" y="162" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="900" letter-spacing="0">Porto<tspan fill="#93C5FD">Builder</tspan></text>
+  <text x="278" y="222" fill="#CBD5E1" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="600" letter-spacing="0">CV ATS, portfolio profesional, dan preview template yang hidup.</text>
+  <rect x="126" y="302" width="286" height="172" rx="18" fill="#F8FAFC"/>
+  <rect x="154" y="333" width="96" height="12" rx="6" fill="#2563EB"/>
+  <rect x="154" y="365" width="214" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="154" y="386" width="188" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="154" y="423" width="74" height="10" rx="5" fill="#0F172A"/>
+  <rect x="240" y="423" width="74" height="10" rx="5" fill="#0F172A"/>
+  <rect x="470" y="302" width="286" height="172" rx="18" fill="#F8FAFC"/>
+  <rect x="498" y="333" width="72" height="72" rx="36" fill="#DBEAFE"/>
+  <rect x="592" y="343" width="118" height="10" rx="5" fill="#0F172A"/>
+  <rect x="592" y="368" width="92" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="498" y="431" width="196" height="9" rx="4.5" fill="#CBD5E1"/>
+  <rect x="814" y="302" width="220" height="172" rx="18" fill="#F8FAFC"/>
+  <path d="M858 402L903 447L992 346" stroke="#2563EB" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

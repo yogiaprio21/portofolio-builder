@@ -2,7 +2,14 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react
 import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createPortfolio, getTemplates, getPortfolio, updatePortfolio, getTemplate } from '../api';
+import {
+  createPortfolio,
+  getTemplates,
+  getPortfolio,
+  updatePortfolio,
+  getTemplate,
+  getStoredToken,
+} from '../api';
 import { resolveText, hasText } from '../shared/lib/text';
 import { toast } from 'react-hot-toast';
 import useImportCv from '../hooks/useImportCv';
@@ -563,8 +570,9 @@ export default function Create() {
 
   const completionLabel = completion.isComplete
     ? 'Form sudah lengkap'
-    : `Lengkapi: ${completion.missing.slice(0, 3).join(', ')}${completion.missing.length > 3 ? ` +${completion.missing.length - 3} lainnya` : ''
-    }`;
+    : `Lengkapi: ${completion.missing.slice(0, 3).join(', ')}${
+        completion.missing.length > 3 ? ` +${completion.missing.length - 3} lainnya` : ''
+      }`;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -810,7 +818,7 @@ export default function Create() {
       notify('info', 'Pilih template terlebih dahulu.');
       return;
     }
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
+    const token = getStoredToken();
     if (!token) {
       notify('warning', 'Silakan login terlebih dahulu.');
       navigate('/app/login?next=/app/create');
@@ -1063,7 +1071,11 @@ export default function Create() {
                 Ikuti langkahnya, preview akan ikut berubah saat Anda mengisi data.
               </p>
             </div>
-            <Stepper steps={stepperItems} currentIndex={activeStepIndex} onSelect={setActiveStepIndex} />
+            <Stepper
+              steps={stepperItems}
+              currentIndex={activeStepIndex}
+              onSelect={setActiveStepIndex}
+            />
           </div>
 
           <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
@@ -1076,10 +1088,11 @@ export default function Create() {
                   onDragStart={() => handleDragStart(key)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(key)}
-                  className={`px-4 py-2 rounded-lg border cursor-move ${dragKey === key
+                  className={`px-4 py-2 rounded-lg border cursor-move ${
+                    dragKey === key
                       ? 'border-blue-400 bg-blue-500/20'
                       : 'border-white/20 bg-white/5'
-                    }`}
+                  }`}
                 >
                   {key}
                 </div>
@@ -1170,8 +1183,9 @@ export default function Create() {
                 <button
                   key={mode}
                   onClick={() => setPreviewMode(mode)}
-                  className={`py-2 rounded-lg text-sm font-semibold ${previewMode === mode ? 'bg-blue-600' : 'bg-white/10'
-                    }`}
+                  className={`py-2 rounded-lg text-sm font-semibold ${
+                    previewMode === mode ? 'bg-blue-600' : 'bg-white/10'
+                  }`}
                 >
                   {mode.toUpperCase()}
                 </button>
@@ -1217,55 +1231,60 @@ export default function Create() {
                   ))}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {templates.length === 0 && (
-                  <div className="text-sm text-blue-100/80">Template belum tersedia.</div>
-                )}
-                {visibleTemplates.map((template) => {
-                  const isSelected = template.id === selectedId;
-                  return (
-                    <button
-                      key={template.id}
-                      onClick={() => {
-                        applyTemplate(template);
-                        setShowTemplatePicker(false);
-                      }}
-                      className={`text-left rounded-xl border p-3 transition ${isSelected
-                          ? 'border-blue-400 bg-blue-500/20'
-                          : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  {templates.length === 0 && (
+                    <div className="text-sm text-blue-100/80">Template belum tersedia.</div>
+                  )}
+                  {visibleTemplates.map((template) => {
+                    const isSelected = template.id === selectedId;
+                    return (
+                      <button
+                        key={template.id}
+                        onClick={() => {
+                          applyTemplate(template);
+                          setShowTemplatePicker(false);
+                        }}
+                        className={`text-left rounded-xl border p-3 transition ${
+                          isSelected
+                            ? 'border-blue-400 bg-blue-500/20'
+                            : 'border-white/10 bg-white/5 hover:bg-white/10'
                         }`}
-                    >
-                      <div className="h-48 overflow-hidden rounded-lg bg-white shadow-inner">
-                        <div className="h-[680px] w-[920px] origin-top-left scale-[0.29] p-8">
-                          <Suspense fallback={<div className="h-full w-full animate-pulse bg-slate-100" />}>
-                            <TemplateRenderer
-                              data={{ cv: templatePreviewCv(template), theme: {} }}
-                              template={template}
-                              sectionsOrder={template.sections || []}
-                            />
-                          </Suspense>
-                        </div>
-                      </div>
-                      <div className="mt-3 flex items-start justify-between gap-3">
-                        <div>
-                          <div className="text-sm font-semibold text-white">{template.name}</div>
-                          <div className="text-xs text-blue-100/80">
-                            {template.category} • {template.metadata?.roleTarget || 'General'}
+                      >
+                        <div className="h-48 overflow-hidden rounded-lg bg-white shadow-inner">
+                          <div className="h-[680px] w-[920px] origin-top-left scale-[0.29] p-8">
+                            <Suspense
+                              fallback={
+                                <div className="h-full w-full animate-pulse bg-slate-100" />
+                              }
+                            >
+                              <TemplateRenderer
+                                data={{ cv: templatePreviewCv(template), theme: {} }}
+                                template={template}
+                                sectionsOrder={template.sections || []}
+                              />
+                            </Suspense>
                           </div>
                         </div>
-                        {template.metadata?.isAtsSafe && (
-                          <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[11px] font-semibold text-emerald-100">
-                            ATS
-                          </span>
+                        <div className="mt-3 flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-semibold text-white">{template.name}</div>
+                            <div className="text-xs text-blue-100/80">
+                              {template.category} • {template.metadata?.roleTarget || 'General'}
+                            </div>
+                          </div>
+                          {template.metadata?.isAtsSafe && (
+                            <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[11px] font-semibold text-emerald-100">
+                              ATS
+                            </span>
+                          )}
+                        </div>
+                        {template.metadata?.recommendedFor && (
+                          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-blue-100/75">
+                            {template.metadata.recommendedFor}
+                          </p>
                         )}
-                      </div>
-                      {template.metadata?.recommendedFor && (
-                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-blue-100/75">
-                          {template.metadata.recommendedFor}
-                        </p>
-                      )}
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1281,7 +1300,9 @@ export default function Create() {
                 </p>
               </div>
             </div>
-            <div className={`overflow-auto rounded-xl border bg-white p-4 shadow-inner sm:p-6 ${previewWidth}`}>
+            <div
+              className={`overflow-auto rounded-xl border bg-white p-4 shadow-inner sm:p-6 ${previewWidth}`}
+            >
               <Suspense fallback={<div className="h-96 animate-pulse" />}>
                 <TemplateRenderer
                   data={{ cv: previewCv, theme }}
@@ -1338,8 +1359,9 @@ export default function Create() {
               </div>
             </div>
             <div
-              className={`rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 transform-gpu ${isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
-                }`}
+              className={`rounded-xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 transform-gpu ${
+                isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
+              }`}
             >
               <div className="mb-4">
                 <div className="text-lg font-semibold text-slate-900">
@@ -1360,10 +1382,7 @@ export default function Create() {
               >
                 Kembali
               </Button>
-              <Button
-                type="button"
-                onClick={handleStepNext}
-              >
+              <Button type="button" onClick={handleStepNext}>
                 {activeStepIndex === stepKeys.length - 1 ? 'Simpan & Lanjutkan' : 'Selanjutnya'}
               </Button>
             </div>
@@ -1376,10 +1395,18 @@ export default function Create() {
           <span>{progressPercent}%</span>
         </div>
         <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
-          <div className="h-full rounded-full bg-blue-600" style={{ width: `${progressPercent}%` }} />
+          <div
+            className="h-full rounded-full bg-blue-600"
+            style={{ width: `${progressPercent}%` }}
+          />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Button type="button" variant="light" onClick={handleStepBack} disabled={activeStepIndex === 0}>
+          <Button
+            type="button"
+            variant="light"
+            onClick={handleStepBack}
+            disabled={activeStepIndex === 0}
+          >
             Kembali
           </Button>
           <Button type="button" onClick={handleStepNext}>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BrandLogo from './BrandLogo.jsx';
 
 export default function Footer() {
   return (
@@ -7,11 +8,11 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           {/* Brand & Slogan */}
           <div className="text-center md:text-left">
-            <Link to="/app" className="text-2xl font-extrabold tracking-tight block mb-2">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                PortoBuilder
-              </span>
-            </Link>
+            <BrandLogo
+              to="/"
+              className="mb-3 justify-center md:justify-start"
+              markClassName="h-9 w-9"
+            />
             <p className="text-white/50 text-sm max-w-sm">
               Membangun karier profesional Anda dengan satu klik. Buat CV dan Portofolio modern
               dalam hitungan menit.

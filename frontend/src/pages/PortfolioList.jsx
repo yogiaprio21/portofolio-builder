@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { listMyPortfolioItems, deletePortfolioItem } from '../api';
+import { listMyPortfolioItems, deletePortfolioItem, getStoredToken } from '../api';
 import Button from '../components/ui/Button.jsx';
 import PageShell from '../components/ui/PageShell.jsx';
 import Alert from '../components/ui/Alert.jsx';
@@ -90,7 +90,7 @@ export default function PortfolioList() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('ACCESS_TOKEN') : '';
+    const token = getStoredToken();
     if (!token) {
       setNotice('Anda harus login untuk menghapus portofolio.');
       return;
@@ -117,10 +117,13 @@ export default function PortfolioList() {
       eyebrow="Koleksi"
       title="Koleksi CV Saya"
       description="Cari, lanjutkan edit, preview, atau hapus CV yang sudah tersimpan."
-      actions={<Button type="button" onClick={() => navigate('/app/create')}>Buat CV Baru</Button>}
+      actions={
+        <Button type="button" onClick={() => navigate('/app/create')}>
+          Buat CV Baru
+        </Button>
+      }
       className="pb-24"
     >
-
       <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.05] p-4">
         <label htmlFor="portfolio-search" className="mb-2 block text-sm font-medium text-white/75">
           Cari CV
@@ -134,7 +137,11 @@ export default function PortfolioList() {
         />
       </div>
 
-      {notice && <Alert tone="warning" className="mb-6">{notice}</Alert>}
+      {notice && (
+        <Alert tone="warning" className="mb-6">
+          {notice}
+        </Alert>
+      )}
 
       {total > 0 && (
         <div className="flex items-center justify-between mb-6 text-sm">
@@ -172,7 +179,11 @@ export default function PortfolioList() {
       ) : filtered.length === 0 ? (
         <EmptyState
           title={q ? 'Tidak ada hasil pencarian.' : 'Anda belum memiliki CV.'}
-          description={q ? 'Coba gunakan kata kunci lain atau reset pencarian.' : 'Koleksi Anda masih kosong. Mulai buat CV pertama dengan template dan bantuan AI.'}
+          description={
+            q
+              ? 'Coba gunakan kata kunci lain atau reset pencarian.'
+              : 'Koleksi Anda masih kosong. Mulai buat CV pertama dengan template dan bantuan AI.'
+          }
           actionLabel={q ? 'Reset Pencarian' : 'Buat CV Sekarang'}
           onAction={q ? () => setQ('') : () => navigate('/app/create')}
         />
@@ -267,7 +278,9 @@ export default function PortfolioList() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Hapus CV?"
-        description={deleteTarget ? `CV "${deleteTarget.title}" akan dihapus permanen dari koleksi Anda.` : ''}
+        description={
+          deleteTarget ? `CV "${deleteTarget.title}" akan dihapus permanen dari koleksi Anda.` : ''
+        }
         confirmLabel="Hapus"
         danger
         onCancel={() => setDeleteTarget(null)}

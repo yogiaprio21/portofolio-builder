@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createPortfolioItem, updatePortfolioItem, getPortfolioItem, uploadImage } from '../api';
+import {
+  createPortfolioItem,
+  updatePortfolioItem,
+  getPortfolioItem,
+  uploadImage,
+  getStoredToken,
+} from '../api';
 import Button from '../components/ui/Button.jsx';
 import PageShell from '../components/ui/PageShell.jsx';
 import Alert from '../components/ui/Alert.jsx';
@@ -79,7 +85,7 @@ export default function PortfolioAdmin() {
     setErrors(v);
     if (Object.keys(v).length) return;
     setSaving(true);
-    const token = window.localStorage.getItem('ACCESS_TOKEN') || '';
+    const token = getStoredToken();
     try {
       if (id && id !== 'new') {
         const res = await updatePortfolioItem(id, form, token);
@@ -146,10 +152,7 @@ export default function PortfolioAdmin() {
             />
           </div>
           <div className="flex gap-3">
-            <Button
-              onClick={handleSubmit}
-              disabled={saving}
-            >
+            <Button onClick={handleSubmit} disabled={saving}>
               {saving ? 'Menyimpan…' : 'Simpan'}
             </Button>
             <Button type="button" variant="light" onClick={() => navigate('/app/portfolios')}>
@@ -172,8 +175,8 @@ export default function PortfolioAdmin() {
             <img
               alt="preview"
               src={previewUrl}
-            className="w-full h-64 object-cover rounded-lg border border-white/20"
-          />
+              className="w-full h-64 object-cover rounded-lg border border-white/20"
+            />
           )}
           <div>
             <label htmlFor="portfolio-image-url" className="block text-sm">

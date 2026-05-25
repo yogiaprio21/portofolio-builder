@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { getTemplates } from '../api';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button.jsx';
+import BrandLogo from '../components/BrandLogo.jsx';
 const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const fallbackCv = {
@@ -22,11 +23,21 @@ const fallbackCv = {
       company: 'Studio Nusantara',
       startDate: '2022',
       endDate: 'Sekarang',
-      highlights: ['Meningkatkan completion onboarding sebesar 28%.', 'Merapikan komponen desain untuk 4 produk internal.'],
+      highlights: [
+        'Meningkatkan completion onboarding sebesar 28%.',
+        'Merapikan komponen desain untuk 4 produk internal.',
+      ],
     },
   ],
   skills: [{ category: 'Core', items: ['UX Research', 'Figma', 'Design System', 'React'] }],
-  projects: [{ name: 'SaaS Onboarding', role: 'Designer', description: 'Riset, wireframe, dan prototipe high-fidelity.', tech: 'Figma, Maze' }],
+  projects: [
+    {
+      name: 'SaaS Onboarding',
+      role: 'Designer',
+      description: 'Riset, wireframe, dan prototipe high-fidelity.',
+      tech: 'Figma, Maze',
+    },
+  ],
   languageBySection: { summary: 'id', workExperience: 'id', skills: 'en', projects: 'id' },
 };
 
@@ -36,7 +47,8 @@ export default function Landing() {
   useEffect(() => {
     getTemplates()
       .then((data) => {
-        if (Array.isArray(data)) setTemplate(data.find((item) => item.metadata?.isAtsSafe) || data[0]);
+        if (Array.isArray(data))
+          setTemplate(data.find((item) => item.metadata?.isAtsSafe) || data[0]);
       })
       .catch(() => {});
   }, []);
@@ -47,9 +59,7 @@ export default function Landing() {
     <div className="bg-slate-950 text-white">
       <header className="border-b border-white/10">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="text-xl font-extrabold">
-            <span className="text-blue-300">Porto</span>Builder
-          </Link>
+          <BrandLogo to="/" markClassName="h-9 w-9" />
           <div className="flex gap-2">
             <Button as={Link} to="/app/login" variant="ghost" size="sm">
               Masuk
@@ -126,8 +136,14 @@ export default function Landing() {
           <div className="mx-auto grid max-w-7xl gap-4 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8">
             {[
               ['Konten lebih jelas', 'Form bertahap membantu Anda fokus ke satu bagian CV.'],
-              ['Template hidup', 'Setiap template punya preview sample sehingga mudah dibandingkan.'],
-              ['Siap deploy', 'Backend, database, upload, email, dan AI sudah disiapkan untuk production.'],
+              [
+                'Template hidup',
+                'Setiap template punya preview sample sehingga mudah dibandingkan.',
+              ],
+              [
+                'Siap deploy',
+                'Backend, database, upload, email, dan AI sudah disiapkan untuk production.',
+              ],
             ].map(([title, desc]) => (
               <article key={title} className="rounded-xl border border-white/10 bg-slate-950 p-6">
                 <h2 className="text-lg font-bold">{title}</h2>

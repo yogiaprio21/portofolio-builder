@@ -1,0 +1,13 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PortoBuilder mark</title>
+  <desc id="desc">Monogram PB inside a polished document and builder grid mark.</desc>
+  <rect width="128" height="128" rx="28" fill="#020617"/>
+  <path d="M33 25H79L98 44V103H33V25Z" fill="#F8FAFC"/>
+  <path d="M79 25V45H98L79 25Z" fill="#BFDBFE"/>
+  <path d="M44 44H66C76.5 44 83 50.1 83 59C83 68 76.5 74 66 74H55V88H44V44ZM55 54V64H65.2C69.5 64 72 62.1 72 59C72 55.9 69.5 54 65.2 54H55Z" fill="#0F172A"/>
+  <path d="M62 75H77.5C87.1 75 93 80.1 93 88.2C93 96.3 87.1 101.5 77.5 101.5H62V75ZM72.5 84.2V92.2H77C80.4 92.2 82.4 90.7 82.4 88.2C82.4 85.8 80.4 84.2 77 84.2H72.5Z" fill="#2563EB"/>
+  <path d="M31 91H52V103H31V91Z" fill="#2563EB"/>
+  <path d="M31 75H52V87H31V75Z" fill="#60A5FA"/>
+  <path d="M31 59H52V71H31V59Z" fill="#93C5FD"/>
+  <path d="M37 105H93" stroke="#60A5FA" stroke-width="5" stroke-linecap="round"/>
+</svg>

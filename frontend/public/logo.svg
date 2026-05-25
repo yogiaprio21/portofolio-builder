@@ -1,0 +1,12 @@
+<svg width="320" height="96" viewBox="0 0 320 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PortoBuilder</title>
+  <desc id="desc">Premium PortoBuilder wordmark for CV and portfolio builder.</desc>
+  <rect width="320" height="96" rx="22" fill="#020617"/>
+  <rect x="18" y="18" width="60" height="60" rx="16" fill="#F8FAFC"/>
+  <path d="M31 30H52C62 30 68 35.8 68 44.3C68 52.8 62 58.5 52 58.5H42V70H31V30ZM42 40V49H51C54.9 49 57.2 47.4 57.2 44.5C57.2 41.6 54.9 40 51 40H42Z" fill="#0F172A"/>
+  <path d="M48 57H63C72 57 77.5 61.7 77.5 69.2C77.5 76.7 72 81.4 63 81.4H48V57ZM58 65.5V73H62.4C65.5 73 67.3 71.6 67.3 69.2C67.3 66.9 65.5 65.5 62.4 65.5H58Z" fill="#2563EB"/>
+  <path d="M20 66H40V78H20V66Z" fill="#2563EB"/>
+  <text x="96" y="47" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="0">Porto</text>
+  <text x="181" y="47" fill="#93C5FD" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="0">Builder</text>
+  <text x="98" y="67" fill="#CBD5E1" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="0">ATS CV and portfolio builder</text>
+</svg>
