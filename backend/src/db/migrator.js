@@ -52,16 +52,19 @@ async function executedMigrationNames(sequelize) {
 
 async function runMigrations(sequelize) {
   const queryInterface = sequelize.getQueryInterface();
+  console.log('Migration check starting');
   await sequelize.transaction(async (transaction) => {
     await ensureMetaTable(queryInterface, transaction);
   });
 
   const executed = await executedMigrationNames(sequelize);
   const migrations = loadMigrations();
+  let appliedCount = 0;
 
   for (const migration of migrations) {
     if (executed.has(migration.name)) continue;
 
+    console.log(`Migration applying: ${migration.name}`);
     await sequelize.transaction(async (transaction) => {
       await migration.up(queryInterface, DataTypes, { transaction, sequelize });
       await queryInterface.bulkInsert(
@@ -70,8 +73,10 @@ async function runMigrations(sequelize) {
         { transaction }
       );
     });
+    appliedCount += 1;
     console.log(`Migration applied: ${migration.name}`);
   }
+  console.log(`Migration check complete: ${appliedCount} applied, ${migrations.length - appliedCount} skipped`);
 }
 
 module.exports = { runMigrations };

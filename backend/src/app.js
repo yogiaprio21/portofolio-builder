@@ -8,6 +8,7 @@ const { requestContext } = require('./middleware/requestContext');
 const { requestLogger } = require('./middleware/requestLogger');
 const { sequelize } = require('./config/sequelize');
 const logger = require('./utils/logger');
+const { getReadiness } = require('./state/readiness');
 
 const portfoliosRoute = require('./routes/portfolios');
 const templatesRoute = require('./routes/templates');
@@ -61,9 +62,13 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.get('/healthz', (req, res) => res.json({ ok: true }));
 app.get('/readyz', async (req, res) => {
+  const readiness = getReadiness();
+  if (!readiness.ready) {
+    return res.status(503).json({ ok: false, ...readiness });
+  }
   try {
     await sequelize.authenticate();
-    res.json({ ok: true, database: 'ok' });
+    res.json({ ok: true, ...readiness, database: 'ok' });
   } catch (err) {
     logger.error('Readiness check failed', { requestId: req.requestId, error: err.message });
     res.status(503).json({ ok: false, database: 'unavailable' });

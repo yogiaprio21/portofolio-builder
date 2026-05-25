@@ -10,24 +10,40 @@ require('./models/Session');
 require('./models/UploadAsset');
 const templateSeeds = require('./data/templates');
 const logger = require('./utils/logger');
+const { markFailed, markReady, markStarting } = require('./state/readiness');
 
 const PORT = config.port;
 let server;
 
-async function start(){
-  try{
-    await runMigrations(sequelize);
-    for (const seed of templateSeeds) {
-      const existing = await Template.findByPk(seed.id);
-      if (!existing) {
-        await Template.create(seed);
-      }
+async function initializeDatabase() {
+  markStarting();
+  logger.info('Database initialization starting');
+  await runMigrations(sequelize);
+  logger.info('Database migrations complete');
+
+  let createdTemplates = 0;
+  for (const seed of templateSeeds) {
+    const existing = await Template.findByPk(seed.id);
+    if (!existing) {
+      await Template.create(seed);
+      createdTemplates += 1;
     }
-    server = app.listen(PORT, () => logger.info('Backend running', { port: PORT }));
-  }catch(err){
-    logger.error('Backend startup failed', { error: err.message, stack: err.stack });
-    process.exit(1);
   }
+  logger.info('Template seed complete', { createdTemplates });
+  markReady();
+}
+
+async function start() {
+  server = app.listen(PORT, () => logger.info('Backend running', { port: PORT }));
+  initializeDatabase().catch((err) => {
+    markFailed(err);
+    logger.error('Backend startup failed', { error: err.message, stack: err.stack });
+    if (server) {
+      server.close(() => process.exit(1));
+    } else {
+      process.exit(1);
+    }
+  });
 }
 
 start();
