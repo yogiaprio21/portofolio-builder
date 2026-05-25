@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../api';
+import Button from '../components/ui/Button.jsx';
+import Alert from '../components/ui/Alert.jsx';
 
 function validateEmail(e) {
   return /\S+@\S+\.\S+/.test(e);
@@ -33,7 +35,8 @@ export default function Register() {
     setError('');
   }, [email, password, confirm]);
 
-  const submit = async () => {
+  const submit = async (event) => {
+    event?.preventDefault();
     if (!emailOk) {
       setError('Format email tidak valid');
       return;
@@ -67,12 +70,9 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 text-white relative">
-      {/* Decorative background element matching Login */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />
-
+    <div className="flex min-h-[calc(100vh-68px)] items-center justify-center p-4 text-white sm:p-6">
       <div className="w-full max-w-md relative">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
+        <form onSubmit={submit} className="rounded-xl border border-white/10 bg-white/[0.05] p-6 shadow-2xl sm:p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Buat Akun Baru</h1>
             <p className="text-white/60 text-sm">Bergabunglah dan mulai bangun portfolio Anda</p>
@@ -161,26 +161,16 @@ export default function Register() {
               />
             </div>
 
-            {error && (
-              <div
-                className="text-red-400 text-sm bg-red-400/10 p-3 rounded-lg border border-red-400/20"
-                aria-live="polite"
-              >
-                {error}
-              </div>
-            )}
+            {error && <Alert tone="error">{error}</Alert>}
 
-            <button
-              onClick={submit}
+            <Button
+              type="submit"
               disabled={loading}
-              className={`w-full py-3.5 mt-2 rounded-xl font-semibold text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] ${
-                loading
-                  ? 'bg-white/10 text-white/50 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50'
-              }`}
+              className="mt-2 w-full"
+              size="lg"
             >
               {loading ? 'Memproses…' : 'Daftar Sekarang'}
-            </button>
+            </Button>
 
             {verifyLink && (
               <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
@@ -230,7 +220,7 @@ export default function Register() {
               </div>
             )}
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

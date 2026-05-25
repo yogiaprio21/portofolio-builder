@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { deletePortfolioItem, getPortfolioItem } from '../api';
 import { generateA4PdfFromElement } from '../utils/pdfGenerator';
+import Button from '../components/ui/Button.jsx';
+import PageShell from '../components/ui/PageShell.jsx';
+import Alert from '../components/ui/Alert.jsx';
+import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 
 export default function PortfolioView() {
   const { id } = useParams();
@@ -11,6 +15,7 @@ export default function PortfolioView() {
   const [error, setError] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -33,26 +38,27 @@ export default function PortfolioView() {
     if (res?.success) navigate('/app/portfolios');
   };
 
-  if (loading) return <div className="container mx-auto px-6 pt-8 text-white">Loading…</div>;
+  if (loading) return <PageShell><div className="h-80 animate-pulse rounded-xl bg-white/[0.06]" /></PageShell>;
   if (!item) {
     return (
-      <div className="container mx-auto px-6 pt-8 text-white space-y-4">
-        <div>{error || 'Tidak ditemukan'}</div>
-        <button
-          onClick={() => navigate('/app/portfolios')}
-          className="px-4 py-2 rounded-lg bg-slate-600"
-        >
+      <PageShell className="space-y-4">
+        <Alert tone="error">{error || 'Tidak ditemukan'}</Alert>
+        <Button type="button" onClick={() => navigate('/app/portfolios')}>
           Kembali ke daftar
-        </button>
-      </div>
+        </Button>
+      </PageShell>
     );
   }
 
   return (
-    <div ref={containerRef} className="container mx-auto px-6 pt-8 pb-24 text-white space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{item.title}</h1>
-        <button
+    <PageShell
+      title={item.title}
+      description="Preview item portfolio dan export sebagai PDF bila diperlukan."
+      className="space-y-6 pb-24"
+      actions={
+        <>
+          <Button
+            type="button"
           onClick={async () => {
             if (!containerRef.current) return;
             try {
@@ -75,22 +81,24 @@ export default function PortfolioView() {
             }
           }}
           disabled={pdfLoading}
-          className={`px-4 py-2 rounded-lg ${pdfLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
           {pdfLoading ? 'Membuat PDF…' : 'PDF'}
-        </button>
-        {window.localStorage.getItem('ACCESS_TOKEN') && (
-          <div className="flex gap-3">
-            <Link to={`/app/portfolios/${id}/edit`} className="px-4 py-2 rounded-lg bg-slate-500">
+          </Button>
+          {window.localStorage.getItem('ACCESS_TOKEN') && (
+            <>
+            <Button as={Link} to={`/app/portfolios/${id}/edit`} variant="secondary">
               Edit
-            </Link>
-            <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600">
+            </Button>
+            <Button type="button" onClick={() => setConfirmDelete(true)} variant="danger">
               Hapus
-            </button>
-          </div>
-        )}
-      </div>
-      {pdfError && <div className="text-red-300 text-sm">{pdfError}</div>}
+            </Button>
+            </>
+          )}
+        </>
+      }
+    >
+      <div ref={containerRef} className="space-y-6">
+      {pdfError && <Alert tone="error">{pdfError}</Alert>}
       {item.image_url || item.imageUrl ? (
         <img
           alt={item.title}
@@ -109,6 +117,16 @@ export default function PortfolioView() {
           Lihat Project
         </a>
       ) : null}
-    </div>
+      </div>
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Hapus item portfolio?"
+        description="Item ini akan dihapus permanen dari koleksi Anda."
+        confirmLabel="Hapus"
+        danger
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+      />
+    </PageShell>
   );
 }

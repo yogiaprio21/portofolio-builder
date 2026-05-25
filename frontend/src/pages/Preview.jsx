@@ -1,8 +1,10 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 import { getPortfolio, getTemplate } from '../api';
 import { downloadPdfFromElement } from '../utils/pdfGenerator';
+import Button from '../components/ui/Button.jsx';
+import Alert from '../components/ui/Alert.jsx';
 
 export default function Preview() {
   const { id } = useParams();
@@ -76,9 +78,9 @@ export default function Preview() {
 
   if (!portfolio) {
     return (
-      <div className="min-h-screen bg-gray-100 p-10 flex flex-col items-center mt-24">
+      <div className="flex min-h-[calc(100vh-68px)] flex-col items-center bg-slate-100 p-4 sm:p-8">
         <div className="w-full max-w-5xl">
-          {error && <div className="mb-6 text-red-500">{error}</div>}
+          {error && <Alert tone="error" className="mb-6 text-red-100">{error}</Alert>}
           <div className="flex justify-between items-center mb-6 animate-pulse">
             <div className="h-8 w-40 bg-slate-200 rounded" />
             <div className="h-10 w-32 bg-slate-200 rounded" />
@@ -101,9 +103,12 @@ export default function Preview() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-10 flex flex-col items-center mt-24">
-      <div className="w-full max-w-5xl flex justify-between items-center mb-6 print:hidden">
-        <div className="flex gap-2">
+    <div className="min-h-[calc(100vh-68px)] bg-slate-100 p-4 sm:p-8">
+      <div className="sticky top-[76px] z-20 mx-auto mb-6 flex w-full max-w-5xl flex-col gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur print:hidden sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <Button as={Link} to={`/app/create/${id}`} variant="light" size="sm">
+            Edit
+          </Button>
           {['web', 'pdf', 'mobile'].map((mode) => (
             <button
               key={mode}
@@ -116,10 +121,10 @@ export default function Preview() {
             </button>
           ))}
         </div>
-        <button
+        <Button
           onClick={downloadPDF}
           disabled={pdfLoading}
-          className={`px-6 py-3 text-white font-semibold rounded-lg shadow-lg flex items-center gap-2 transition-all active:scale-95 ${pdfLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+          className="w-full sm:w-auto"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -136,12 +141,12 @@ export default function Preview() {
             />
           </svg>
           {pdfLoading ? 'Membuat PDF…' : 'Download PDF'}
-        </button>
+        </Button>
       </div>
-      {pdfError && <div className="w-full max-w-5xl mb-4 text-red-500">{pdfError}</div>}
+      {pdfError && <Alert tone="error" className="mx-auto mb-4 max-w-5xl">{pdfError}</Alert>}
 
       <div
-        className={`bg-white rounded-[12px] shadow-[0_0_35px_rgba(0,0,0,0.12)] w-full transition-all ${
+        className={`mx-auto w-full rounded-xl bg-white shadow-[0_0_35px_rgba(0,0,0,0.12)] transition-all ${
           previewMode === 'pdf' ? 'p-0 border-0 shadow-none' : 'p-10 border border-gray-200'
         } ${previewWidth}`}
         style={{ minHeight: '1123px' }}

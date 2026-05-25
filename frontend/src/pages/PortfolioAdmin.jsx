@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createPortfolioItem, updatePortfolioItem, getPortfolioItem, uploadImage } from '../api';
+import Button from '../components/ui/Button.jsx';
+import PageShell from '../components/ui/PageShell.jsx';
+import Alert from '../components/ui/Alert.jsx';
+import SectionCard from '../components/ui/SectionCard.jsx';
 
 function validate({ title, description }) {
   const errors = {};
@@ -92,12 +96,14 @@ export default function PortfolioAdmin() {
   };
 
   return (
-    <div className="container mx-auto px-6 pt-8 pb-24 text-white space-y-6">
-      <h1 className="text-2xl font-bold">
-        {id && id !== 'new' ? 'Edit Portfolio' : 'Tambah Portfolio'}
-      </h1>
-      <div className="grid md:grid-cols-[2fr_1fr] gap-8">
-        <div className="space-y-4">
+    <PageShell
+      eyebrow="Portfolio item"
+      title={id && id !== 'new' ? 'Edit item portfolio' : 'Tambah item portfolio'}
+      description="Gunakan halaman ini untuk menambahkan karya atau project terpisah dari CV utama Anda."
+      className="pb-24"
+    >
+      <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
+        <SectionCard tone="light" className="space-y-4 p-6">
           <div>
             <label htmlFor="portfolio-title" className="block text-sm">
               Judul
@@ -107,7 +113,7 @@ export default function PortfolioAdmin() {
               value={form.title}
               onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
               aria-invalid={Boolean(errors.title)}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20"
+              className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
             />
             {errors.title && <div className="text-red-300 text-sm mt-1">{errors.title}</div>}
           </div>
@@ -121,7 +127,7 @@ export default function PortfolioAdmin() {
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
               aria-invalid={Boolean(errors.description)}
               rows={6}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
             />
             {errors.description && (
               <div className="text-red-300 text-sm mt-1">{errors.description}</div>
@@ -135,22 +141,24 @@ export default function PortfolioAdmin() {
               id="portfolio-project-url"
               value={form.project_url}
               onChange={(e) => setForm((p) => ({ ...p, project_url: e.target.value }))}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20"
+              className="mt-1 min-h-11 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
               placeholder="https://..."
             />
           </div>
           <div className="flex gap-3">
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={saving}
-              className={`px-4 py-2 rounded-lg ${saving ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'}`}
             >
               {saving ? 'Menyimpan…' : 'Simpan'}
-            </button>
+            </Button>
+            <Button type="button" variant="light" onClick={() => navigate('/app/portfolios')}>
+              Kembali
+            </Button>
           </div>
-          {formError && <div className="text-red-300 text-sm">{formError}</div>}
-        </div>
-        <div className="space-y-4">
+          {formError && <Alert tone="error">{formError}</Alert>}
+        </SectionCard>
+        <SectionCard className="space-y-4 p-6">
           <label htmlFor="portfolio-image" className="block text-sm">
             Gambar
           </label>
@@ -164,8 +172,8 @@ export default function PortfolioAdmin() {
             <img
               alt="preview"
               src={previewUrl}
-              className="w-full h-64 object-cover rounded-lg border border-white/20"
-            />
+            className="w-full h-64 object-cover rounded-lg border border-white/20"
+          />
           )}
           <div>
             <label htmlFor="portfolio-image-url" className="block text-sm">
@@ -175,12 +183,12 @@ export default function PortfolioAdmin() {
               id="portfolio-image-url"
               value={form.image_url}
               onChange={(e) => setForm((p) => ({ ...p, image_url: e.target.value }))}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20"
+              className="mt-1 min-h-11 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2"
               placeholder="https://..."
             />
           </div>
-        </div>
+        </SectionCard>
       </div>
-    </div>
+    </PageShell>
   );
 }

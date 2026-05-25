@@ -1,72 +1,100 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../auth/useAuth.js';
+import Button from './ui/Button.jsx';
 
 export default function Navbar() {
   const { isAuthenticated, logout } = useAuth();
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
+    setOpen(false);
     navigate('/app/login');
   };
 
   const navClass = ({ isActive }) =>
-    `px-4 py-2 rounded-xl transition-colors font-medium text-sm ${
-      isActive ? 'bg-white/12 text-white' : 'text-white/75 hover:text-white hover:bg-white/10'
+    `min-h-10 px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
+      isActive ? 'bg-white/12 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
     }`;
 
-  return (
-    <header className="fixed top-0 left-0 w-full z-40 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 shadow-lg">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/app" className="text-2xl font-extrabold tracking-tight">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-300 hover:to-indigo-300 transition-all duration-300">
-            PortoBuilder
-          </span>
-        </Link>
+  const authLinks = (
+    <>
+      <NavLink to="/app" end className={navClass} onClick={() => setOpen(false)}>
+        Dashboard
+      </NavLink>
+      <NavLink to="/app/portfolios" className={navClass} onClick={() => setOpen(false)}>
+        Koleksi CV
+      </NavLink>
+      <Button as={Link} to="/app/create" size="sm" onClick={() => setOpen(false)}>
+        Buat CV
+      </Button>
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="min-h-10 rounded-lg px-3 py-2 text-sm font-medium text-red-300 transition hover:bg-red-400/10 hover:text-red-200"
+      >
+        Logout
+      </button>
+    </>
+  );
 
-        <nav className="flex gap-3 items-center">
-          {isAuthenticated ? (
-            <>
-              <NavLink to="/app" end className={navClass}>
-                Dashboard
-              </NavLink>
-              <NavLink
-                to="/app/portfolios"
-                className={navClass}
-              >
-                Koleksi CV
-              </NavLink>
-              <NavLink
-                to="/app/create"
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all duration-300 font-medium text-sm"
-              >
-                Buat CV
-              </NavLink>
-              <button
-                onClick={handleLogout}
-                className="ml-2 px-4 py-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors font-medium text-sm"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/app/login"
-                className="px-5 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors font-medium text-sm"
-              >
-                Masuk
-              </Link>
-              <Link
-                to="/app/register"
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all duration-300 font-medium text-sm"
-              >
-                Daftar
-              </Link>
-            </>
-          )}
+  const guestLinks = (
+    <>
+      <Button as={Link} to="/app/login" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+        Masuk
+      </Button>
+      <Button as={Link} to="/app/register" size="sm" onClick={() => setOpen(false)}>
+        Daftar
+      </Button>
+    </>
+  );
+
+  return (
+    <>
+      <header className="fixed left-0 top-0 z-40 w-full border-b border-white/10 bg-slate-950/90 shadow-lg backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link to={isAuthenticated ? '/app' : '/'} className="text-xl font-extrabold tracking-tight">
+            <span className="text-blue-300">Porto</span>
+            <span className="text-white">Builder</span>
+          </Link>
+
+          <nav className="hidden items-center gap-2 md:flex">
+            {isAuthenticated ? authLinks : guestLinks}
+          </nav>
+
+          <button
+            type="button"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white md:hidden"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-label="Buka navigasi"
+          >
+            <span className="text-xl">{open ? '×' : '☰'}</span>
+          </button>
+        </div>
+
+        {open && (
+          <div className="border-t border-white/10 bg-slate-950 px-4 py-4 md:hidden">
+            <nav className="grid gap-2">{isAuthenticated ? authLinks : guestLinks}</nav>
+          </div>
+        )}
+      </header>
+
+      {isAuthenticated && (
+        <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-3 border-t border-white/10 bg-slate-950/95 px-2 py-2 text-xs text-white shadow-2xl backdrop-blur-xl md:hidden">
+          <NavLink to="/app" end className={navClass}>
+            Dashboard
+          </NavLink>
+          <NavLink to="/app/portfolios" className={navClass}>
+            Koleksi
+          </NavLink>
+          <NavLink to="/app/create" className={navClass}>
+            Buat CV
+          </NavLink>
         </nav>
-      </div>
-    </header>
+      )}
+    </>
   );
 }

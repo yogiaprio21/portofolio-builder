@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900 border-t border-white/10 pt-12 pb-8">
+    <footer className="border-t border-white/10 bg-slate-900 pb-24 pt-12 md:pb-8">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           {/* Brand & Slogan */}

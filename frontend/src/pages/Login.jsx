@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { resendVerification } from '../api';
 import { useAuth } from '../auth/useAuth.js';
+import Button from '../components/ui/Button.jsx';
+import Alert from '../components/ui/Alert.jsx';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,7 +16,8 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
 
-  const submit = async () => {
+  const submit = async (event) => {
+    event?.preventDefault();
     setError('');
     setNotice('');
     setCanResend(false);
@@ -51,12 +54,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 text-white relative">
-      {/* Optional decorative background element */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />
-
+    <div className="flex min-h-[calc(100vh-68px)] items-center justify-center p-4 text-white sm:p-6">
       <div className="w-full max-w-md relative">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
+        <form onSubmit={submit} className="rounded-xl border border-white/10 bg-white/[0.05] p-6 shadow-2xl sm:p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Selamat Datang Kembali</h1>
             <p className="text-white/60 text-sm">Silakan masuk ke akun Anda untuk melanjutkan</p>
@@ -100,10 +100,7 @@ export default function Login() {
             </div>
 
             {error && (
-              <div
-                className="text-red-400 text-sm bg-red-400/10 p-3 rounded-lg border border-red-400/20"
-                aria-live="polite"
-              >
+              <Alert tone="error">
                 {error}
                 {canResend && (
                   <button
@@ -114,28 +111,18 @@ export default function Login() {
                     Kirim ulang email verifikasi
                   </button>
                 )}
-              </div>
+              </Alert>
             )}
-            {notice && (
-              <div
-                className="text-emerald-300 text-sm bg-emerald-400/10 p-3 rounded-lg border border-emerald-400/20"
-                aria-live="polite"
-              >
-                {notice}
-              </div>
-            )}
+            {notice && <Alert tone="success">{notice}</Alert>}
 
-            <button
-              onClick={submit}
+            <Button
+              type="submit"
               disabled={loading}
-              className={`w-full py-3.5 mt-2 rounded-xl font-semibold text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] ${
-                loading
-                  ? 'bg-white/10 text-white/50 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50'
-              }`}
+              className="mt-2 w-full"
+              size="lg"
             >
               {loading ? 'Memproses…' : 'Masuk'}
-            </button>
+            </Button>
 
             <div className="text-center mt-6 text-sm text-white/60">
               Belum punya akun?{' '}
@@ -151,7 +138,7 @@ export default function Login() {
               </a>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

@@ -18,6 +18,8 @@ import CertificationsList from '../features/cv/components/CertificationsList';
 import AchievementsList from '../features/cv/components/AchievementsList';
 import ReferencesList from '../features/cv/components/ReferencesList';
 import AdditionalForm from '../features/cv/components/AdditionalForm';
+import Button from '../components/ui/Button.jsx';
+import Stepper from '../components/ui/Stepper.jsx';
 const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const defaultSections = [
@@ -110,6 +112,7 @@ export default function Create() {
   });
   const [previewMode, setPreviewMode] = useState('web');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [templateCategory, setTemplateCategory] = useState('Semua');
 
   useEffect(() => {
     async function load() {
@@ -179,6 +182,17 @@ export default function Create() {
     (template) => template?.metadata?.previewCv || template?.previewCv || emptyCv,
     [],
   );
+  const templateCategories = useMemo(
+    () => ['Semua', ...new Set(templates.map((template) => template.category).filter(Boolean))],
+    [templates],
+  );
+  const visibleTemplates = useMemo(
+    () =>
+      templateCategory === 'Semua'
+        ? templates
+        : templates.filter((template) => template.category === templateCategory),
+    [templates, templateCategory],
+  );
 
   const [errors, setErrors] = useState({});
   const [formatErrors, setFormatErrors] = useState({});
@@ -224,6 +238,22 @@ export default function Create() {
     }),
     [],
   );
+  const stepHelp = useMemo(
+    () => ({
+      personal: 'Nama, kontak, dan link profesional',
+      summary: 'Cerita singkat tentang nilai Anda',
+      workExperience: 'Riwayat kerja paling relevan',
+      experience: 'Pengalaman tambahan',
+      education: 'Pendidikan dan kredensial',
+      skills: 'Keahlian yang mudah dipindai',
+      certifications: 'Sertifikasi pendukung',
+      projects: 'Studi kasus dan hasil kerja',
+      achievements: 'Pencapaian terukur',
+      references: 'Kontak referensi jika diperlukan',
+      additional: 'Bahasa, minat, dan informasi lain',
+    }),
+    [],
+  );
   const stepKeys = useMemo(() => {
     const ordered = activeSections.filter((key) => key !== 'summary');
     return ['personal', 'summary', ...ordered];
@@ -232,6 +262,10 @@ export default function Create() {
   const remainingSteps = Math.max(stepKeys.length - activeStepIndex - 1, 0);
   const totalSteps = Math.max(stepKeys.length, 1);
   const progressPercent = Math.round(((activeStepIndex + 1) / totalSteps) * 100);
+  const stepperItems = useMemo(
+    () => stepKeys.map((key) => ({ key, label: stepLabels[key] || key, help: stepHelp[key] })),
+    [stepKeys, stepLabels, stepHelp],
+  );
 
   const updatePersonal = (key, value) => {
     setCv((prev) => ({
@@ -1019,10 +1053,20 @@ export default function Create() {
   };
 
   return (
-    <div className="min-h-screen text-white bg-gradient-to-br from-slate-900 to-slate-800 p-6 pt-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-[1.1fr_1.9fr] gap-8">
-        <aside className="space-y-6">
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl border border-white/10">
+    <div className="min-h-screen bg-slate-950 p-4 pb-28 pt-8 text-white sm:p-6 sm:pb-10">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 xl:grid-cols-[1.05fr_1.95fr]">
+        <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
+            <div className="mb-4">
+              <h1 className="text-2xl font-bold">Buat CV</h1>
+              <p className="mt-1 text-sm text-white/60">
+                Ikuti langkahnya, preview akan ikut berubah saat Anda mengisi data.
+              </p>
+            </div>
+            <Stepper steps={stepperItems} currentIndex={activeStepIndex} onSelect={setActiveStepIndex} />
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
             <h4 className="font-semibold text-blue-300 mb-4">Urutan Section</h4>
             <div className="space-y-2">
               {sectionsOrder.map((key) => (
@@ -1043,7 +1087,7 @@ export default function Create() {
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl border border-white/10 space-y-4">
+          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl space-y-4">
             <h4 className="font-semibold text-blue-300">Kustomisasi</h4>
             <div className="grid gap-3">
               <label className="text-sm text-gray-300">
@@ -1119,7 +1163,7 @@ export default function Create() {
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl border border-white/10">
+          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl">
             <h4 className="font-semibold text-blue-300 mb-4">Mode Preview</h4>
             <div className="grid grid-cols-3 gap-2">
               {['web', 'pdf', 'mobile'].map((mode) => (
@@ -1137,7 +1181,7 @@ export default function Create() {
         </aside>
 
         <section className="space-y-6">
-          <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-white/10">
+          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-bold text-blue-300">Template</h2>
@@ -1155,11 +1199,28 @@ export default function Create() {
               </button>
             </div>
             {showTemplatePicker && (
-              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="mt-5 space-y-4">
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {templateCategories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => setTemplateCategory(category)}
+                      className={`min-h-9 shrink-0 rounded-lg px-3 text-sm font-semibold ${
+                        templateCategory === category
+                          ? 'bg-blue-600 text-white'
+                          : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {templates.length === 0 && (
                   <div className="text-sm text-blue-100/80">Template belum tersedia.</div>
                 )}
-                {templates.map((template) => {
+                {visibleTemplates.map((template) => {
                   const isSelected = template.id === selectedId;
                   return (
                     <button
@@ -1205,10 +1266,11 @@ export default function Create() {
                     </button>
                   );
                 })}
+                </div>
               </div>
             )}
           </div>
-          <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-white/10">
+          <div className="rounded-xl border border-white/10 bg-white/[0.05] p-5 shadow-xl sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
                 <h2 className="text-2xl font-bold text-blue-300">Preview</h2>
@@ -1219,7 +1281,7 @@ export default function Create() {
                 </p>
               </div>
             </div>
-            <div className={`bg-white rounded-xl p-6 shadow-inner border ${previewWidth}`}>
+            <div className={`overflow-auto rounded-xl border bg-white p-4 shadow-inner sm:p-6 ${previewWidth}`}>
               <Suspense fallback={<div className="h-96 animate-pulse" />}>
                 <TemplateRenderer
                   data={{ cv: previewCv, theme }}
@@ -1237,7 +1299,7 @@ export default function Create() {
             canEnhance={Boolean(lastImportedText)}
             onEnhance={handleEnhanceWithAI}
           />
-          <div className="bg-white rounded-xl p-6 text-slate-900 space-y-6">
+          <div className="rounded-xl bg-white p-5 text-slate-900 shadow-xl sm:p-6 space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-semibold">Form Editor</h2>
@@ -1260,15 +1322,18 @@ export default function Create() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {stepKeys.map((key, index) => (
-                  <div
+                  <button
                     key={`${key}-${index}`}
-                    className={`px-3 py-1 rounded-full text-xs ${index === activeStepIndex
+                    type="button"
+                    onClick={() => setActiveStepIndex(index)}
+                    className={`min-h-8 rounded-full px-3 text-xs font-semibold ${
+                      index === activeStepIndex
                         ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 text-slate-600'
-                      }`}
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
                   >
                     {index + 1}. {stepLabels[key] || key}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1287,25 +1352,40 @@ export default function Create() {
               {renderStepContent()}
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <button
+              <Button
+                type="button"
+                variant="light"
                 onClick={handleStepBack}
                 disabled={activeStepIndex === 0}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold ${activeStepIndex === 0
-                    ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                    : 'bg-slate-900 text-white'
-                  }`}
               >
                 Kembali
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={handleStepNext}
-                className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold"
               >
                 {activeStepIndex === stepKeys.length - 1 ? 'Simpan & Lanjutkan' : 'Selanjutnya'}
-              </button>
+              </Button>
             </div>
           </div>
         </section>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white p-3 shadow-2xl md:hidden">
+        <div className="mb-2 flex items-center justify-between text-xs text-slate-600">
+          <span>{stepLabels[activeStepKey] || activeStepKey}</span>
+          <span>{progressPercent}%</span>
+        </div>
+        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full rounded-full bg-blue-600" style={{ width: `${progressPercent}%` }} />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Button type="button" variant="light" onClick={handleStepBack} disabled={activeStepIndex === 0}>
+            Kembali
+          </Button>
+          <Button type="button" onClick={handleStepNext}>
+            {activeStepIndex === stepKeys.length - 1 ? 'Simpan' : 'Lanjut'}
+          </Button>
+        </div>
       </div>
     </div>
   );

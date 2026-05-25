@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { listMyPortfolioItems, deletePortfolioItem } from '../api';
+import Button from '../components/ui/Button.jsx';
+import PageShell from '../components/ui/PageShell.jsx';
+import Alert from '../components/ui/Alert.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
+import SkeletonCard from '../components/ui/SkeletonCard.jsx';
 
 // Helper to generate a consistent gradient color based on a string (like a title or ID)
 function getGradientFromText(text) {
@@ -18,6 +24,19 @@ function getGradientFromText(text) {
     hash = text.charCodeAt(i) + ((hash << 5) - hash);
   }
   return gradients[Math.abs(hash) % gradients.length];
+}
+
+function formatDate(value) {
+  if (!value) return 'Belum tersedia';
+  try {
+    return new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(value));
+  } catch {
+    return 'Belum tersedia';
+  }
 }
 
 export default function PortfolioList() {
@@ -94,34 +113,28 @@ export default function PortfolioList() {
   };
 
   return (
-    <div className="container mx-auto px-6 pt-8 pb-24 text-white">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-extrabold tracking-tight">Koleksi CV Saya</h1>
-        <button
-          onClick={() => navigate('/app/create')}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all duration-300 font-semibold"
-        >
-          + Buat CV Baru
-        </button>
-      </div>
+    <PageShell
+      eyebrow="Koleksi"
+      title="Koleksi CV Saya"
+      description="Cari, lanjutkan edit, preview, atau hapus CV yang sudah tersimpan."
+      actions={<Button type="button" onClick={() => navigate('/app/create')}>Buat CV Baru</Button>}
+      className="pb-24"
+    >
 
-      <div className="mb-8 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+      <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.05] p-4">
+        <label htmlFor="portfolio-search" className="mb-2 block text-sm font-medium text-white/75">
+          Cari CV
+        </label>
         <input
+          id="portfolio-search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Cari CV berdasarkan judul atau deskripsi…"
-          className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-white/40"
+          className="min-h-11 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 outline-none transition placeholder:text-white/40 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
         />
       </div>
 
-      {notice && (
-        <div
-          className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 font-medium"
-          aria-live="polite"
-        >
-          {notice}
-        </div>
-      )}
+      {notice && <Alert tone="warning" className="mb-6">{notice}</Alert>}
 
       {total > 0 && (
         <div className="flex items-center justify-between mb-6 text-sm">
@@ -151,35 +164,18 @@ export default function PortfolioList() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonCard key={index} className="h-80" />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center backdrop-blur-sm">
-          <div className="text-xl font-bold mb-2">Anda belum memiliki CV.</div>
-          <div className="text-white/60 mb-6">
-            Koleksi Anda masih kosong. Mulai buat CV pertama Anda dengan bantuan AI sekarang!
-          </div>
-          <div className="flex justify-center gap-4">
-            {q && (
-              <button
-                onClick={() => {
-                  setQ('');
-                  setNotice('');
-                }}
-                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-medium"
-              >
-                Reset Pencarian
-              </button>
-            )}
-            <button
-              onClick={() => navigate('/app/create')}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all font-medium"
-            >
-              Buat CV Sekarang
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          title={q ? 'Tidak ada hasil pencarian.' : 'Anda belum memiliki CV.'}
+          description={q ? 'Coba gunakan kata kunci lain atau reset pencarian.' : 'Koleksi Anda masih kosong. Mulai buat CV pertama dengan template dan bantuan AI.'}
+          actionLabel={q ? 'Reset Pencarian' : 'Buat CV Sekarang'}
+          onAction={q ? () => setQ('') : () => navigate('/app/create')}
+        />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filtered.map((it) => {
@@ -201,13 +197,24 @@ export default function PortfolioList() {
                     className="w-full h-48 object-cover border-b border-white/10"
                   />
                 ) : (
-                  <div
-                    className={`w-full h-48 bg-gradient-to-br ${gradientClass} flex items-center justify-center border-b border-white/10 relative overflow-hidden`}
-                  >
-                    <span className="text-7xl font-bold text-white/30 drop-shadow-xl z-10">
-                      {initial}
-                    </span>
-                    <div className="absolute inset-0 bg-black/10 z-0 mix-blend-overlay"></div>
+                  <div className={`h-48 w-full bg-gradient-to-br ${gradientClass} p-5`}>
+                    <div className="h-full rounded-lg bg-white/90 p-4 text-slate-800 shadow-xl">
+                      <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
+                        <div>
+                          <div className="text-lg font-bold leading-tight">{title}</div>
+                          <div className="text-xs text-slate-500">{formatDate(it.createdAt)}</div>
+                        </div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold">
+                          {initial}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-2 rounded bg-slate-200" />
+                        <div className="h-2 w-4/5 rounded bg-slate-200" />
+                        <div className="mt-4 h-2 w-1/2 rounded bg-slate-300" />
+                        <div className="h-2 w-3/4 rounded bg-slate-200" />
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -257,27 +264,15 @@ export default function PortfolioList() {
           })}
         </div>
       )}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-950 p-6 shadow-2xl">
-            <h2 className="text-xl font-bold">Hapus CV?</h2>
-            <p className="mt-3 text-white/65">
-              CV "{deleteTarget.title}" akan dihapus permanen dari koleksi Anda.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15"
-              >
-                Batal
-              </button>
-              <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500">
-                Hapus
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Hapus CV?"
+        description={deleteTarget ? `CV "${deleteTarget.title}" akan dihapus permanen dari koleksi Anda.` : ''}
+        confirmLabel="Hapus"
+        danger
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
+    </PageShell>
   );
 }
