@@ -3,12 +3,11 @@ const app = require('./app');
 const { sequelize } = require('./config/sequelize');
 const config = require('./config/env');
 const { runMigrations } = require('./db/migrator');
-const Template = require('./models/Template');
 require('./models/PortfolioItem');
 require('./models/User');
 require('./models/Session');
 require('./models/UploadAsset');
-const templateSeeds = require('./data/templates');
+const { seedDatabase } = require('./db/seeder');
 const logger = require('./utils/logger');
 const { markFailed, markReady, markStarting } = require('./state/readiness');
 
@@ -21,15 +20,11 @@ async function initializeDatabase() {
   await runMigrations(sequelize);
   logger.info('Database migrations complete');
 
-  let createdTemplates = 0;
-  for (const seed of templateSeeds) {
-    const existing = await Template.findByPk(seed.id);
-    if (!existing) {
-      await Template.create(seed);
-      createdTemplates += 1;
-    }
+  if (config.seed.onStart) {
+    await seedDatabase();
+  } else {
+    logger.info('Database seed skipped', { reason: 'SEED_ON_START=false' });
   }
-  logger.info('Template seed complete', { createdTemplates });
   markReady();
 }
 

@@ -9,7 +9,10 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "migrate": "node src/db/migrate.js",
-    "test:integration": "node scripts/integration-test.js"
+    "seed": "node scripts/seed.js",
+    "db:setup": "node scripts/seed.js",
+    "test:integration": "node scripts/integration-test.js",
+    "verify:backend": "node scripts/verify-backend.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

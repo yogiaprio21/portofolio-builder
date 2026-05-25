@@ -1,5 +1,6 @@
 const path = require('path');
 const cvParser = require('../services/cvParser');
+const { parseCvText } = require('../services/aiParser');
 const fs = require('fs');
 
 exports.parseCv = async (req, res) => {
@@ -8,10 +9,20 @@ exports.parseCv = async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const parsed = await cvParser.parsePdf(filepath);
+    const enhanced = parsed.text && parsed.text.trim().length >= 20
+      ? await parseCvText(parsed.text)
+      : { cv: null, languageBySection: {}, provider: 'none' };
 
     return res.json({
       message: "CV parsed successfully",
-      data: parsed
+      data: {
+        name: parsed.name,
+        email: parsed.email,
+        skills: parsed.skills,
+        experience: parsed.experience
+      },
+      textLength: parsed.text.length,
+      ...enhanced
     });
 
   } catch (error) {

@@ -33,6 +33,8 @@ requireInProduction('CORS_ORIGIN');
 
 const uploadMaxBytes = intFromEnv('UPLOAD_MAX_BYTES', 5 * 1024 * 1024);
 const storageProvider = process.env.STORAGE_PROVIDER || 'local';
+const aiProvider = (process.env.AI_PROVIDER || 'heuristic').toLowerCase();
+const aiProviderChain = csv(process.env.AI_PROVIDER_CHAIN).map((provider) => provider.toLowerCase());
 
 module.exports = {
   isProduction,
@@ -46,6 +48,15 @@ module.exports = {
   authCookieSameSite: process.env.AUTH_COOKIE_SAMESITE || 'Lax',
   authCookieSecure: boolFromEnv('AUTH_COOKIE_SECURE', isProduction),
   verificationCooldownSeconds: intFromEnv('VERIFICATION_RESEND_COOLDOWN_SECONDS', 60),
+  seed: {
+    onStart: boolFromEnv('SEED_ON_START', true),
+    updateExistingTemplates: boolFromEnv('SEED_UPDATE_EXISTING_TEMPLATES', true),
+    adminEmail: process.env.SEED_ADMIN_EMAIL || '',
+    adminPassword: process.env.SEED_ADMIN_PASSWORD || '',
+    demoPortfolio: boolFromEnv('SEED_DEMO_PORTFOLIO', false),
+    demoEmail: process.env.SEED_DEMO_EMAIL || '',
+    demoPassword: process.env.SEED_DEMO_PASSWORD || ''
+  },
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
   uploadMaxBytes,
   requireUploadAuth: boolFromEnv('REQUIRE_UPLOAD_AUTH', isProduction),
@@ -71,6 +82,22 @@ module.exports = {
       rejectUnauthorized: boolFromEnv('SMTP_REJECT_UNAUTHORIZED', true),
       ehloName: process.env.SMTP_EHLO_NAME || 'portfolio-builder.local'
     }
+  },
+  ai: {
+    provider: aiProvider,
+    providerChain: aiProviderChain.length ? aiProviderChain : [aiProvider],
+    openaiApiKey: process.env.OPENAI_API_KEY || '',
+    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+    groqApiKey: process.env.GROQ_API_KEY || '',
+    groqModel: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
+    openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
+    openrouterModel: process.env.OPENROUTER_MODEL || 'google/gemma-3-27b-it:free',
+    openrouterReferer: process.env.OPENROUTER_REFERER || process.env.APP_URL || '',
+    openrouterTitle: process.env.OPENROUTER_TITLE || 'Portfolio Builder',
+    timeoutMs: intFromEnv('AI_TIMEOUT_MS', 20000),
+    maxInputChars: intFromEnv('AI_MAX_INPUT_CHARS', 50000)
   },
   corsOrigins: csv(process.env.CORS_ORIGIN),
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || '1mb',
@@ -109,4 +136,22 @@ if (process.env.EMAIL_PROVIDER === 'smtp') {
   requireInProduction('SMTP_HOST');
   requireInProduction('SMTP_USER');
   requireInProduction('SMTP_PASS');
+}
+
+const requiredAiProviders = new Set(aiProviderChain.length ? aiProviderChain : [aiProvider]);
+
+if (requiredAiProviders.has('openai')) {
+  requireInProduction('OPENAI_API_KEY');
+}
+
+if (requiredAiProviders.has('gemini')) {
+  requireInProduction('GEMINI_API_KEY');
+}
+
+if (requiredAiProviders.has('groq')) {
+  requireInProduction('GROQ_API_KEY');
+}
+
+if (requiredAiProviders.has('openrouter')) {
+  requireInProduction('OPENROUTER_API_KEY');
 }

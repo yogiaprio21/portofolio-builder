@@ -44,10 +44,10 @@ exports.parsePdf = async (filepath) => {
 
     experience = expLines.slice(0, 4).join(" | ");
 
-    return { name, email, skills, experience };
+    return { name, email, skills, experience, text, lines };
 
   } catch (err) {
     console.error("CV parse error:", err);
-    return { name: "", email: "", skills: "", experience: "" };
+    return { name: "", email: "", skills: "", experience: "", text: "", lines: [] };
   }
 };

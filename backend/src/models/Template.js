@@ -8,6 +8,7 @@ const Template = sequelize.define('Template', {
   style: DataTypes.JSON,
   sections: DataTypes.JSON,
   tags: DataTypes.JSON,
+  metadata: DataTypes.JSON,
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true

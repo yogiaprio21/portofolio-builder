@@ -175,6 +175,10 @@ export default function Create() {
     () => templates.find((t) => t.id === selectedId),
     [templates, selectedId],
   );
+  const templatePreviewCv = useCallback(
+    (template) => template?.metadata?.previewCv || template?.previewCv || emptyCv,
+    [],
+  );
 
   const [errors, setErrors] = useState({});
   const [formatErrors, setFormatErrors] = useState({});
@@ -1151,7 +1155,7 @@ export default function Create() {
               </button>
             </div>
             {showTemplatePicker && (
-              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {templates.length === 0 && (
                   <div className="text-sm text-blue-100/80">Template belum tersedia.</div>
                 )}
@@ -1164,13 +1168,40 @@ export default function Create() {
                         applyTemplate(template);
                         setShowTemplatePicker(false);
                       }}
-                      className={`text-left rounded-xl border p-4 transition ${isSelected
+                      className={`text-left rounded-xl border p-3 transition ${isSelected
                           ? 'border-blue-400 bg-blue-500/20'
                           : 'border-white/10 bg-white/5 hover:bg-white/10'
                         }`}
                     >
-                      <div className="text-sm font-semibold text-white">{template.name}</div>
-                      <div className="text-xs text-blue-100/80">{template.category}</div>
+                      <div className="h-48 overflow-hidden rounded-lg bg-white shadow-inner">
+                        <div className="h-[680px] w-[920px] origin-top-left scale-[0.29] p-8">
+                          <Suspense fallback={<div className="h-full w-full animate-pulse bg-slate-100" />}>
+                            <TemplateRenderer
+                              data={{ cv: templatePreviewCv(template), theme: {} }}
+                              template={template}
+                              sectionsOrder={template.sections || []}
+                            />
+                          </Suspense>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-white">{template.name}</div>
+                          <div className="text-xs text-blue-100/80">
+                            {template.category} • {template.metadata?.roleTarget || 'General'}
+                          </div>
+                        </div>
+                        {template.metadata?.isAtsSafe && (
+                          <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[11px] font-semibold text-emerald-100">
+                            ATS
+                          </span>
+                        )}
+                      </div>
+                      {template.metadata?.recommendedFor && (
+                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-blue-100/75">
+                          {template.metadata.recommendedFor}
+                        </p>
+                      )}
                     </button>
                   );
                 })}

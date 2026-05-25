@@ -23,7 +23,7 @@ exports.getTemplate = async (req, res) => {
 
 exports.createTemplate = async (req, res) => {
   try {
-    const { name, category, layout, style, sections, tags } = req.body;
+    const { name, category, layout, style, sections, tags, metadata } = req.body;
     if (!name || !layout) {
       return res.status(400).json({ error: 'Missing template data' });
     }
@@ -34,6 +34,7 @@ exports.createTemplate = async (req, res) => {
       style: style || {},
       sections: sections || [],
       tags: tags || [],
+      metadata: metadata || {},
       isActive: true
     });
     res.status(201).json(template);
