@@ -1,8 +1,8 @@
-import { resolveText } from '../../../shared/lib/text';
+import { resolveTextStrict } from '../../../shared/lib/text';
+import LanguageTabs from './LanguageTabs';
 
 export default function CertificationsList({
   lang,
-  languageOptions,
   setSectionLanguage,
   items,
   addItem,
@@ -12,24 +12,21 @@ export default function CertificationsList({
   errors,
   attemptSubmit,
   markIfError,
+  languageStatus,
+  onCopyLanguage,
 }) {
   const sectionKey = 'certifications';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">Sertifikasi</h3>
-          <select
-            value={lang}
-            onChange={(e) => setSectionLanguage(sectionKey, e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
-          >
-            {languageOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <h3 className="text-lg font-black text-slate-900">Sertifikasi</h3>
+          <LanguageTabs
+            lang={lang}
+            onChange={(value) => setSectionLanguage(sectionKey, value)}
+            status={languageStatus}
+            onCopy={onCopyLanguage}
+          />
         </div>
         <button
           onClick={() =>
@@ -53,7 +50,7 @@ export default function CertificationsList({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="text-sm text-slate-700">Nama Sertifikasi*</label>
             <input
-              value={resolveText(item.name, lang)}
+              value={resolveTextStrict(item.name, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'name', lang, e.target.value)
               }
@@ -70,7 +67,7 @@ export default function CertificationsList({
             )}
             <label className="text-sm text-slate-700">Penerbit*</label>
             <input
-              value={resolveText(item.issuer, lang)}
+              value={resolveTextStrict(item.issuer, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'issuer', lang, e.target.value)
               }

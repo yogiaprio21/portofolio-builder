@@ -37,8 +37,13 @@ const openAiJsonSchema = {
 const systemPrompt = [
   'You extract CV/resume text into a JSON object for a portfolio builder.',
   'Preserve Indonesian and English content when present.',
+  'For localized text fields, always use objects shaped as { "id": "", "en": "" }.',
+  'For localized bullet arrays, always use objects shaped as { "id": [], "en": [] }.',
+  'If the source text is only Indonesian, put content only in id and leave en empty. If the source text is only English, put content only in en and leave id empty.',
+  'Do not translate unless the source text explicitly contains both language versions or the request asks for bilingual content.',
   'Use these section keys only: personal, summary, workExperience, experience, education, skills, projects, certifications, achievements, references, languageBySection, additional.',
   'Do not invent facts that are not present in the CV text.',
+  'Keep dates, URLs, emails, phone numbers, GPA, and credential URLs as plain strings.',
   'Return JSON only.'
 ].join(' ');
 
@@ -90,6 +95,8 @@ async function parseOpenAiCompatible({
   hintLanguageBySection,
   timeoutMs,
   provider,
+  targetLanguageMode,
+  currentCv,
   headers = {},
   responseFormat = { type: 'json_object' }
 }) {
@@ -110,7 +117,7 @@ async function parseOpenAiCompatible({
         { role: 'system', content: systemPrompt },
         {
           role: 'user',
-          content: JSON.stringify({ text, hintLanguageBySection })
+          content: JSON.stringify({ text, hintLanguageBySection, targetLanguageMode, currentCv })
         }
       ]
     }

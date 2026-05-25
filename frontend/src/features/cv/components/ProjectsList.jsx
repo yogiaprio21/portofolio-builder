@@ -1,8 +1,8 @@
-import { resolveText } from '../../../shared/lib/text';
+import { resolveTextStrict } from '../../../shared/lib/text';
+import LanguageTabs from './LanguageTabs';
 
 export default function ProjectsList({
   lang,
-  languageOptions,
   setSectionLanguage,
   items,
   addItem,
@@ -12,24 +12,21 @@ export default function ProjectsList({
   errors,
   attemptSubmit,
   markIfError,
+  languageStatus,
+  onCopyLanguage,
 }) {
   const sectionKey = 'projects';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">Proyek</h3>
-          <select
-            value={lang}
-            onChange={(e) => setSectionLanguage(sectionKey, e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
-          >
-            {languageOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <h3 className="text-lg font-black text-slate-900">Proyek</h3>
+          <LanguageTabs
+            lang={lang}
+            onChange={(value) => setSectionLanguage(sectionKey, value)}
+            status={languageStatus}
+            onCopy={onCopyLanguage}
+          />
         </div>
         <button
           onClick={() =>
@@ -54,7 +51,7 @@ export default function ProjectsList({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="text-sm text-slate-700">Nama Proyek*</label>
             <input
-              value={resolveText(item.name, lang)}
+              value={resolveTextStrict(item.name, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'name', lang, e.target.value)
               }
@@ -68,7 +65,7 @@ export default function ProjectsList({
               <div className="text-xs text-red-600 mt-1">{errors[`projects.${index}.name`]}</div>
             )}
             <input
-              value={resolveText(item.role, lang)}
+              value={resolveTextStrict(item.role, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'role', lang, e.target.value)
               }
@@ -76,7 +73,7 @@ export default function ProjectsList({
               placeholder="Peran"
             />
             <input
-              value={resolveText(item.tech, lang)}
+              value={resolveTextStrict(item.tech, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'tech', lang, e.target.value)
               }
@@ -91,7 +88,7 @@ export default function ProjectsList({
             />
           </div>
           <textarea
-            value={resolveText(item.description, lang)}
+            value={resolveTextStrict(item.description, lang)}
             onChange={(e) =>
               updateLocalizedField(sectionKey, index, 'description', lang, e.target.value)
             }

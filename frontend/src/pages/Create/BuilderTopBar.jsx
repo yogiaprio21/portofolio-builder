@@ -8,6 +8,7 @@ export default function BuilderTopBar({
   completionLabel,
   selectedTemplate,
   onOpenTemplate,
+  onOpenPreview,
   onSubmit,
 }) {
   return (
@@ -42,6 +43,9 @@ export default function BuilderTopBar({
           <div className="flex flex-wrap gap-2 sm:justify-end">
             <Button type="button" variant="dark" onClick={onOpenTemplate}>
               {selectedTemplate ? 'Ganti Template' : 'Pilih Template'}
+            </Button>
+            <Button type="button" variant="dark" onClick={onOpenPreview}>
+              Preview & Setting
             </Button>
             <Button type="button" onClick={onSubmit}>
               Simpan

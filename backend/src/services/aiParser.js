@@ -352,7 +352,7 @@ function heuristicEnhanceCv(text, hintLanguageBySection = {}) {
   return { cv, languageBySection: cv.languageBySection, provider: 'heuristic' };
 }
 
-async function parseCvText(text, hintLanguageBySection = {}) {
+async function parseCvText(text, hintLanguageBySection = {}, options = {}) {
   const clippedText = String(text || '').slice(0, config.ai.maxInputChars);
   const chain = Array.isArray(config.ai.providerChain) && config.ai.providerChain.length
     ? config.ai.providerChain
@@ -366,19 +366,19 @@ async function parseCvText(text, hintLanguageBySection = {}) {
     try {
       if (provider === 'openai') {
         const { parseWithOpenAi } = require('./openaiCvParser');
-        return await parseWithOpenAi(clippedText, hintLanguageBySection);
+        return await parseWithOpenAi(clippedText, hintLanguageBySection, options);
       }
       if (provider === 'gemini') {
         const { parseWithGemini } = require('./geminiCvParser');
-        return await parseWithGemini(clippedText, hintLanguageBySection);
+        return await parseWithGemini(clippedText, hintLanguageBySection, options);
       }
       if (provider === 'groq') {
         const { parseWithGroq } = require('./groqCvParser');
-        return await parseWithGroq(clippedText, hintLanguageBySection);
+        return await parseWithGroq(clippedText, hintLanguageBySection, options);
       }
       if (provider === 'openrouter') {
         const { parseWithOpenRouter } = require('./openrouterCvParser');
-        return await parseWithOpenRouter(clippedText, hintLanguageBySection);
+        return await parseWithOpenRouter(clippedText, hintLanguageBySection, options);
       }
       logger.warn('Unknown AI provider skipped', { provider });
     } catch (err) {

@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { resolveText, resolveArray, hasText, renderDuration } from './text';
+import {
+  resolveText,
+  resolveTextStrict,
+  resolveArray,
+  resolveArrayStrict,
+  hasText,
+  renderDuration,
+} from './text';
 
 describe('text utils', () => {
   it('resolveText handles strings and objects', () => {
@@ -14,6 +21,15 @@ describe('text utils', () => {
     expect(resolveArray({ id: ['a'] }, 'id')).toEqual(['a']);
     expect(resolveArray({ en: ['x'] }, 'id')).toEqual(['x']);
     expect(resolveArray(undefined, 'id')).toEqual([]);
+  });
+
+  it('strict resolvers do not fallback across languages', () => {
+    expect(resolveTextStrict({ id: 'hai' }, 'en')).toBe('');
+    expect(resolveTextStrict('hai', 'en')).toBe('');
+    expect(resolveTextStrict('hai', 'id')).toBe('hai');
+    expect(resolveArrayStrict({ id: ['a'] }, 'en')).toEqual([]);
+    expect(resolveArrayStrict(['a'], 'en')).toEqual([]);
+    expect(resolveArrayStrict(['a'], 'id')).toEqual(['a']);
   });
 
   it('hasText detects presence in string/object/array', () => {

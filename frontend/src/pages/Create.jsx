@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,7 +10,7 @@ import {
   getTemplate,
   getStoredToken,
 } from '../api';
-import { resolveText, hasText } from '../shared/lib/text';
+import { resolveTextStrict, hasText } from '../shared/lib/text';
 import { toast } from 'react-hot-toast';
 import useImportCv from '../hooks/useImportCv';
 import useAiEnhance from '../hooks/useAiEnhance';
@@ -29,8 +29,12 @@ import BuilderTopBar from './Create/BuilderTopBar.jsx';
 import BuilderRail from './Create/BuilderRail.jsx';
 import PreviewPanel from './Create/PreviewPanel.jsx';
 import FormWorkspace from './Create/FormWorkspace.jsx';
-import MobileBuilderPanel from './Create/MobileBuilderPanel.jsx';
 import TemplatePickerDialog from './Create/TemplatePickerDialog.jsx';
+import {
+  copySectionLanguage,
+  normalizeCvLocalization,
+  sectionLanguageStatus,
+} from '../features/cv/localization';
 const TemplateRenderer = lazy(() => import('../templates/TemplateRenderer'));
 
 const defaultSections = [
@@ -122,6 +126,8 @@ export default function Create() {
     layout: 'single',
   });
   const [previewMode, setPreviewMode] = useState('web');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [documentLanguageMode, setDocumentLanguageMode] = useState('id');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('Semua');
 
@@ -143,7 +149,8 @@ export default function Create() {
       try {
         const p = await getPortfolio(id);
         if (p?.cv) {
-          setCv(p.cv || emptyCv);
+          setCv(normalizeCvLocalization(p.cv || emptyCv, p.cv?.languageMode || 'id'));
+          if (p.cv?.languageMode) setDocumentLanguageMode(p.cv.languageMode);
           setSectionsOrder(Array.isArray(p.sectionsOrder) ? p.sectionsOrder : defaultSections);
           setSelectedId(p.templateId || null);
           setTheme({ ...(p.theme || {}), layout: p.theme?.layout || 'single' });
@@ -225,12 +232,24 @@ export default function Create() {
     return () => clearTimeout(t);
   }, [cv]);
 
-  const { importMessage, lastImportedText, handleImportFile } = useImportCv(cv, setCv);
-  const { aiMessage, aiLoading, enhance } = useAiEnhance(cv, setCv);
+  const { importMessage, lastImportedText, importDiagnostics, handleImportFile } = useImportCv(
+    setCv,
+    { documentLanguageMode },
+  );
+  const { aiMessage, aiLoading, aiReview, enhance, applyReview, discardReview } = useAiEnhance(
+    cv,
+    setCv,
+    { documentLanguageMode },
+  );
 
   const handleEnhanceWithAI = async () => {
     await enhance(lastImportedText);
   };
+
+  const languageStatusFor = useCallback((section) => sectionLanguageStatus(cv, section), [cv]);
+  const handleCopySectionLanguage = useCallback((section, fromLang, toLang) => {
+    setCv((prev) => copySectionLanguage(prev, section, fromLang, toLang));
+  }, []);
 
   const activeSections = useMemo(() => sectionsOrder, [sectionsOrder]);
   const stepLabels = useMemo(
@@ -587,7 +606,11 @@ export default function Create() {
     }
     try {
       const parsed = JSON.parse(raw);
-      if (parsed?.cv) setCv(parsed.cv);
+      if (parsed?.cv) {
+        const draftLanguageMode = parsed.documentLanguageMode || parsed.cv.languageMode || 'id';
+        setCv(normalizeCvLocalization(parsed.cv, draftLanguageMode === 'en' ? 'en' : 'id'));
+        setDocumentLanguageMode(draftLanguageMode);
+      }
       if (parsed?.theme) setTheme((prev) => ({ ...prev, ...parsed.theme }));
       if (Array.isArray(parsed?.sectionsOrder) && parsed.sectionsOrder.length > 0) {
         setSectionsOrder(parsed.sectionsOrder);
@@ -613,12 +636,22 @@ export default function Create() {
       selectedId,
       previewMode,
       activeStepIndex,
+      documentLanguageMode,
     };
     const t = setTimeout(() => {
       window.localStorage.setItem('portfolio-builder.create-draft', JSON.stringify(payload));
     }, 350);
     return () => clearTimeout(t);
-  }, [cv, theme, sectionsOrder, selectedId, previewMode, activeStepIndex, draftLoaded]);
+  }, [
+    cv,
+    theme,
+    sectionsOrder,
+    selectedId,
+    previewMode,
+    activeStepIndex,
+    documentLanguageMode,
+    draftLoaded,
+  ]);
 
   useEffect(() => {
     if (!stepKeys.length) return;
@@ -681,9 +714,9 @@ export default function Create() {
             (v) => v && (typeof v === 'string' ? v.trim() : Array.isArray(v) ? v.length : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.role, workExperienceLang).trim())
+            if (!resolveTextStrict(item.role, workExperienceLang).trim())
               nextErrors[`workExperience.${idx}.role`] = 'Posisi wajib diisi.';
-            if (!resolveText(item.company, workExperienceLang).trim())
+            if (!resolveTextStrict(item.company, workExperienceLang).trim())
               nextErrors[`workExperience.${idx}.company`] = 'Perusahaan wajib diisi.';
           }
         });
@@ -701,9 +734,9 @@ export default function Create() {
             (v) => v && (typeof v === 'string' ? v.trim() : Array.isArray(v) ? v.length : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.role, experienceLang).trim())
+            if (!resolveTextStrict(item.role, experienceLang).trim())
               nextErrors[`experience.${idx}.role`] = 'Posisi wajib diisi.';
-            if (!resolveText(item.company, experienceLang).trim())
+            if (!resolveTextStrict(item.company, experienceLang).trim())
               nextErrors[`experience.${idx}.company`] = 'Perusahaan wajib diisi.';
           }
         });
@@ -719,9 +752,9 @@ export default function Create() {
             item.gpa,
           ].some((v) => v && (typeof v === 'string' ? v.trim() : true));
           if (anyPresence) {
-            if (!resolveText(item.degree, educationLang).trim())
+            if (!resolveTextStrict(item.degree, educationLang).trim())
               nextErrors[`education.${idx}.degree`] = 'Gelar wajib diisi.';
-            if (!resolveText(item.institution, educationLang).trim())
+            if (!resolveTextStrict(item.institution, educationLang).trim())
               nextErrors[`education.${idx}.institution`] = 'Institusi wajib diisi.';
           }
         });
@@ -730,7 +763,8 @@ export default function Create() {
         (cv.skills || []).forEach((group, gIdx) => {
           const entries = Array.isArray(group.items) ? group.items : [];
           entries.forEach((entry, eIdx) => {
-            const name = typeof entry === 'string' ? entry : resolveText(entry?.name, skillsLang);
+            const name =
+              typeof entry === 'string' ? entry : resolveTextStrict(entry?.name, skillsLang);
             const level = typeof entry === 'object' ? entry?.level : '';
             const anyPresence = (name && name.trim()) || level;
             if (anyPresence) {
@@ -746,9 +780,9 @@ export default function Create() {
             (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.name, certificationsLang).trim())
+            if (!resolveTextStrict(item.name, certificationsLang).trim())
               nextErrors[`certifications.${idx}.name`] = 'Nama sertifikasi wajib diisi.';
-            if (!resolveText(item.issuer, certificationsLang).trim())
+            if (!resolveTextStrict(item.issuer, certificationsLang).trim())
               nextErrors[`certifications.${idx}.issuer`] = 'Penerbit wajib diisi.';
           }
         });
@@ -759,7 +793,7 @@ export default function Create() {
             (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.name, projectsLang).trim())
+            if (!resolveTextStrict(item.name, projectsLang).trim())
               nextErrors[`projects.${idx}.name`] = 'Nama proyek wajib diisi.';
           }
         });
@@ -770,7 +804,7 @@ export default function Create() {
             (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.title, achievementsLang).trim())
+            if (!resolveTextStrict(item.title, achievementsLang).trim())
               nextErrors[`achievements.${idx}.title`] = 'Judul wajib diisi.';
           }
         });
@@ -781,7 +815,7 @@ export default function Create() {
             (v) => v && (typeof v === 'string' ? v.trim() : true),
           );
           if (anyPresence) {
-            if (!resolveText(item.name, referencesLang).trim())
+            if (!resolveTextStrict(item.name, referencesLang).trim())
               nextErrors[`references.${idx}.name`] = 'Nama wajib diisi.';
           }
         });
@@ -830,7 +864,7 @@ export default function Create() {
     }
     try {
       const payload = {
-        cv,
+        cv: { ...cv, languageMode: documentLanguageMode },
         templateId: selectedId,
         theme,
         sectionsOrder,
@@ -886,6 +920,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('summary')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('summary', from, to)}
         />
       );
     }
@@ -900,6 +936,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('workExperience')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('workExperience', from, to)}
         />
       );
     }
@@ -920,6 +958,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('experience')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('experience', from, to)}
         />
       );
     }
@@ -940,6 +980,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('education')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('education', from, to)}
         />
       );
     }
@@ -979,6 +1021,8 @@ export default function Create() {
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
           levelOptions={skillLevelOptions}
+          languageStatus={languageStatusFor('skills')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('skills', from, to)}
         />
       );
     }
@@ -996,6 +1040,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('certifications')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('certifications', from, to)}
         />
       );
     }
@@ -1013,6 +1059,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('projects')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('projects', from, to)}
         />
       );
     }
@@ -1030,6 +1078,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('achievements')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('achievements', from, to)}
         />
       );
     }
@@ -1047,6 +1097,8 @@ export default function Create() {
           errors={mergedErrors}
           attemptSubmit={attemptSubmit}
           markIfError={markIfError}
+          languageStatus={languageStatusFor('references')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('references', from, to)}
         />
       );
     }
@@ -1058,6 +1110,8 @@ export default function Create() {
           languageOptions={languageOptions}
           setSectionLanguage={setSectionLanguage}
           onChange={updateAdditional}
+          languageStatus={languageStatusFor('additional')}
+          onCopyLanguage={(from, to) => handleCopySectionLanguage('additional', from, to)}
         />
       );
     }
@@ -1074,50 +1128,28 @@ export default function Create() {
           completionLabel={completionLabel}
           selectedTemplate={selectedTemplate}
           onOpenTemplate={() => setShowTemplatePicker(true)}
+          onOpenPreview={() => setPreviewOpen(true)}
           onSubmit={handleSubmit}
         />
 
-        <MobileBuilderPanel
-          progressPercent={progressPercent}
-          stepperItems={stepperItems}
-          activeStepIndex={activeStepIndex}
-          onSelectStep={setActiveStepIndex}
-          sectionsOrder={sectionsOrder}
-          stepLabels={stepLabels}
-          dragKey={dragKey}
-          onDragStart={handleDragStart}
-          onDrop={handleDrop}
-          theme={theme}
-          setTheme={setTheme}
-          fontOptions={fontOptions}
-        />
-
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[280px_minmax(0,1fr)_420px]">
-          <div className="hidden xl:block">
-            <BuilderRail
-              stepperItems={stepperItems}
-              activeStepIndex={activeStepIndex}
-              activeStepKey={activeStepKey}
-              onSelectStep={setActiveStepIndex}
-              selectedTemplate={selectedTemplate}
-              onOpenTemplate={() => setShowTemplatePicker(true)}
-              onScrollToImport={() =>
-                document
-                  .getElementById('create-import-panel')
-                  ?.scrollIntoView({ behavior: 'smooth' })
-              }
-            />
-          </div>
-
-          <main className="space-y-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <main className="space-y-5 lg:min-w-0">
             <div id="create-import-panel">
               <ImportPanel
                 importMessage={importMessage}
+                importDiagnostics={importDiagnostics}
                 onFileSelected={handleImportFile}
                 aiMessage={aiMessage}
                 aiLoading={aiLoading}
                 canEnhance={Boolean(lastImportedText)}
                 onEnhance={handleEnhanceWithAI}
+                aiReview={aiReview}
+                onApplyAiReview={applyReview}
+                onDiscardAiReview={discardReview}
+                documentLanguageMode={documentLanguageMode}
+                setDocumentLanguageMode={setDocumentLanguageMode}
+                selectedTemplate={selectedTemplate}
+                onOpenTemplate={() => setShowTemplatePicker(true)}
               />
             </div>
 
@@ -1138,25 +1170,65 @@ export default function Create() {
             />
           </main>
 
-          <PreviewPanel
-            TemplateRenderer={TemplateRenderer}
-            previewCv={previewCv}
-            theme={theme}
-            selectedTemplate={selectedTemplate}
-            sectionsOrder={sectionsOrder}
-            previewMode={previewMode}
-            setPreviewMode={setPreviewMode}
-            previewWidth={previewWidth}
-            stepLabels={stepLabels}
-            dragKey={dragKey}
-            onDragStart={handleDragStart}
-            onDrop={handleDrop}
-            setTheme={setTheme}
-            fontOptions={fontOptions}
-            onSubmit={handleSubmit}
-          />
+          <div className="hidden lg:block">
+            <BuilderRail
+              stepperItems={stepperItems}
+              activeStepIndex={activeStepIndex}
+              activeStepKey={activeStepKey}
+              onSelectStep={setActiveStepIndex}
+              selectedTemplate={selectedTemplate}
+              onOpenTemplate={() => setShowTemplatePicker(true)}
+              onScrollToImport={() =>
+                document
+                  .getElementById('create-import-panel')
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }
+            />
+          </div>
         </div>
       </div>
+
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/65 p-3 backdrop-blur-sm sm:p-6">
+          <div className="mx-auto flex max-h-[calc(100vh-1.5rem)] max-w-6xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 p-4">
+              <div>
+                <h2 className="text-lg font-black text-slate-950">Preview dan pengaturan</h2>
+                <p className="text-sm text-slate-500">
+                  Cek tampilan CV, tema, dan urutan section tanpa memecah halaman editor.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-black text-slate-700 hover:bg-slate-50"
+              >
+                Tutup
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <PreviewPanel
+                TemplateRenderer={TemplateRenderer}
+                previewCv={previewCv}
+                theme={theme}
+                selectedTemplate={selectedTemplate}
+                sectionsOrder={sectionsOrder}
+                previewMode={previewMode}
+                setPreviewMode={setPreviewMode}
+                previewWidth={previewWidth}
+                stepLabels={stepLabels}
+                dragKey={dragKey}
+                onDragStart={handleDragStart}
+                onDrop={handleDrop}
+                setTheme={setTheme}
+                fontOptions={fontOptions}
+                onSubmit={handleSubmit}
+                embedded
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <TemplatePickerDialog
         open={showTemplatePicker}

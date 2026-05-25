@@ -1,69 +1,72 @@
 import { useState } from 'react';
 import { aiEnhanceCv } from '../api';
+import { mergeImportedCv, normalizeCvLocalization } from '../features/cv/localization';
 
-export default function useAiEnhance(cv, setCv) {
+const reviewableSections = [
+  'summary',
+  'workExperience',
+  'experience',
+  'education',
+  'skills',
+  'projects',
+  'certifications',
+  'achievements',
+  'references',
+  'additional',
+];
+
+export default function useAiEnhance(cv, setCv, { documentLanguageMode = 'id' } = {}) {
   const [aiMessage, setAiMessage] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiReview, setAiReview] = useState(null);
 
   const enhance = async (text) => {
     setAiMessage('');
+    setAiReview(null);
     if (!text || text.length < 20) {
       setAiMessage('Import PDF/TXT terlebih dahulu untuk diproses AI.');
       return;
     }
     setAiLoading(true);
     try {
-      const payload = { text, hintLanguageBySection: cv.languageBySection };
+      const payload = {
+        text,
+        hintLanguageBySection: cv.languageBySection,
+        targetLanguageMode: documentLanguageMode,
+        currentCv: cv,
+      };
       const result = await aiEnhanceCv(payload);
       if (result && !result.error) {
-        const s = result.cv || {};
-        setCv((prev) => ({
-          ...prev,
-          summary: s.summary || prev.summary,
-          workExperience:
-            Array.isArray(s.workExperience) && s.workExperience.length
-              ? prev.workExperience?.length
-                ? prev.workExperience
-                : s.workExperience
-              : prev.workExperience,
-          experience:
-            Array.isArray(s.experience) && s.experience.length
-              ? prev.experience.length
-                ? prev.experience
-                : s.experience
-              : prev.experience,
-          education:
-            Array.isArray(s.education) && s.education.length
-              ? prev.education.length
-                ? prev.education
-                : s.education
-              : prev.education,
-          skills:
-            Array.isArray(s.skills) && s.skills.length
-              ? prev.skills.length
-                ? prev.skills
-                : s.skills
-              : prev.skills,
-          projects:
-            Array.isArray(s.projects) && s.projects.length
-              ? prev.projects.length
-                ? prev.projects
-                : s.projects
-              : prev.projects,
-          certifications:
-            Array.isArray(s.certifications) && s.certifications.length
-              ? prev.certifications.length
-                ? prev.certifications
-                : s.certifications
-              : prev.certifications,
-          achievements:
-            Array.isArray(s.achievements) && s.achievements.length
-              ? prev.achievements.length
-                ? prev.achievements
-                : s.achievements
-              : prev.achievements,
-        }));
-        setAiMessage('Berhasil ditingkatkan dengan AI.');
+        const lang =
+          result.languageBySection?.summary ||
+          result.cv?.languageBySection?.summary ||
+          (documentLanguageMode === 'en' ? 'en' : 'id');
+        const normalized = normalizeCvLocalization(
+          {
+            ...(result.cv || {}),
+            languageBySection: {
+              ...(result.cv?.languageBySection || {}),
+              ...(result.languageBySection || {}),
+            },
+          },
+          lang,
+        );
+        const availableSections = reviewableSections.filter((section) => {
+          if (section === 'summary')
+            return Boolean(normalized.summary?.id || normalized.summary?.en);
+          if (section === 'additional') return normalized.additional;
+          return Array.isArray(normalized[section]) && normalized[section].length > 0;
+        });
+        setAiReview({
+          cv: normalized,
+          provider: result.provider || 'ai',
+          model: result.model || '',
+          sections: availableSections,
+          languageBySection: normalized.languageBySection,
+        });
+        setAiMessage(
+          `AI selesai membaca dokumen. Review ${availableSections.length} section sebelum diterapkan.`,
+        );
       } else {
         setAiMessage('Endpoint AI belum aktif. Menggunakan hasil import heuristik.');
       }
@@ -74,5 +77,19 @@ export default function useAiEnhance(cv, setCv) {
     }
   };
 
-  return { aiMessage, setAiMessage, aiLoading, enhance };
+  const applyReview = (sections) => {
+    if (!aiReview?.cv) return;
+    const selectedSections =
+      Array.isArray(sections) && sections.length ? sections : aiReview.sections;
+    setCv((prev) => mergeImportedCv(prev, aiReview.cv, { replaceSections: selectedSections }));
+    setAiMessage('Hasil AI sudah diterapkan ke section terpilih.');
+    setAiReview(null);
+  };
+
+  const discardReview = () => {
+    setAiReview(null);
+    setAiMessage('Hasil AI dibatalkan. Data CV tidak berubah.');
+  };
+
+  return { aiMessage, setAiMessage, aiLoading, aiReview, enhance, applyReview, discardReview };
 }

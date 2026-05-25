@@ -2,7 +2,7 @@ const config = require('../config/env');
 const { normalizeCv } = require('./aiParser');
 const { cvJsonSchema, parseJsonObject, postJson, systemPrompt } = require('./aiProviderUtils');
 
-async function parseWithGemini(text, hintLanguageBySection = {}) {
+async function parseWithGemini(text, hintLanguageBySection = {}, options = {}) {
   if (!config.ai.geminiApiKey) {
     throw new Error('GEMINI_API_KEY is required for AI_PROVIDER=gemini');
   }
@@ -20,7 +20,7 @@ async function parseWithGemini(text, hintLanguageBySection = {}) {
           role: 'user',
           parts: [
             {
-              text: `${systemPrompt}\n\n${JSON.stringify({ text, hintLanguageBySection })}`
+              text: `${systemPrompt}\n\n${JSON.stringify({ text, hintLanguageBySection, targetLanguageMode: options.targetLanguageMode, currentCv: options.currentCv })}`
             }
           ]
         }

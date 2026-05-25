@@ -20,9 +20,16 @@ export default function PreviewPanel({
   setTheme,
   fontOptions,
   onSubmit,
+  embedded = false,
 }) {
   return (
-    <aside className="space-y-4 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-auto xl:pr-1">
+    <aside
+      className={
+        embedded
+          ? 'grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]'
+          : 'space-y-4 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-auto xl:pr-1'
+      }
+    >
       <section className="rounded-lg border border-slate-200 bg-white/95 p-4 shadow-sm">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -53,7 +60,11 @@ export default function PreviewPanel({
             </button>
           ))}
         </div>
-        <div className="max-h-[46vh] overflow-auto rounded-lg border border-slate-200 bg-slate-100 p-3 shadow-inner xl:max-h-[calc(100vh-22rem)]">
+        <div
+          className={`overflow-auto rounded-lg border border-slate-200 bg-slate-100 p-3 shadow-inner ${
+            embedded ? 'max-h-[68vh]' : 'max-h-[46vh] xl:max-h-[calc(100vh-22rem)]'
+          }`}
+        >
           <div className={`mx-auto rounded-lg bg-white p-5 ${previewWidth}`}>
             <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-slate-100" />}>
               {createElement(Renderer, {

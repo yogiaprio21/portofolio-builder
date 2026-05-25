@@ -2,13 +2,15 @@ const config = require('../config/env');
 const { normalizeCv } = require('./aiParser');
 const { openAiJsonSchema, parseOpenAiCompatible } = require('./aiProviderUtils');
 
-async function parseWithOpenAi(text, hintLanguageBySection = {}) {
+async function parseWithOpenAi(text, hintLanguageBySection = {}, options = {}) {
   const parsed = await parseOpenAiCompatible({
     endpoint: 'https://api.openai.com/v1/chat/completions',
     apiKey: config.ai.openaiApiKey,
     model: config.ai.model,
     text,
     hintLanguageBySection,
+    targetLanguageMode: options.targetLanguageMode,
+    currentCv: options.currentCv,
     timeoutMs: config.ai.timeoutMs,
     provider: 'openai',
     responseFormat: {

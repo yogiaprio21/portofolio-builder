@@ -1,10 +1,10 @@
-import { resolveArray, resolveText } from '../../../shared/lib/text';
+import { resolveArrayStrict, resolveTextStrict } from '../../../shared/lib/text';
+import LanguageTabs from './LanguageTabs';
 
 export default function ExperienceList({
   sectionKey,
   title,
   lang,
-  languageOptions,
   setSectionLanguage,
   items,
   addItem,
@@ -15,23 +15,20 @@ export default function ExperienceList({
   errors,
   attemptSubmit,
   markIfError,
+  languageStatus,
+  onCopyLanguage,
 }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-          <select
-            value={lang}
-            onChange={(e) => setSectionLanguage(sectionKey, e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
-          >
-            {languageOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <h3 className="text-lg font-black text-slate-900">{title}</h3>
+          <LanguageTabs
+            lang={lang}
+            onChange={(value) => setSectionLanguage(sectionKey, value)}
+            status={languageStatus}
+            onCopy={onCopyLanguage}
+          />
         </div>
         <button
           onClick={() =>
@@ -57,7 +54,7 @@ export default function ExperienceList({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="text-sm text-slate-700">Posisi*</label>
             <input
-              value={resolveText(item.role, lang)}
+              value={resolveTextStrict(item.role, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'role', lang, e.target.value)
               }
@@ -74,7 +71,7 @@ export default function ExperienceList({
             )}
             <label className="text-sm text-slate-700">Perusahaan*</label>
             <input
-              value={resolveText(item.company, lang)}
+              value={resolveTextStrict(item.company, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'company', lang, e.target.value)
               }
@@ -90,7 +87,7 @@ export default function ExperienceList({
               </div>
             )}
             <input
-              value={resolveText(item.location, lang)}
+              value={resolveTextStrict(item.location, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'location', lang, e.target.value)
               }
@@ -113,7 +110,7 @@ export default function ExperienceList({
             </div>
           </div>
           <textarea
-            value={resolveArray(item.highlights, lang).join('. ')}
+            value={resolveArrayStrict(item.highlights, lang).join('. ')}
             onChange={(e) =>
               updateHighlightsByDot(sectionKey, index, 'highlights', lang, e.target.value)
             }

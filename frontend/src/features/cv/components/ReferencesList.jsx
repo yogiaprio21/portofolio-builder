@@ -1,8 +1,8 @@
-import { resolveText } from '../../../shared/lib/text';
+import { resolveTextStrict } from '../../../shared/lib/text';
+import LanguageTabs from './LanguageTabs';
 
 export default function ReferencesList({
   lang,
-  languageOptions,
   setSectionLanguage,
   items,
   addItem,
@@ -12,24 +12,21 @@ export default function ReferencesList({
   errors,
   attemptSubmit,
   markIfError,
+  languageStatus,
+  onCopyLanguage,
 }) {
   const sectionKey = 'references';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">Referensi</h3>
-          <select
-            value={lang}
-            onChange={(e) => setSectionLanguage(sectionKey, e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
-          >
-            {languageOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <h3 className="text-lg font-black text-slate-900">Referensi</h3>
+          <LanguageTabs
+            lang={lang}
+            onChange={(value) => setSectionLanguage(sectionKey, value)}
+            status={languageStatus}
+            onCopy={onCopyLanguage}
+          />
         </div>
         <button
           onClick={() => addItem(sectionKey, { name: '', title: '', company: '', contact: '' })}
@@ -46,7 +43,7 @@ export default function ReferencesList({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="text-sm text-slate-700">Nama*</label>
             <input
-              value={resolveText(item.name, lang)}
+              value={resolveTextStrict(item.name, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'name', lang, e.target.value)
               }
@@ -60,7 +57,7 @@ export default function ReferencesList({
               <div className="text-xs text-red-600 mt-1">{errors[`references.${index}.name`]}</div>
             )}
             <input
-              value={resolveText(item.title, lang)}
+              value={resolveTextStrict(item.title, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'title', lang, e.target.value)
               }
@@ -68,7 +65,7 @@ export default function ReferencesList({
               placeholder="Jabatan"
             />
             <input
-              value={resolveText(item.company, lang)}
+              value={resolveTextStrict(item.company, lang)}
               onChange={(e) =>
                 updateLocalizedField(sectionKey, index, 'company', lang, e.target.value)
               }

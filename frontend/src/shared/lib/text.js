@@ -5,10 +5,24 @@ export const resolveText = (value, lang) => {
   return '';
 };
 
+export const resolveTextStrict = (value, lang) => {
+  if (!value) return '';
+  if (typeof value === 'string') return lang === 'id' ? value : '';
+  if (typeof value === 'object') return value[lang] || '';
+  return '';
+};
+
 export const resolveArray = (value, lang) => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
   if (typeof value === 'object') return value[lang] || value.id || value.en || [];
+  return [];
+};
+
+export const resolveArrayStrict = (value, lang) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return lang === 'id' ? value : [];
+  if (typeof value === 'object') return Array.isArray(value[lang]) ? value[lang] : [];
   return [];
 };
 

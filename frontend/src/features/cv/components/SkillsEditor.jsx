@@ -1,8 +1,8 @@
-import { resolveText } from '../../../shared/lib/text';
+import { resolveTextStrict } from '../../../shared/lib/text';
+import LanguageTabs from './LanguageTabs';
 
 export default function SkillsEditor({
   lang,
-  languageOptions,
   setSectionLanguage,
   items,
   addGroup,
@@ -15,24 +15,21 @@ export default function SkillsEditor({
   attemptSubmit,
   markIfError,
   levelOptions,
+  languageStatus,
+  onCopyLanguage,
 }) {
   const sectionKey = 'skills';
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">Keahlian</h3>
-          <select
-            value={lang}
-            onChange={(e) => setSectionLanguage(sectionKey, e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
-          >
-            {languageOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <h3 className="text-lg font-black text-slate-900">Keahlian</h3>
+          <LanguageTabs
+            lang={lang}
+            onChange={(value) => setSectionLanguage(sectionKey, value)}
+            status={languageStatus}
+            onCopy={onCopyLanguage}
+          />
         </div>
         <button
           onClick={() => addGroup({ category: '', items: [] })}
@@ -50,7 +47,7 @@ export default function SkillsEditor({
             <div className="flex-1 min-w-[220px]">
               <label className="text-sm text-slate-700">Kategori</label>
               <input
-                value={resolveText(item.category, lang)}
+                value={resolveTextStrict(item.category, lang)}
                 onChange={(e) => updateLocalizedField(index, 'category', lang, e.target.value)}
                 className="w-full p-2 rounded text-black border border-slate-200 mt-1"
                 placeholder="Kategori"
@@ -66,7 +63,7 @@ export default function SkillsEditor({
                 typeof skill === 'string'
                   ? { name: { [lang]: skill }, level: '', proof: { [lang]: '' } }
                   : skill || { name: { [lang]: '' }, level: '', proof: { [lang]: '' } };
-              const skillName = resolveText(normalizedSkill?.name, lang);
+              const skillName = resolveTextStrict(normalizedSkill?.name, lang);
               return (
                 <div
                   key={`skill-${index}-${skillIndex}`}
@@ -123,7 +120,7 @@ export default function SkillsEditor({
                         {lang === 'en' ? 'Usage or Certificate' : 'Contoh penggunaan / Sertifikat'}
                       </label>
                       <input
-                        value={resolveText(normalizedSkill?.proof, lang)}
+                        value={resolveTextStrict(normalizedSkill?.proof, lang)}
                         onChange={(e) =>
                           updateEntry(index, skillIndex, 'proof', e.target.value, lang)
                         }

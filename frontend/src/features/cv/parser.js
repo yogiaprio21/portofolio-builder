@@ -191,11 +191,44 @@ export const parsePdfToText = async (file) => {
   const buffer = await file.arrayBuffer();
   const loadingTask = getDocument({ data: buffer });
   const pdf = await loadingTask.promise;
-  let text = '';
+  const pages = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    text += content.items.map((it) => it.str).join(' ') + '\n';
+    const rows = new Map();
+    for (const item of content.items) {
+      const value = String(item.str || '').trim();
+      if (!value) continue;
+      const [, , , , x, y] = item.transform || [0, 0, 0, 0, 0, 0];
+      const rowKey = Math.round(y / 3) * 3;
+      const row = rows.get(rowKey) || [];
+      row.push({ x, value });
+      rows.set(rowKey, row);
+    }
+    const pageText = [...rows.entries()]
+      .sort((a, b) => b[0] - a[0])
+      .map(([, row]) =>
+        row
+          .sort((a, b) => a.x - b.x)
+          .map((item) => item.value)
+          .join(' ')
+          .replace(/\s+/g, ' ')
+          .trim(),
+      )
+      .filter(Boolean)
+      .join('\n');
+    pages.push(pageText);
   }
-  return text;
+  const text = pages.join('\n\n').trim();
+  return {
+    text,
+    diagnostics: {
+      pages: pdf.numPages,
+      characters: text.length,
+      lines: text.split(/\r?\n/).filter(Boolean).length,
+      hasEmail: /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(text),
+      hasSectionHeading: /(experience|pengalaman|education|pendidikan|skills|keahlian)/i.test(text),
+      textLayerReadable: text.length >= 80,
+    },
+  };
 };
